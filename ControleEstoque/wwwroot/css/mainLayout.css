@@ -1,0 +1,33 @@
+/* Aplica a imagem de fundo ao corpo da página */
+body {
+    background-image: url('../image/logo-lidydecor-default-colorido.png');
+    background-size: 1000px; /* Faz com que a imagem ocupe toda a área */
+    background-position: center; /* Centraliza a imagem */
+    background-repeat: no-repeat;
+    background-position: 400px center;
+    height: 100vh; /* Garante que a imagem ocupe toda a altura da tela */
+    margin: 0;
+    font-family: Arial, sans-serif; /* Defina uma fonte se necessário */
+}
+
+/* Ajuste o layout para não interferir com a imagem de fundo */
+.page {
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    width: 100%;
+}
+
+.sidebar {
+    width: 250px; /* Ajuste o tamanho da sidebar conforme necessário */
+    background-color: rgba(255, 255, 255, 0.8); /* Semitransparente para destacar o conteúdo */
+    padding: 20px;
+}
+
+main {
+    flex-grow: 1;
+    padding: 20px;
+    background-color: rgba(255, 255, 255, 0.7); /* Semitransparente para o conteúdo */
+    border-radius: 10px;
+    overflow-y: auto; /* Para permitir rolagem se o conteúdo for maior que a tela */
+}

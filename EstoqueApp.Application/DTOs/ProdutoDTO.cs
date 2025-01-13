@@ -1,6 +1,4 @@
 ﻿using EstoqueApp.Infrastructure.Attributes;
-using Newtonsoft.Json;
-using Swashbuckle.AspNetCore.Annotations;
 
 namespace EstoqueApp.Application.DTOs
 {

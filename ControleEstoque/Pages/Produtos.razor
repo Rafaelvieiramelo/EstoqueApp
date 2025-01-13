@@ -1,0 +1,80 @@
+﻿@page "/produtos"
+
+@inject HttpClient Http
+
+<PageTitle>Produtos</PageTitle>
+
+<h1>Lista de Produtos</h1>
+
+@if (produtos == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Nome</th>
+                <th>Descrição</th>
+                <th>Quantidade</th>
+                <th>Preço Unitário</th>
+                <th>Categoria Id</th>
+                <th>Fornecedor Id</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var produto in produtos)
+            {
+                <tr>
+                    <td>@produto.id</td>
+                    <td>@produto.nome</td>
+                    <td>@produto.descricao</td>
+                    <td>@produto.quantidade</td>
+                    <td>@produto.precoUnitario</td>
+                    <td>@produto.categoriaId</td>
+                    <td>@produto.fornecedorId</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Produto> produtos;
+
+    protected override async Task OnInitializedAsync()
+    {
+        produtos = await GetProdutosFromApi();
+    }
+
+    private async Task<List<Produto>> GetProdutosFromApi()
+    {
+        try
+        {
+            // Realiza a chamada à API e obtém os dados de produtos
+            var response = await Http.GetFromJsonAsync<List<Produto>>("https://localhost:7071/Produtos/GetProdutos");
+
+            // Retorna a lista de produtos
+            return response;
+        }
+        catch (Exception ex)
+        {
+            // Em caso de erro, você pode exibir uma mensagem ou fazer algum tratamento adicional
+            Console.Error.WriteLine($"Erro ao chamar a API: {ex.Message}");
+            return new List<Produto>(); // Retorna uma lista vazia em caso de erro
+        }
+    }
+
+    public class Produto
+    {
+        public int id { get; set; }
+        public string nome { get; set; }
+        public string descricao { get; set; }
+        public int quantidade { get; set; }
+        public decimal precoUnitario { get; set; }
+        public int categoriaId { get; set; }
+        public int fornecedorId { get; set; }
+    }
+}
