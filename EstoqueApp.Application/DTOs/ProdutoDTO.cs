@@ -13,5 +13,7 @@ namespace EstoqueApp.Application.DTOs
         public decimal PrecoUnitario { get; set; }
         public int CategoriaId { get; set; }
         public int FornecedorId { get; set; }
+        public string? NomeCategoria { get; set; }
+        public string? NomeFornecedor { get; set; }
     }
 }

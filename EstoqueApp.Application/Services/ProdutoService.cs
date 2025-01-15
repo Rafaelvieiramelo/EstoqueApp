@@ -4,17 +4,22 @@ using EstoqueApp.Application.Exceptions;
 using EstoqueApp.Application.Interfaces;
 using EstoqueApp.Domain;
 using EstoqueApp.Domain.Interfaces;
+using EstoqueApp.Infrastructure.Repository;
 
 namespace EstoqueApp.Application.Services
 {
     public class ProdutoService : IProdutoService
     {
         private readonly IProdutoRepository _produtoRepository;
+        private readonly ICategoriaRepository _categoriaRepository;
+        private readonly IFornecedorRepository _fornecedorRepository;
         private readonly IMapper _mapper;
 
-        public ProdutoService(IProdutoRepository produtoRepository, IMapper mapper)
+        public ProdutoService(IProdutoRepository produtoRepository, ICategoriaRepository categoriaRepository, IFornecedorRepository fornecedorRepository,  IMapper mapper)
         {
             _produtoRepository = produtoRepository;
+            _categoriaRepository = categoriaRepository;
+            _fornecedorRepository = fornecedorRepository;
             _mapper = mapper;
         }
 
@@ -22,6 +27,19 @@ namespace EstoqueApp.Application.Services
         {
             var produtos = await _produtoRepository.GetProdutosAsync();
             var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produtos);
+
+            if (produtosDto != null && produtosDto.Any())
+            {
+                foreach (var produtoDto in produtosDto)
+                {
+                    var fronecedor = await _fornecedorRepository.GetFornecedorByIdAsync(produtoDto.FornecedorId);
+                    var categoria = await _categoriaRepository.GetCategoriaByIdAsync(produtoDto.CategoriaId);
+                    
+                    produtoDto.NomeFornecedor = fronecedor.Nome;
+                    produtoDto.NomeCategoria = categoria.Nome
+                        ;
+                }
+            }
 
             return produtosDto;
         }

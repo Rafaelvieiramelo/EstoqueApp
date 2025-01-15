@@ -1,57 +1,7 @@
-﻿@page "/produtos"
+﻿@using static EstoqueApp.Web.Pages.Produtos
 @inject HttpClient Http
-@inject IJSRuntime JSRuntime
 
-<PageTitle>Lista de Produtos</PageTitle>
 
-<h1>Lista de Produtos</h1>
-
-@if (produtos == null)
-{
-    <p><em>Carregando...</em></p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Nome</th>
-                <th>Descrição</th>
-                <th>Quantidade</th>
-                <th>Preço Unit</th>
-                <th>Categoria</th>
-                <th>Fornecedor</th>
-                <th>Valor Total</th> <!-- Nova coluna para o Valor Total -->
-                <th></th> <!-- Coluna para o botão de editar -->
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var produto in produtos)
-            {
-                <tr>
-                    <td>@produto.id</td>
-                    <td>@produto.nome</td>
-                    <td>@produto.descricao</td>
-                    <td>@produto.quantidade</td>
-                    <td>@produto.precoUnitario</td>
-                    <td>@produto.nomeCategoria</td>
-                    <td>@produto.nomeFornecedor</td>
-                    <td>@(produto.quantidade * produto.precoUnitario)</td> <!-- Cálculo do Valor Total -->
-                    <td>
-                        <!-- Botão de Editar -->
-                        <button class="btn btn-primary" @onclick="() => OpenEditModal(produto)">Editar</button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-
-    @* <ProdutoTabela Produtos="produtos" OnEditarProduto="OpenEditModal" /> *@
-
-}
-
-<!-- Modal -->
 @if (showModal)
 {
     <div class="modal fade show" style="display: block;" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="false">
@@ -127,80 +77,31 @@ else
             </div>
         </div>
     </div>
-
 }
 
 @code {
-    private bool showModal = false;  // Variável para controlar a visibilidade do modal
-    private Produto produtoEdicao = new Produto();
-    private List<Produto> produtos;
-    private List<Categoria> categorias = new List<Categoria>();
-    private List<Fornecedor> fornecedores = new List<Fornecedor>();
+    [Parameter] public Produto produtoEdicao { get; set; }
+    [Parameter] public List<Categoria> categorias { get; set; }
+    [Parameter] public List<Fornecedor> fornecedores { get; set; }
+    [Parameter] public EventCallback<bool> OnClose { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    private bool showModal = false;
+
+    public void OpenModal()
     {
-        produtos = await GetProdutosFromApi();
-        categorias = await GetCategoriasFromApi();
-        fornecedores = await GetFornecedoresFromApi();
+        showModal = true;
     }
 
-    private async Task<List<Produto>> GetProdutosFromApi()
-    {
-        return await Http.GetFromJsonAsync<List<Produto>>("https://localhost:7071/Produtos/GetProdutos");
-    }
-
-    private async Task<List<Categoria>> GetCategoriasFromApi()
-    {
-        return await Http.GetFromJsonAsync<List<Categoria>>("https://localhost:7071/Categorias/GetCategorias");
-    }
-
-    private async Task<List<Fornecedor>> GetFornecedoresFromApi()
-    {
-        return await Http.GetFromJsonAsync<List<Fornecedor>>("https://localhost:7071/Fornecedores/GetFornecedores");
-    }
-
-    // Método para abrir o modal
-    private void OpenEditModal(Produto produto)
-    {
-        produtoEdicao = produto; // Preenche os dados do produto no modal
-        showModal = true; // Torna o modal visível
-    }
-
-    // Método para fechar o modal
     private void HideModal()
     {
-        showModal = false; // Esconde o modal
+        showModal = false;
+        OnClose.InvokeAsync(true);
     }
 
-    // Método para salvar as alterações no produto
     private async Task SalvarProduto()
     {
-        await Http.PatchAsJsonAsync("https://localhost:7071/Produtos/UpdateProdutoAsync", produtoEdicao);
+        // Aqui você pode chamar a API para salvar o produto
+        await Http.PostAsJsonAsync("https://localhost:7071/Produtos/UpdateProdutoAsync", produtoEdicao);
         HideModal(); // Fecha o modal após salvar
-    }
-
-    public class Produto
-    {
-        public int id { get; set; }
-        public string nome { get; set; }
-        public string descricao { get; set; }
-        public int quantidade { get; set; }
-        public decimal precoUnitario { get; set; }
-        public int categoriaId { get; set; }
-        public int fornecedorId { get; set; }
-        public string nomeCategoria { get; set; }
-        public string nomeFornecedor { get; set; }
-    }
-
-    public class Categoria
-    {
-        public int id { get; set; }
-        public string nome { get; set; }
-    }
-
-    public class Fornecedor
-    {
-        public int id { get; set; }
-        public string nome { get; set; }
     }
 }

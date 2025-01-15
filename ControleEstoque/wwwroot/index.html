@@ -12,6 +12,9 @@
     <link rel="stylesheet" href="css/app.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
     <link href="EstoqueApp.Web.styles.css" rel="stylesheet" />
+
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/5.3.0-alpha1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0-alpha1/js/bootstrap.bundle.min.js"></script>
 </head>
 
 <body>
@@ -31,4 +34,24 @@
     <script src="_framework/blazor.webassembly.js"></script>
 </body>
 
+
 </html>
+
+<
+<script>
+    function showModal(modalId) {
+        var modalElement = document.getElementById(modalId);
+        if (modalElement) {
+            var modal = new bootstrap.Modal(modalElement);
+            modal.show();
+        }
+    }
+
+    function hideModal(modalId) {
+        var modalElement = document.getElementById(modalId);
+        if (modalElement) {
+            var modal = bootstrap.Modal.getInstance(modalElement);
+            modal.hide();
+        }
+    }
+</script>
