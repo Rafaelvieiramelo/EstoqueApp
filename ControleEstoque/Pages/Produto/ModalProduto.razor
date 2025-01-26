@@ -1,55 +1,51 @@
-﻿@using static EstoqueApp.Web.Pages.Produtos
-@inject HttpClient Http
+﻿@using EstoqueApp.Web.Pages
+@using EstoqueApp.Web.Models
 
+@using static EstoqueApp.Web.Pages.Produto.Produtos
 
-@if (showModal)
+@if (ShowModal)
 {
     <div class="modal fade show" style="display: block;" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="false">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="editModalLabel">Editar Produto</h5>
+                    <h5 class="modal-title" id="editModalLabel">@((IsEditMode ? "Editar" : "Adicionar") + " Produto")</h5>
                     <button type="button" class="btn-close" @onclick="HideModal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <!-- Nome -->
                     <div class="mb-3 row">
                         <label for="nome" class="col-sm-3 col-form-label">Nome</label>
                         <div class="col-sm-9">
-                            <input type="text" id="nome" @bind="produtoEdicao.nome" class="form-control" placeholder="Nome" />
+                            <input type="text" id="nome" @bind="ProdutoEdicao.nome" class="form-control" placeholder="Nome" />
                         </div>
                     </div>
 
-                    <!-- Descrição -->
                     <div class="mb-3 row">
                         <label for="descricao" class="col-sm-3 col-form-label">Descrição</label>
                         <div class="col-sm-9">
-                            <textarea id="descricao" @bind="produtoEdicao.descricao" class="form-control" placeholder="Descrição"></textarea>
+                            <textarea id="descricao" @bind="ProdutoEdicao.descricao" class="form-control" placeholder="Descrição"></textarea>
                         </div>
                     </div>
 
-                    <!-- Quantidade -->
                     <div class="mb-3 row">
                         <label for="quantidade" class="col-sm-3 col-form-label">Quantidade</label>
                         <div class="col-sm-9">
-                            <input type="number" id="quantidade" @bind="produtoEdicao.quantidade" class="form-control" placeholder="Quantidade" />
+                            <input type="number" id="quantidade" @bind="ProdutoEdicao.quantidade" class="form-control" placeholder="Quantidade" />
                         </div>
                     </div>
 
-                    <!-- Preço Unitário -->
                     <div class="mb-3 row">
                         <label for="precoUnitario" class="col-sm-3 col-form-label">Preço Unit</label>
                         <div class="col-sm-9">
-                            <input type="number" id="precoUnitario" @bind="produtoEdicao.precoUnitario" class="form-control" placeholder="Preço Unitário" />
+                            <input type="number" id="precoUnitario" @bind="ProdutoEdicao.precoUnitario" class="form-control" placeholder="Preço Unitário" />
                         </div>
                     </div>
 
-                    <!-- Categoria -->
                     <div class="mb-3 row">
                         <label for="categoriaId" class="col-sm-3 col-form-label">Categoria</label>
                         <div class="col-sm-9">
-                            <select class="form-control" id="categoriaId" @bind="produtoEdicao.categoriaId">
-                                @foreach (var categoria in categorias)
+                            <select class="form-control" id="categoriaId" @bind="ProdutoEdicao.categoriaId">
+                                @foreach (var categoria in Categorias)
                                 {
                                     <option value="@categoria.id">@categoria.nome</option>
                                 }
@@ -57,12 +53,11 @@
                         </div>
                     </div>
 
-                    <!-- Fornecedor -->
                     <div class="mb-3 row">
                         <label for="fornecedorId" class="col-sm-3 col-form-label">Fornecedor</label>
                         <div class="col-sm-9">
-                            <select class="form-control" id="fornecedorId" @bind="produtoEdicao.fornecedorId">
-                                @foreach (var fornecedor in fornecedores)
+                            <select class="form-control" id="fornecedorId" @bind="ProdutoEdicao.fornecedorId">
+                                @foreach (var fornecedor in Fornecedores)
                                 {
                                     <option value="@fornecedor.id">@fornecedor.nome</option>
                                 }
@@ -72,7 +67,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="HideModal">Fechar</button>
-                    <button type="button" class="btn btn-primary" @onclick="SalvarProduto">Salvar</button>
+                    <button type="button" class="btn btn-primary" @onclick="SalvarProduto">@((IsEditMode ? "Salvar" : "Adicionar"))</button>
                 </div>
             </div>
         </div>
@@ -80,28 +75,22 @@
 }
 
 @code {
-    [Parameter] public Produto produtoEdicao { get; set; }
-    [Parameter] public List<Categoria> categorias { get; set; }
-    [Parameter] public List<Fornecedor> fornecedores { get; set; }
-    [Parameter] public EventCallback<bool> OnClose { get; set; }
+    [Parameter] public bool ShowModal { get; set; }
+    [Parameter] public ProdutoModel ProdutoEdicao { get; set; }
+    [Parameter] public List<Categoria> Categorias { get; set; }
+    [Parameter] public List<Fornecedor> Fornecedores { get; set; }
+    [Parameter] public EventCallback HideModalCallback { get; set; }
+    [Parameter] public EventCallback<ProdutoModel> SalvarProdutoCallback { get; set; }
+    [Parameter] public bool IsEditMode { get; set; }
 
-    private bool showModal = false;
-
-    public void OpenModal()
+    private async Task HideModal()
     {
-        showModal = true;
-    }
-
-    private void HideModal()
-    {
-        showModal = false;
-        OnClose.InvokeAsync(true);
+        await HideModalCallback.InvokeAsync(null);
     }
 
     private async Task SalvarProduto()
     {
-        // Aqui você pode chamar a API para salvar o produto
-        await Http.PostAsJsonAsync("https://localhost:7071/Produtos/UpdateProdutoAsync", produtoEdicao);
-        HideModal(); // Fecha o modal após salvar
+        await SalvarProdutoCallback.InvokeAsync(ProdutoEdicao);
+        await HideModal();
     }
 }

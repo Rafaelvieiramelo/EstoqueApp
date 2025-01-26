@@ -1,0 +1,66 @@
+﻿@using EstoqueApp.Web.Pages.Produto
+@using EstoqueApp.Web.Models
+
+<table id="produtosTable" class="table">
+    <thead>
+        <tr>
+            <th class="hide">Id</th>
+            <th>Nome</th>
+            <th>Descrição</th>
+            <th>Quantidade</th>
+            <th>Preço Unit</th>
+            <th>Categoria</th>
+            <th>Fornecedor</th>
+            <th>Valor Total</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var produto in Produtos)
+        {
+            <tr>
+                <td class="hide">@produto.id</td>
+                <td>@produto.nome</td>
+                <td>@produto.descricao</td>
+                <td>@produto.quantidade</td>
+                <td>@produto.precoUnitario</td>
+                <td>@produto.nomeCategoria</td>
+                <td>@produto.nomeFornecedor</td>
+                <td>@(produto.quantidade * produto.precoUnitario)</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => OnEdit(produto)">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-danger" @onclick="() => DeleteProduto(produto.id)">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter] public List<ProdutoModel> Produtos { get; set; }
+    [Parameter] public EventCallback<ProdutoModel> EditarProduto { get; set; }
+    [Parameter] public EventCallback<int> ExcluirProduto { get; set; }
+    [Inject] private IJSRuntime JSRuntime { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("initializeDataTable");
+        }
+    }
+
+    private void OnEdit(ProdutoModel produto)
+    {
+        EditarProduto.InvokeAsync(produto);
+    }
+
+    private void DeleteProduto(int idProduto)
+    {
+        ExcluirProduto.InvokeAsync(idProduto);
+    }
+}
