@@ -6,6 +6,9 @@ using EstoqueApp.Infrastructure;
 using EstoqueApp.Infrastructure.Filters;
 using EstoqueApp.Infrastructure.Repository;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,14 +28,41 @@ builder.Services.AddSwaggerGen(options =>
     options.SchemaFilter<SwaggerExcludeFilter>();
 });
 
+// Add authentication services
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = builder.Configuration["Jwt:Issuer"],
+        ValidAudience = builder.Configuration["Jwt:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+    };
+});
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+    options.AddPolicy("User", policy => policy.RequireRole("User"));
+});
+
 builder.Services.AddScoped<IProdutoService, ProdutoService>();
 builder.Services.AddScoped<ICategoriaService, CategoriaService>();
 builder.Services.AddScoped<IFornecedorService, FornecedorService>();
 
-
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
 builder.Services.AddScoped<IFornecedorRepository, FornecedorRepository>();
+
+builder.Services.AddTransient<IJwtTokenService, JwtTokenService>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
@@ -42,19 +72,16 @@ builder.Services.AddDbContext<EstoqueDbContext>(options =>
 
 var app = builder.Build();
 
-
 app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseRouting();
-app.MapControllers();
-
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseCors("AllowAll");
-
 
 app.MapControllers();
 

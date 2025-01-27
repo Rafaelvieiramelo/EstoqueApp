@@ -1,10 +1,7 @@
-﻿using EstoqueApp.Infrastructure.Attributes;
-
-namespace EstoqueApp.Application.DTOs
+﻿namespace EstoqueApp.Application.DTOs
 {
     public class ProdutoDTO
     {
-        [SwaggerExclude]
         public int Id { get; set; }
 
         public string Nome { get; set; }
@@ -13,5 +10,7 @@ namespace EstoqueApp.Application.DTOs
         public decimal PrecoUnitario { get; set; }
         public int CategoriaId { get; set; }
         public int FornecedorId { get; set; }
+        public string? NomeCategoria { get; set; }
+        public string? NomeFornecedor { get; set; }
     }
 }

@@ -5,33 +5,34 @@ namespace EstoqueApp.Infrastructure
 {
     public class EstoqueDbContext : DbContext
     {
+        public EstoqueDbContext(DbContextOptions<EstoqueDbContext> options)
+        : base(options)
+        {
+        }
+
         public DbSet<Categoria> Categorias { get; set; }
         public DbSet<Fornecedor> Fornecedores { get; set; }
         public DbSet<Produto> Produtos { get; set; }
         public DbSet<MovimentoEstoque> MovimentosEstoque { get; set; }
+        public DbSet<Usuario> Usuario { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configura o Produto
             modelBuilder.Entity<Produto>()
-                .HasKey(p => p.Id);  // Definindo a chave primária
+                .HasKey(p => p.Id);
 
             modelBuilder.Entity<Produto>()
                 .Property(p => p.Id)
-                .ValueGeneratedOnAdd();  // Garante que o Id será auto-incrementado
-        }
+                .ValueGeneratedOnAdd();
 
-        // Construtor que recebe as opções de configuração, como a string de conexão
-        public EstoqueDbContext(DbContextOptions<EstoqueDbContext> options)
-            : base(options)
-        {
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Nome).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Email).IsRequired().HasMaxLength(150);
+                entity.Property(e => e.SenhaHash).IsRequired();
+                entity.Property(e => e.Role).IsRequired().HasMaxLength(50);
+            });
         }
-
-        // Não é necessário o método OnConfiguring agora, pois a configuração vem do DI container
-        //protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        //{
-        //    var caminhoBanco = @"C:\Users\rafael.melo\source\repos\ControleEstoque\Data\estoque.db";
-        //    optionsBuilder.UseSqlite($"Data Source={caminhoBanco}");
-        //}
     }
 }
