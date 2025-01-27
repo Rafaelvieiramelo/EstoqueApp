@@ -1,0 +1,49 @@
+﻿@using EstoqueApp.Web.Pages
+@using EstoqueApp.Web.Models
+
+@using static EstoqueApp.Web.Pages.Categoria.Categorias
+
+@if (ShowModal)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">@((IsEditMode ? "Editar" : "Adicionar") + " Categoria")</h5>
+                    <button type="button" class="btn-close" @onclick="HideModal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <label for="nome" class="col-sm-3 col-form-label">Nome</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="nome" @bind="CategoriaEdicao.nome" class="form-control" placeholder="Nome" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="HideModal">Fechar</button>
+                    <button type="button" class="btn btn-primary" @onclick="SalvarCategoria">@((IsEditMode ? "Salvar" : "Adicionar"))</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool ShowModal { get; set; }
+    [Parameter] public CategoriaModel CategoriaEdicao { get; set; }
+    [Parameter] public EventCallback HideModalCallback { get; set; }
+    [Parameter] public EventCallback<CategoriaModel> SalvarCategoriaCallback { get; set; }
+    [Parameter] public bool IsEditMode { get; set; }
+
+    private async Task HideModal()
+    {
+        await HideModalCallback.InvokeAsync(null);
+    }
+
+    private async Task SalvarCategoria()
+    {
+        await SalvarCategoriaCallback.InvokeAsync(CategoriaEdicao);
+        await HideModal();
+    }
+}
