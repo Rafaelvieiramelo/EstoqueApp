@@ -4,7 +4,6 @@ using EstoqueApp.Application.Exceptions;
 using EstoqueApp.Application.Interfaces;
 using EstoqueApp.Domain;
 using EstoqueApp.Domain.Interfaces;
-using EstoqueApp.Infrastructure.Repository;
 
 namespace EstoqueApp.Application.Services
 {

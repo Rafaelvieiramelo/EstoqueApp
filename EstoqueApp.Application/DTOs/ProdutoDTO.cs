@@ -1,10 +1,7 @@
-﻿using EstoqueApp.Infrastructure.Attributes;
-
-namespace EstoqueApp.Application.DTOs
+﻿namespace EstoqueApp.Application.DTOs
 {
     public class ProdutoDTO
     {
-        [SwaggerExclude]
         public int Id { get; set; }
 
         public string Nome { get; set; }
