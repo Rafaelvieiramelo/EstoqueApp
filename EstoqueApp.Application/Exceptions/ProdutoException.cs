@@ -1,8 +1,8 @@
 ﻿namespace EstoqueApp.Application.Exceptions
 {
-    public class DeleteProdutoException : Exception
+    public class DeleteException : Exception
     {
-        public DeleteProdutoException(string message)
+        public DeleteException(string message)
             : base(message)
         {
         }

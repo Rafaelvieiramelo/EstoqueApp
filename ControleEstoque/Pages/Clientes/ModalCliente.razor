@@ -1,0 +1,115 @@
+﻿@using EstoqueApp.Web.Pages
+@using EstoqueApp.Web.Models
+
+@using static EstoqueApp.Web.Pages.Clientes.Clientes
+
+@if (ShowModal)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">@((IsEditMode ? "Editar" : "Adicionar") + " Cliente")</h5>
+                    <button type="button" class="btn-close" @onclick="HideModal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <label for="nome" class="col-sm-3 col-form-label">Nome</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="nome" @bind="ClienteEdicao.Nome" class="form-control" placeholder="Nome" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="email" class="col-sm-3 col-form-label">E-mail</label>
+                        <div class="col-sm-9">
+                            <input type="email" id="email" @bind="ClienteEdicao.Email" class="form-control" placeholder="E-mail"></input>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="telefone" class="col-sm-3 col-form-label">Telefone</label>
+                        <div class="col-sm-9">
+                            <input type="tel" id="telefone" @bind="ClienteEdicao.Telefone" class="form-control" placeholder="Telefone" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="cpfCnpj" class="col-sm-3 col-form-label">Cpf/Cnpj</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="cpfCnpj" @bind="ClienteEdicao.CpfCnpj" class="form-control" placeholder="Cpf/Cnpj" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="logradouro" class="col-sm-3 col-form-label">Logradouro</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="logradouro" @bind="ClienteEdicao.Logradouro" class="form-control" placeholder="Logradouro" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="numero" class="col-sm-3 col-form-label">Numero</label>
+                        <div class="col-sm-9">
+                            <input type="number" id="numero" @bind="ClienteEdicao.Numero" class="form-control" placeholder="Numero" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="bairro" class="col-sm-3 col-form-label">Bairro</label>
+                        <div class="col-sm-9">
+                            <input type="number" id="bairro" @bind="ClienteEdicao.Bairro" class="form-control" placeholder="Bairro" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="cidade" class="col-sm-3 col-form-label">Cidade</label>
+                        <div class="col-sm-9">
+                            <input type="number" id="cidade" @bind="ClienteEdicao.Cidade" class="form-control" placeholder="Cidade" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="estado" class="col-sm-3 col-form-label">Estado</label>
+                        <div class="col-sm-9">
+                            <input type="number" id="estado" @bind="ClienteEdicao.Estado" class="form-control" placeholder="Estado" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="cep" class="col-sm-3 col-form-label">Cep</label>
+                        <div class="col-sm-9">
+                            <input type="number" id="cep" @bind="ClienteEdicao.Cep" class="form-control" placeholder="Cep" />
+                        </div>
+                    </div>
+
+                    
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="HideModal">Fechar</button>
+                    <button type="button" class="btn btn-primary" @onclick="SalvarCliente">@((IsEditMode ? "Salvar" : "Adicionar"))</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool ShowModal { get; set; }
+    [Parameter] public ClienteModel ClienteEdicao { get; set; }
+    [Parameter] public EventCallback HideModalCallback { get; set; }
+    [Parameter] public EventCallback<ClienteModel> SalvarClienteCallback { get; set; }
+    [Parameter] public bool IsEditMode { get; set; }
+
+    private async Task HideModal()
+    {
+        await HideModalCallback.InvokeAsync(null);
+    }
+
+    private async Task SalvarCliente()
+    {
+        await SalvarClienteCallback.InvokeAsync(ClienteEdicao);
+        await HideModal();
+    }
+}
