@@ -15,6 +15,7 @@ namespace EstoqueApp.Infrastructure
         public DbSet<Produto> Produtos { get; set; }
         public DbSet<MovimentoEstoque> MovimentosEstoque { get; set; }
         public DbSet<Usuario> Usuario { get; set; }
+        public DbSet<Cliente> Cliente { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -32,6 +33,13 @@ namespace EstoqueApp.Infrastructure
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(150);
                 entity.Property(e => e.SenhaHash).IsRequired();
                 entity.Property(e => e.Role).IsRequired().HasMaxLength(50);
+            });
+
+            modelBuilder.Entity<Cliente>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Nome).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Email).HasMaxLength(150);
             });
         }
     }

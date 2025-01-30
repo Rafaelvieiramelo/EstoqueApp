@@ -85,7 +85,7 @@ namespace EstoqueApp.Application.Services
             }
             catch (Exception ex)
             {
-                throw new DeleteProdutoException(ex.Message);
+                throw new DeleteException(ex.Message);
             }
         }
     }

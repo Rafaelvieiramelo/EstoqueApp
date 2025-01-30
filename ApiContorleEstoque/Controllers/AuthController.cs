@@ -1,61 +1,39 @@
 using EstoqueApp.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+using static EstoqueApp.API.Model.AuthModel;
 
-[ApiController]
-[Route("[controller]")]
-public class AuthController : ControllerBase
+namespace EstoqueApp.API.Controllers
 {
-    private readonly IConfiguration _configuration;
-    private readonly IJwtTokenService _jwtTokenService;
-
-    public AuthController(IConfiguration configuration, IJwtTokenService jwtTokenService)
+    [ApiController]
+    [Route("[controller]")]
+    public class AuthController : ControllerBase
     {
-        _configuration = configuration;
-        _jwtTokenService = jwtTokenService;
-    }
+        private readonly IUsuarioService _usuarioService;
+        private readonly IJwtTokenService _jwtTokenService;
 
-    [HttpPost("login")]
-    public IActionResult Login([FromBody] UserLogin userLogin)
-    {
-        // Validate the user credentials (this is just an example, use a proper validation)
-        if (userLogin.Username == "admin" && userLogin.Password == "password")
+        public AuthController(IUsuarioService usuarioService, IJwtTokenService jwtTokenService)
         {
-            var token = _jwtTokenService.GenerateToken(userLogin.Username, "UserRole");
-            return Ok(new { token });
+            _usuarioService = usuarioService;
+            _jwtTokenService = jwtTokenService;
         }
 
-        return Unauthorized();
-    }
-
-    private string GenerateJwtToken(string username, string role)
-    {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-        var claims = new[]
+        [HttpPost("login")]
+        public async Task<IActionResult> Login([FromBody] UserLogin userLogin)
         {
-            new Claim(JwtRegisteredClaimNames.Sub, username),
-            new Claim(ClaimTypes.Role, role),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
-        };
+            if (string.IsNullOrEmpty(userLogin.Email) || string.IsNullOrEmpty(userLogin.Senha))
+                return BadRequest("Username and password must be provided.");
 
-        var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt:Issuer"],
-            audience: _configuration["Jwt:Audience"],
-            claims: claims,
-            expires: DateTime.Now.AddMinutes(30),
-            signingCredentials: credentials);
+            var user = await _usuarioService.GetUsuarioByEmailSenhaAsync(userLogin.Email);
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
+            if (user == null)
+                return Unauthorized("Invalid username or password.");
+
+            if (!BCrypt.Net.BCrypt.Verify(userLogin.Senha, user.SenhaHash))
+                return Unauthorized("Invalid username or password.");
+
+            var token = _jwtTokenService.GenerateToken(user.Email, user.Role);
+
+            return Ok(new { token });
+        }
     }
-}
-
-public class UserLogin
-{
-    public string Username { get; set; }
-    public string Password { get; set; }
 }

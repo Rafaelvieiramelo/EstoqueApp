@@ -1,0 +1,76 @@
+﻿@using EstoqueApp.Web.Pages
+@using EstoqueApp.Web.Models
+
+@using static EstoqueApp.Web.Pages.Usuario.Usuarios
+
+@if (ShowModal)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">@((IsEditMode ? "Editar" : "Adicionar") + " Usuario")</h5>
+                    <button type="button" class="btn-close" @onclick="HideModal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <label for="nome" class="col-sm-3 col-form-label">Nome</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="nome" @bind="UsuarioEdicao.nome" class="form-control" placeholder="Nome" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="email" class="col-sm-3 col-form-label">E-mail</label>
+                        <div class="col-sm-9">
+                            <textarea id="email" @bind="UsuarioEdicao.email" class="form-control" placeholder="E-mail"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="senha" class="col-sm-3 col-form-label">Senha</label>
+                        <div class="col-sm-9">
+                            <input type="password" id="senha" @bind="UsuarioEdicao.senhaHash" class="form-control" placeholder="Senha" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="perfil" class="col-sm-3 col-form-label">Perfil</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="perfil" @bind="UsuarioEdicao.role" class="form-control" placeholder="perfil" />
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="ativo" class="col-sm-3 col-form-label">Ativo</label>
+                        <div class="col-sm-9">
+                            <input type="checkbox" id="ativo" @bind="UsuarioEdicao.ativo" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="HideModal">Fechar</button>
+                    <button type="button" class="btn btn-primary" @onclick="SalvarUsuario">@((IsEditMode ? "Salvar" : "Adicionar"))</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool ShowModal { get; set; }
+    [Parameter] public UsuarioModel UsuarioEdicao { get; set; }
+    [Parameter] public EventCallback HideModalCallback { get; set; }
+    [Parameter] public EventCallback<UsuarioModel> SalvarUsuarioCallback { get; set; }
+    [Parameter] public bool IsEditMode { get; set; }
+
+    private async Task HideModal()
+    {
+        await HideModalCallback.InvokeAsync(null);
+    }
+
+    private async Task SalvarUsuario()
+    {
+        await SalvarUsuarioCallback.InvokeAsync(UsuarioEdicao);
+        await HideModal();
+    }
+}
