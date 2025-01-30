@@ -1,0 +1,155 @@
+﻿@page "/usuarios"
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+
+@using EstoqueApp.Web.Models;
+
+<PageTitle>Lista de Usuarios</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Lista de Usuarios</h1>
+    <button class="btn btn-primary bi bi-plus" @onclick="OpenAddModal"></button>
+</div>
+
+@if (!string.IsNullOrEmpty(alertMessage))
+{
+    <div class="alert alert-@alertMessageType alert-dismissible fade show" role="alert">
+        @alertMessage
+        <button type="button" class="btn-close" aria-label="Close" @onclick="CloseAlert"></button>
+    </div>
+}
+
+@if (usuarios == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <TabelaUsuarios Usuarios="usuarios" EditarUsuario="OpenEditModal" ExcluirUsuario="ExcluirUsuario" />
+}
+
+<ModalUsuario ShowModal="showModal"
+              UsuarioEdicao="usuarioEdicao"
+              HideModalCallback="HideModal"
+              SalvarUsuarioCallback="SalvarUsuario"
+              IsEditMode="isEditMode" />
+
+@code {
+    private bool showModal = false;
+    private bool isEditMode = false;
+    private UsuarioModel usuarioEdicao = new UsuarioModel();
+    private List<UsuarioModel>? usuarios;
+    private List<Categoria> categorias = new List<Categoria>();
+    private List<Fornecedor> fornecedores = new List<Fornecedor>();
+    private string? alertMessage;
+    private string? alertMessageType;
+    private bool alertVisible;
+
+    protected override async Task OnInitializedAsync()
+    {
+        usuarios = await GetUsuariosFromApi();
+    }
+
+    private async Task<List<UsuarioModel>> GetUsuariosFromApi()
+    {
+        return await Http.GetFromJsonAsync<List<UsuarioModel>>("https://localhost:7071/Usuario/GetUsuarios");
+    }
+
+    private void OpenEditModal(UsuarioModel usuario)
+    {
+        usuarioEdicao = usuario;
+        isEditMode = true;
+        showModal = true;
+    }
+
+    private void OpenAddModal()
+    {
+        usuarioEdicao = new UsuarioModel();
+        isEditMode = false;
+        showModal = true;
+    }
+
+    private void HideModal()
+    {
+        showModal = false;
+    }
+
+    private async Task ExcluirUsuario(int idUsuario)
+    {
+        alertMessage = null;
+        alertMessageType = null;
+        HttpResponseMessage response;
+
+        response = await Http.PatchAsJsonAsync($"https://localhost:7071/Usuario/DeleteUsuario?id={idUsuario}","");
+
+        if (response.IsSuccessStatusCode)
+        {
+            alertMessage = "Usuario exluido com sucesso!";
+            alertMessageType = "success";
+            usuarios = await GetUsuariosFromApi();
+        }
+        else
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            alertMessage = $"Erro ao excluir o usuario: {errorContent}";
+            alertMessageType = "danger";
+        }
+    }
+
+    private async Task SalvarUsuario(UsuarioModel usuario)
+    {
+        alertMessage = null;
+        alertMessageType = null;
+
+        HttpResponseMessage response;
+        if (isEditMode)
+        {
+            response = await Http.PatchAsJsonAsync("https://localhost:7071/Usuario/UpdateUsuario", usuario);
+        }
+        else
+        {
+            response = await Http.PostAsJsonAsync("https://localhost:7071/Usuario/AddUsuario", usuario);
+        }
+
+        if (response.IsSuccessStatusCode)
+        {
+            alertMessage = isEditMode ? "Usuario editado com sucesso!" : "Usuario adicionado com sucesso!";
+            alertMessageType = "success";
+            usuarios = await GetUsuariosFromApi(); // Atualiza a lista de usuarios
+        }
+        else
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            alertMessage = $"Erro ao {(isEditMode ? "salvar" : "adicionar")} o usuario: {errorContent}";
+            alertMessageType = "danger";
+        }
+
+        ShowAlert();
+        HideModal();
+    }
+
+    private void ShowAlert()
+    {
+        alertVisible = true;
+        StateHasChanged();
+    }
+
+    private void CloseAlert()
+    {
+        alertMessage = null;
+        alertMessageType = null;
+        alertVisible = false;
+    }
+
+    public class Categoria
+    {
+        public int id { get; set; }
+        public string nome { get; set; }
+    }
+
+    public class Fornecedor
+    {
+        public int id { get; set; }
+        public string nome { get; set; }
+    }
+}
