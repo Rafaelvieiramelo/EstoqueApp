@@ -24,6 +24,12 @@ namespace EstoqueApp.Application.Mapping
 
             CreateMap<Cliente, ClienteDTO>();
             CreateMap<ClienteDTO, Cliente>();
+
+            CreateMap<Orcamento, OrcamentoDTO>();
+            CreateMap<OrcamentoDTO, Orcamento>();
+
+            CreateMap<TipoEvento, TipoEventoDTO>();
+            CreateMap<TipoEventoDTO, TipoEvento>();
         }
     }
 }

@@ -13,5 +13,6 @@
 
         public int FornecedorId { get; set; }
         public Fornecedor Fornecedor { get; set; }
+        public ICollection<ProdutosOrcamento> ProdutosOrcamento { get; set; } = new List<ProdutosOrcamento>();
     }
 }    

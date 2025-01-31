@@ -1,0 +1,67 @@
+﻿@using EstoqueApp.Web.Pages.Orcamento
+@using EstoqueApp.Web.Models
+
+<table id="orcamentosTable" class="table">
+    <thead>
+        <tr>
+            <th class="d-none">Id</th>
+            <th>Número</th>
+            <th>Cliente</th>
+            <th>Tipo de Evento</th>
+            <th>Data</th>
+            <th>Data do Evento</th>
+            <th>Observações</th>
+            <th>Valor Total</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var orcamento in Orcamentos)
+        {
+            <tr>
+                <td class="d-none">@orcamento.Id</td>
+                <td>@orcamento.Numero</td>
+                <td>@orcamento.Cliente?.Nome</td>
+                <td>@orcamento.TipoEvento?.Tipo</td>
+                <td>@orcamento.Data.ToString("dd/MM/yyyy")</td>
+                <td>@(orcamento.DataEvento?.ToString("dd/MM/yyyy") ?? "Não definida")</td>
+                <td>@orcamento.Observacoes</td>
+                <td>@orcamento.ValorTotal.ToString("C")</td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => OnEdit(orcamento)">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-danger" @onclick="() => DeleteOrcamento(orcamento.Id)">
+                        <i class="bi bi-trash3"></i>
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@code {
+    [Parameter] public List<OrcamentoModel> Orcamentos { get; set; }
+    [Parameter] public EventCallback<OrcamentoModel> EditarOrcamento { get; set; }
+    [Parameter] public EventCallback<int> ExcluirOrcamento { get; set; }
+    [Inject] private IJSRuntime JSRuntime { get; set; }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("initializeDataTable");
+        }
+    }
+
+    private void OnEdit(OrcamentoModel orcamento)
+    {
+        EditarOrcamento.InvokeAsync(orcamento);
+    }
+
+    private void DeleteOrcamento(int idOrcamento)
+    {
+        ExcluirOrcamento.InvokeAsync(idOrcamento);
+    }
+}

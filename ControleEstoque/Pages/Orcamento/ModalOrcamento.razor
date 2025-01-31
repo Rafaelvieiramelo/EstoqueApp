@@ -1,0 +1,118 @@
+﻿@using EstoqueApp.Web.Pages
+@using EstoqueApp.Web.Models
+
+@using static EstoqueApp.Web.Pages.Orcamento.Orcamento
+
+@if (ShowModal)
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="false">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">@((IsEditMode ? "Editar" : "Adicionar") + " Orcamento")</h5>
+                    <button type="button" class="btn-close" @onclick="HideModal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    @* <div class="mb-3 row">
+                        <label for="tipoEventoId" class="col-sm-3 col-form-label">Tipo de Evento</label>
+                        <div class="col-sm-9">
+                            <input type="number" id="tipoEventoId" @bind="OrcamentoEdicao.TipoEventoId" class="form-control" placeholder="Tipo de Evento" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="clienteId" class="col-sm-3 col-form-label">Cliente</label>
+                        <div class="col-sm-9">
+                            <input type="number" id="clienteId" @bind="OrcamentoEdicao.ClienteId" class="form-control" placeholder="Cliente" />
+                        </div>
+                    </div> *@
+
+                    <div class="mb-3 row">
+                        <label for="numero" class="col-sm-3 col-form-label">Número</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="numero" @bind="OrcamentoEdicao.Numero" class="form-control" placeholder="Número" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="data" class="col-sm-3 col-form-label">Data</label>
+                        <div class="col-sm-9">
+                            <input type="date" id="data" @bind="OrcamentoEdicao.Data" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="dataEvento" class="col-sm-3 col-form-label">Data do Evento</label>
+                        <div class="col-sm-9">
+                            <input type="date" id="dataEvento" @bind="OrcamentoEdicao.DataEvento" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="observacoes" class="col-sm-3 col-form-label">Observações</label>
+                        <div class="col-sm-9">
+                            <textarea id="observacoes" @bind="OrcamentoEdicao.Observacoes" class="form-control" placeholder="Observações"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="valorTotal" class="col-sm-3 col-form-label">Valor Total</label>
+                        <div class="col-sm-9">
+                            <input type="number" id="valorTotal" @bind="OrcamentoEdicao.ValorTotal" class="form-control" placeholder="Valor Total" step="0.01" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="clienteId" class="col-sm-3 col-form-label">Cliente</label>
+                        <div class="col-sm-9">
+                            <select class="form-control" id="categoriaId" @bind="OrcamentoEdicao.ClienteId">
+                                @foreach (var cliente in Clientes)
+                                {
+                                    <option value="@cliente.id">@cliente.nome</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="fornecedorId" class="col-sm-3 col-form-label">Fornecedor</label>
+                        <div class="col-sm-9">
+                            <select class="form-control" id="fornecedorId" @bind="OrcamentoEdicao.TipoEventoId">
+                                @foreach (var tipoEvento in TiposEvento)
+                                {
+                                    <option value="@tipoEvento.id">@tipoEvento.tipo</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="HideModal">Fechar</button>
+                    <button type="button" class="btn btn-primary" @onclick="SalvarOrcamento">@((IsEditMode ? "Salvar" : "Adicionar"))</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public bool ShowModal { get; set; }
+    [Parameter] public OrcamentoModel OrcamentoEdicao { get; set; }
+    [Parameter] public List<Clientes> Clientes { get; set; }
+    [Parameter] public List<TiposEvento> TiposEvento { get; set; }
+    [Parameter] public EventCallback HideModalCallback { get; set; }
+    [Parameter] public EventCallback<OrcamentoModel> SalvarOrcamentoCallback { get; set; }
+    [Parameter] public bool IsEditMode { get; set; }
+
+    private async Task HideModal()
+    {
+        await HideModalCallback.InvokeAsync(null);
+    }
+
+    private async Task SalvarOrcamento()
+    {
+        await SalvarOrcamentoCallback.InvokeAsync(OrcamentoEdicao);
+        await HideModal();
+    }
+}

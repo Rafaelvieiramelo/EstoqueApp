@@ -1,0 +1,169 @@
+﻿@page "/orcamentos"
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+
+@using EstoqueApp.Web.Models;
+
+<PageTitle>Lista de Orcamentos</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Lista de Orcamentos</h1>
+    <button class="btn btn-primary bi bi-plus" @onclick="OpenAddModal"></button>
+</div>
+
+@if (!string.IsNullOrEmpty(alertMessage))
+{
+    <div class="alert alert-@alertMessageType alert-dismissible fade show" role="alert">
+        @alertMessage
+        <button type="button" class="btn-close" aria-label="Close" @onclick="CloseAlert"></button>
+    </div>
+}
+
+@if (orcamentos == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <TabelaOrcamentos Orcamentos="orcamentos" EditarOrcamento="OpenEditModal" ExcluirOrcamento="ExcluirOrcamento" />
+}
+
+<ModalOrcamento ShowModal="showModal"
+              OrcamentoEdicao="orcamentoEdicao"
+              Clientes="clientes"
+              TiposEvento="tiposEventos"
+              HideModalCallback="HideModal"
+              SalvarOrcamentoCallback="SalvarOrcamento"
+              IsEditMode="isEditMode" />
+
+@code {
+    private bool showModal = false;
+    private bool isEditMode = false;
+    private OrcamentoModel orcamentoEdicao = new OrcamentoModel();
+    private List<OrcamentoModel>? orcamentos; 
+    private List<Clientes> clientes = new List<Clientes>();
+    private List<TiposEvento> tiposEventos = new List<TiposEvento>();
+    private string? alertMessage;
+    private string? alertMessageType;
+    private bool alertVisible;
+
+    protected override async Task OnInitializedAsync()
+    {
+        orcamentos = await GetOrcamentosFromApi(); 
+        clientes = await GetClientesFromApi();
+        tiposEventos = await GetTiposEventoFromApi();
+    }
+
+    private async Task<List<OrcamentoModel>> GetOrcamentosFromApi()
+    {
+        return await Http.GetFromJsonAsync<List<OrcamentoModel>>("https://localhost:7071/Orcamentos/GetOrcamentos");
+    }
+
+    private async Task<List<Clientes>> GetClientesFromApi()
+    {
+        return await Http.GetFromJsonAsync<List<Clientes>>("https://localhost:7071/Clientes/GetClientes");
+    }
+
+    private async Task<List<TiposEvento>> GetTiposEventoFromApi()
+    {
+        return await Http.GetFromJsonAsync<List<TiposEvento>>("https://localhost:7071/Orcamentos/GetTiposEvento");
+    }
+
+    private void OpenEditModal(OrcamentoModel orcamento)
+    {
+        orcamentoEdicao = orcamento;
+        isEditMode = true;
+        showModal = true;
+    }
+
+    private void OpenAddModal()
+    {
+        orcamentoEdicao = new OrcamentoModel();
+        isEditMode = false;
+        showModal = true;
+    }
+
+    private void HideModal()
+    {
+        showModal = false;
+    }
+
+    private async Task ExcluirOrcamento(int idOrcamento)
+    {
+        alertMessage = null;
+        alertMessageType = null;
+        HttpResponseMessage response;
+
+        response = await Http.PatchAsJsonAsync($"https://localhost:7071/Orcamentos/DeleteOrcamentoAsync?id={idOrcamento}","");
+
+        if (response.IsSuccessStatusCode)
+        {
+            alertMessage = "Orcamento exluido com sucesso!";
+            alertMessageType = "success";
+            orcamentos = await GetOrcamentosFromApi();
+        }
+        else
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            alertMessage = $"Erro ao excluir o orcamento: {errorContent}";
+            alertMessageType = "danger";
+        }
+    }
+
+    private async Task SalvarOrcamento(OrcamentoModel orcamento)
+    {
+        alertMessage = null;
+        alertMessageType = null;
+
+        HttpResponseMessage response;
+        if (isEditMode)
+        {
+            response = await Http.PatchAsJsonAsync("https://localhost:7071/Orcamentos/UpdateOrcamentoAsync", orcamento);
+        }
+        else
+        {
+            response = await Http.PostAsJsonAsync("https://localhost:7071/Orcamentos/AddOrcamentoAsync", orcamento);
+        }
+
+        if (response.IsSuccessStatusCode)
+        {
+            alertMessage = isEditMode ? "Orcamento editado com sucesso!" : "Orcamento adicionado com sucesso!";
+            alertMessageType = "success";
+            orcamentos = await GetOrcamentosFromApi(); // Atualiza a lista de orcamentos
+        }
+        else
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            alertMessage = $"Erro ao {(isEditMode ? "salvar" : "adicionar")} o orcamento: {errorContent}";
+            alertMessageType = "danger";
+        }
+
+        ShowAlert();
+        HideModal();
+    }
+
+    private void ShowAlert()
+    {
+        alertVisible = true;
+        StateHasChanged(); // Força a renderização da interface com o novo estado
+    }
+
+    private void CloseAlert()
+    {
+        alertMessage = null;
+        alertMessageType = null;
+        alertVisible = false;
+    }
+
+    public class Clientes
+    {
+        public int id { get; set; }
+        public string nome { get; set; }
+    }
+
+    public class TiposEvento
+    {
+        public int id { get; set; }
+        public string tipo { get; set; }
+    }
+}
