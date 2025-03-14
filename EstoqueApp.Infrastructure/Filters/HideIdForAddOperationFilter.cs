@@ -1,9 +1,9 @@
 ﻿using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Reflection;
-using EstoqueApp.Infrastructure.Attributes;
+using LidyDecorApp.Infrastructure.Attributes;
 
-namespace EstoqueApp.Infrastructure.Filters
+namespace LidyDecorApp.Infrastructure.Filters
 {
     public class SwaggerExcludeFilter : ISchemaFilter
     {

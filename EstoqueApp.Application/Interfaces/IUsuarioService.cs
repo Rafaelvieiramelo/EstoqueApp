@@ -1,14 +1,14 @@
-﻿using EstoqueApp.Application.DTOs;
+﻿using LidyDecorApp.Application.DTOs;
 
-namespace EstoqueApp.Application.Interfaces
+namespace LidyDecorApp.Application.Interfaces
 {
-    public interface IUsuarioService
+    public interface IUsuariosService
     {       
-        Task<UsuarioDTO> GetUsuarioByEmailSenhaAsync(string email);
-        Task<IEnumerable<UsuarioDTO>> GetUsuariosAsync();
-        Task<UsuarioDTO> GetUsuarioByIdAsync(int id);
-        Task<UsuarioDTO> AddUsuarioAsync(UsuarioDTO categoria);
-        Task<UsuarioDTO> UpdateUsuarioAsync(UsuarioDTO categoria);
-        Task DeleteUsuarioAsync(int id);
+        Task<UsuarioReadDTO> GetUsuariosByEmailSenhaAsync(string email);
+        Task<IEnumerable<UsuarioReadDTO>> GetUsuariosAsync();
+        Task<UsuarioReadDTO> GetUsuariosByIdAsync(int id);
+        Task<UsuarioWriteDTO> AddUsuariosAsync(UsuarioWriteDTO categoria);
+        Task<UsuarioWriteDTO> UpdateUsuariosAsync(UsuarioWriteDTO categoria);
+        Task DeleteUsuariosAsync(int id);
     }
 }

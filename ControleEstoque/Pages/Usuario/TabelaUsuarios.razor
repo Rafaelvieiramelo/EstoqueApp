@@ -1,5 +1,5 @@
-﻿@using EstoqueApp.Web.Pages.Usuario
-@using EstoqueApp.Web.Models
+﻿@using LidyDecorApp.Web.Pages.Usuario
+@using LidyDecorApp.Web.Models
 
 <table id="usuariosTable" class="table">
     <thead>
@@ -13,19 +13,19 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var usuario in Usuarios)
+        @foreach (var usuarios in Usuarios)
         {
             <tr>
-                <td class="hide">@usuario.id</td>
-                <td>@usuario.nome</td>
-                <td>@usuario.email</td>
-                <td>@usuario.role</td>
-                <td>@usuario.ativo</td>
+                <td class="hide">@usuarios.id</td>
+                <td>@usuarios.nome</td>
+                <td>@usuarios.email</td>
+                <td>@usuarios.role</td>
+                <td>@usuarios.ativo</td>
                 <td>
-                    <button class="btn btn-primary" @onclick="() => OnEdit(usuario)">
+                    <button class="btn btn-primary" @onclick="() => OnEdit(usuarios)">
                         <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-danger" @onclick="() => DeleteUsuario(usuario.id)">
+                    <button class="btn btn-danger" @onclick="() => DeleteUsuarios(usuarios.id)">
                         <i class="bi bi-trash3"></i>
                     </button>
                 </td>
@@ -35,26 +35,26 @@
 </table>
 
 @code {
-    [Parameter] public List<UsuarioModel> Usuarios { get; set; }
-    [Parameter] public EventCallback<UsuarioModel> EditarUsuario { get; set; }
-    [Parameter] public EventCallback<int> ExcluirUsuario { get; set; }
+    [Parameter] public List<UsuariosModel> Usuarios { get; set; }
+    [Parameter] public EventCallback<UsuariosModel> EditarUsuarios { get; set; }
+    [Parameter] public EventCallback<int> ExcluirUsuarios { get; set; }
     [Inject] private IJSRuntime JSRuntime { get; set; }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    // protected override async Task OnAfterRenderAsync(bool firstRender)
+    // {
+    //     if (firstRender)
+    //     {
+    //         await JSRuntime.InvokeVoidAsync("initializeDataTable");
+    //     }
+    // }
+
+    private void OnEdit(UsuariosModel usuarios)
     {
-        if (firstRender)
-        {
-            await JSRuntime.InvokeVoidAsync("initializeDataTable");
-        }
+        EditarUsuarios.InvokeAsync(usuarios);
     }
 
-    private void OnEdit(UsuarioModel usuario)
+    private void DeleteUsuarios(int idUsuarios)
     {
-        EditarUsuario.InvokeAsync(usuario);
-    }
-
-    private void DeleteUsuario(int idUsuario)
-    {
-        ExcluirUsuario.InvokeAsync(idUsuario);
+        ExcluirUsuarios.InvokeAsync(idUsuarios);
     }
 }

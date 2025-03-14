@@ -1,14 +1,14 @@
-﻿namespace EstoqueApp.Domain
+﻿
+namespace LidyDecorApp.Domain
 {
     public class ProdutosOrcamento
     {
         public int Id { get; set; }
-        public int ProdutoId { get; set; }
-        public int OrcamentoId { get; set; }
+        public int ProdutosId { get; set; }
+        public int OrcamentosId { get; set; }
         public DateOnly Inclusao { get; set; } = DateOnly.FromDateTime(DateTime.Now);
-       
 
-        public Orcamento? Orcamento { get; set; }
-        public Produto? Produto { get; set; }
+        public Produtos? Produtoss { get; set; }
+        public Orcamentos? Orcamentos { get; set; }
     }
-}    
+}

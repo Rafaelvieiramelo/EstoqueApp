@@ -1,70 +1,70 @@
 ﻿using AutoMapper;
-using EstoqueApp.Application.DTOs;
-using EstoqueApp.Application.Exceptions;
-using EstoqueApp.Application.Interfaces;
-using EstoqueApp.Domain;
-using EstoqueApp.Domain.Interfaces;
+using LidyDecorApp.Application.DTOs;
+using LidyDecorApp.Application.Exceptions;
+using LidyDecorApp.Application.Interfaces;
+using LidyDecorApp.Domain;
+using LidyDecorApp.Domain.Interfaces;
 
-namespace EstoqueApp.Application.Services
+namespace LidyDecorApp.Application.Services
 {
-    public class ClienteService : IClienteService
+    public class ClientesService : IClientesService
     {
-        private readonly IClienteRepository _clienteRepository;
+        private readonly IClientesRepository _clientesRepository;
         private readonly IMapper _mapper;
 
-        public ClienteService(IClienteRepository clienteRepository, IMapper mapper)
+        public ClientesService(IClientesRepository clientesRepository, IMapper mapper)
         {
-            _clienteRepository = clienteRepository;
+            _clientesRepository = clientesRepository;
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<ClienteDTO>> GetClientesAsync()
+        public async Task<IEnumerable<ClientesDTO>> GetClientesAsync()
         {
-            var Clientes = await _clienteRepository.GetClientesAsync();
-            var ClientesDto = _mapper.Map<IEnumerable<ClienteDTO>>(Clientes);
+            var Clientess = await _clientesRepository.GetClientessAsync();
+            var ClientessDto = _mapper.Map<IEnumerable<ClientesDTO>>(Clientess);
 
-            return ClientesDto;
+            return ClientessDto;
         }
 
-        public async Task<ClienteDTO> GetClienteByIdAsync(int id)
+        public async Task<ClientesDTO> GetClientesByIdAsync(int id)
         {
-            var cliente = await _clienteRepository.GetClienteByIdAsync(id);
-            return _mapper.Map<ClienteDTO>(cliente);
+            var clientes = await _clientesRepository.GetClientesByIdAsync(id);
+            return _mapper.Map<ClientesDTO>(clientes);
         }
 
-        public async Task<ClienteDTO> AddClienteAsync(ClienteDTO clienteDTO)
+        public async Task<ClientesDTO> AddClientesAsync(ClientesDTO clientesDTO)
         {
             try
             {
-                var cliente = _mapper.Map<Cliente>(clienteDTO);
-                await _clienteRepository.AddClienteAsync(cliente);
+                var clientes = _mapper.Map<Clientes>(clientesDTO);
+                await _clientesRepository.AddClientesAsync(clientes);
 
-                return _mapper.Map<ClienteDTO>(cliente);
+                return _mapper.Map<ClientesDTO>(clientes);
             }
             catch (Exception)
             {
-                return new ClienteDTO();
+                return new ClientesDTO();
             }
         }
 
-        public async Task<ClienteDTO> UpdateClienteAsync(ClienteDTO cliente)
+        public async Task<ClientesDTO> UpdateClientesAsync(ClientesDTO clientes)
         {
             try
             {
-                await _clienteRepository.UpdateClienteAsync(_mapper.Map<Cliente>(cliente));
-                return cliente;
+                await _clientesRepository.UpdateClientesAsync(_mapper.Map<Clientes>(clientes));
+                return clientes;
             }
             catch (Exception)
             {
-                return new ClienteDTO();
+                return new ClientesDTO();
             }            
         }
 
-        public async Task DeleteClienteAsync(int id)
+        public async Task DeleteClientesAsync(int id)
         {
             try
             {
-                await _clienteRepository.DeleteClienteAsync(id);
+                await _clientesRepository.DeleteClientesAsync(id);
             }
             catch (Exception ex)
             {

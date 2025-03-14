@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using System.Security.Claims;
 using System.Text;
-using EstoqueApp.Application.Interfaces;
+using LidyDecorApp.Application.Interfaces;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 

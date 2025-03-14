@@ -1,76 +1,76 @@
 ﻿using AutoMapper;
-using EstoqueApp.Application.DTOs;
-using EstoqueApp.Application.Exceptions;
-using EstoqueApp.Application.Interfaces;
-using EstoqueApp.Domain;
-using EstoqueApp.Domain.Interfaces;
+using LidyDecorApp.Application.DTOs;
+using LidyDecorApp.Application.Exceptions;
+using LidyDecorApp.Application.Interfaces;
+using LidyDecorApp.Domain;
+using LidyDecorApp.Domain.Interfaces;
 
-namespace EstoqueApp.Application.Services
+namespace LidyDecorApp.Application.Services
 {
-    public class UsuarioService : IUsuarioService
+    public class UsuariosService : IUsuariosService
     {
-        private readonly IUsuarioRepository _usuarioRepository;
+        private readonly IUsuariosRepository _usuariosRepository;
         private readonly IMapper _mapper;
 
-        public UsuarioService(IUsuarioRepository usuarioRepository, IMapper mapper)
+        public UsuariosService(IUsuariosRepository usuariosRepository, IMapper mapper)
         {
-            _usuarioRepository = usuarioRepository;
+            _usuariosRepository = usuariosRepository;
             _mapper = mapper;
         }
 
-        public async Task<UsuarioDTO> GetUsuarioByEmailSenhaAsync(string email)
+        public async Task<UsuarioReadDTO> GetUsuariosByEmailSenhaAsync(string email)
         {
-            var usuario = await _usuarioRepository.GetUsuarioByEmailAsync(email);
-            return _mapper.Map<UsuarioDTO>(usuario);
+            var usuarios = await _usuariosRepository.GetUsuariosByEmailAsync(email);
+            return _mapper.Map<UsuarioReadDTO>(usuarios);
         }
 
-        public async Task<IEnumerable<UsuarioDTO>> GetUsuariosAsync()
+        public async Task<IEnumerable<UsuarioReadDTO>> GetUsuariosAsync()
         {
-            var usuarios = await _usuarioRepository.GetUsuariosAsync();
-            var usuariosDto = _mapper.Map<IEnumerable<UsuarioDTO>>(usuarios);
+            var usuarioss = await _usuariosRepository.GetUsuariossAsync();
+            var usuariossDto = _mapper.Map<IEnumerable<UsuarioReadDTO>>(usuarioss);
 
-            return usuariosDto;
+            return usuariossDto;
         }
 
-        public async Task<UsuarioDTO> GetUsuarioByIdAsync(int id)
+        public async Task<UsuarioReadDTO> GetUsuariosByIdAsync(int id)
         {
-            var usuario = await _usuarioRepository.GetUsuarioByIdAsync(id);
-            return _mapper.Map<UsuarioDTO>(usuario);
+            var usuarios = await _usuariosRepository.GetUsuariosByIdAsync(id);
+            return _mapper.Map<UsuarioReadDTO>(usuarios);
         }
 
-        public async Task<UsuarioDTO> AddUsuarioAsync(UsuarioDTO UsuarioDTO)
+        public async Task<UsuarioWriteDTO> AddUsuariosAsync(UsuarioWriteDTO UsuariosDTO)
         {
             try
             {
-                var usuario = _mapper.Map<Usuario>(UsuarioDTO);
-                await _usuarioRepository.AddUsuarioAsync(usuario);
+                var usuarios = _mapper.Map<Usuarios>(UsuariosDTO);
+                await _usuariosRepository.AddUsuariosAsync(usuarios);
 
-                return _mapper.Map<UsuarioDTO>(usuario);
+                return _mapper.Map<UsuarioWriteDTO>(usuarios);
             }
             catch (Exception)
             {
-                return new UsuarioDTO();
+                return new UsuarioWriteDTO();
             }
         }
 
-        public async Task<UsuarioDTO> UpdateUsuarioAsync(UsuarioDTO usuario)
+        public async Task<UsuarioWriteDTO> UpdateUsuariosAsync(UsuarioWriteDTO usuarios)
         {
             try
             {
-                await _usuarioRepository.UpdateUsuarioAsync(_mapper.Map<Usuario>(usuario));
-                return usuario;
+                await _usuariosRepository.UpdateUsuariosAsync(_mapper.Map<Usuarios>(usuarios));
+                return usuarios;
             }
             catch (Exception)
             {
-                return new UsuarioDTO();
+                return new UsuarioWriteDTO();
             }            
         }
 
-        public async Task DeleteUsuarioAsync(int id)
+        public async Task DeleteUsuariosAsync(int id)
         {
             try
             {
-                await _usuarioRepository.DeleteUsuarioAsync(id);
+                await _usuariosRepository.DeleteUsuariosAsync(id);
             }
             catch (Exception ex)
             {

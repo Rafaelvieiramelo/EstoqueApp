@@ -1,13 +1,13 @@
-﻿using EstoqueApp.Application.DTOs;
+﻿using LidyDecorApp.Application.DTOs;
 
-namespace EstoqueApp.Application.Interfaces
+namespace LidyDecorApp.Application.Interfaces
 {
-    public interface IClienteService
+    public interface IClientesService
     {
-        Task<IEnumerable<ClienteDTO>> GetClientesAsync();
-        Task<ClienteDTO> GetClienteByIdAsync(int id);
-        Task<ClienteDTO> AddClienteAsync(ClienteDTO categoria);
-        Task<ClienteDTO> UpdateClienteAsync(ClienteDTO categoria);
-        Task DeleteClienteAsync(int id);
+        Task<IEnumerable<ClientesDTO>> GetClientesAsync();
+        Task<ClientesDTO> GetClientesByIdAsync(int id);
+        Task<ClientesDTO> AddClientesAsync(ClientesDTO categoria);
+        Task<ClientesDTO> UpdateClientesAsync(ClientesDTO categoria);
+        Task DeleteClientesAsync(int id);
     }
 }

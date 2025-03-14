@@ -1,4 +1,4 @@
-﻿namespace EstoqueApp.Application.Exceptions
+﻿namespace LidyDecorApp.Application.Exceptions
 {
     public class DeleteException : Exception
     {

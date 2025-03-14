@@ -1,6 +1,6 @@
-﻿namespace EstoqueApp.Domain
+﻿namespace LidyDecorApp.Domain
 {
-    public class Produto
+    public class Produtos
     {
         public int Id { get; set; }
         public string Nome { get; set; }
@@ -8,11 +8,6 @@
         public int Quantidade { get; set; }
         public decimal PrecoUnitario { get; set; }
 
-        public int CategoriaId { get; set; }
-        public Categoria Categoria { get; set; }
-
-        public int FornecedorId { get; set; }
-        public Fornecedor Fornecedor { get; set; }
         public ICollection<ProdutosOrcamento> ProdutosOrcamento { get; set; } = new List<ProdutosOrcamento>();
     }
 }    

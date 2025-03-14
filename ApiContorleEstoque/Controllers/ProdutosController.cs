@@ -1,69 +1,70 @@
-using EstoqueApp.Application.DTOs;
-using EstoqueApp.Application.Interfaces;
+using LidyDecorApp.Application.DTOs;
+using LidyDecorApp.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EstoqueApp.API.Controllers
+namespace LidyDecorApp.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     public class ProdutosController : ControllerBase
     {
-        private readonly IProdutoService _produtoService;
+        private const string id = "{id}";
+        private readonly IProdutosService _produtosService;
 
-        public ProdutosController(IProdutoService produtoService)
+        public ProdutosController(IProdutosService produtosService)
         {
-            _produtoService = produtoService;
+            _produtosService = produtosService;
         }
 
-        [HttpGet("GetProdutos")]
-        public async Task<ActionResult<IEnumerable<ProdutoDTO>>> GetProdutos()
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ProdutosDTO>>> GetProdutos()
         {
-            var produtos = await _produtoService.GetProdutosAsync();
+            var produtos = await _produtosService.GetProdutosAsync();
             return Ok(produtos);
         }
 
-        [HttpGet("GetProdutosById")]
-        public async Task<ActionResult<ProdutoDTO>> GetProdutosById(int id)
+        [HttpGet(id)]
+        public async Task<ActionResult<ProdutosDTO>> GetProdutosById(int id)
         {
-            var produtos = await _produtoService.GetProdutoByIdAsync(id);
+            var produtos = await _produtosService.GetProdutosByIdAsync(id);
             return Ok(produtos);
         }
 
-        [HttpPost("AddProdutoAsync")]
-        public async Task<ActionResult<ProdutoDTO>> AddProdutoAsync(ProdutoDTO produto)
+        [HttpPost]
+        public async Task<ActionResult<ProdutosDTO>> AddProdutosAsync(ProdutosDTO produtos)
         {
-            var produtosNovo = await _produtoService.AddProdutoAsync(produto);
+            var produtosNovo = await _produtosService.AddProdutosAsync(produtos);
             var objetoDefault = Shared.ObjectValidator.IsObjectDefault(produtosNovo);
 
             if (objetoDefault)
-                return BadRequest("Erro ao adicionar produto");
+                return BadRequest("Erro ao adicionar produtos");
 
             return Ok(produtosNovo);
         }
 
-        [HttpPatch("UpdateProdutoAsync")]
-        public async Task<ActionResult<ProdutoDTO>> UpdateProdutoAsync(ProdutoDTO produto)
+        [HttpPatch]
+        public async Task<ActionResult<ProdutosDTO>> UpdateProdutosAsync(ProdutosDTO produtos)
         {
-            var produtosAtualizado = await _produtoService.UpdateProdutoAsync(produto);
+            var produtosAtualizado = await _produtosService.UpdateProdutosAsync(produtos);
             var objetoDefault = Shared.ObjectValidator.IsObjectDefault(produtosAtualizado);
 
             if (objetoDefault)
-                return BadRequest("Erro ao editar produto");
+                return BadRequest("Erro ao editar produtos");
 
             return Ok(produtosAtualizado);
         }
 
-        [HttpPatch("DeleteProdutoAsync")]
-        public async Task<ActionResult> DeleteProdutoAsync(int id)
+        [HttpDelete(id)]
+        public async Task<ActionResult> DeleteProdutosAsync(int id)
         {
             try
             {
-                await _produtoService.DeleteProdutoAsync(id);
+                await _produtosService.DeleteProdutosAsync(id);
                 return Ok();
             }
             catch (Exception ex)
             {
-                return BadRequest($"Erro ao Deletar produto:{ex.Message}");            
+                return BadRequest($"Erro ao Deletar produtos:{ex.Message}");            
             }
         }
     }

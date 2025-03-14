@@ -1,78 +1,86 @@
 ﻿using AutoMapper;
-using EstoqueApp.Application.DTOs;
-using EstoqueApp.Application.Exceptions;
-using EstoqueApp.Application.Interfaces;
-using EstoqueApp.Domain;
-using EstoqueApp.Domain.Interfaces;
+using LidyDecorApp.Application.DTOs;
+using LidyDecorApp.Application.Exceptions;
+using LidyDecorApp.Application.Interfaces;
+using LidyDecorApp.Domain;
+using LidyDecorApp.Domain.Interfaces;
 
-namespace EstoqueApp.Application.Services
+namespace LidyDecorApp.Application.Services
 {
-    public class OrcamentoService : IOrcamentoService
+    public class OrcamentosService : IOrcamentosService
     {
-        private readonly IOrcamentoRepository _orcamentoRepository;
+        private readonly IOrcamentosRepository _orcamentosRepository;
         private readonly IMapper _mapper;
 
-        public OrcamentoService(IOrcamentoRepository orcamentoRepository, IMapper mapper)
+        public OrcamentosService(IOrcamentosRepository orcamentosRepository, IMapper mapper)
         {
-            _orcamentoRepository = orcamentoRepository;
+            _orcamentosRepository = orcamentosRepository;
             _mapper = mapper;
         }
 
         public async Task<IEnumerable<TipoEventoDTO>> GetTiposEventoAsync()
         {
-            var tiposEvento = await _orcamentoRepository.GetTiposEventoAsync();
+            var tiposEvento = await _orcamentosRepository.GetTiposEventoAsync();
             var tiposEventoDto = _mapper.Map<IEnumerable<TipoEventoDTO>>(tiposEvento);
 
             return tiposEventoDto;
         }
 
-        public async Task<IEnumerable<OrcamentoDTO>> GetOrcamentosAsync()
+        public async Task<IEnumerable<OrcamentosDTO>> GetOrcamentosAsync()
         {
-            var Orcamentos = await _orcamentoRepository.GetOrcamentosAsync();
-            var OrcamentosDto = _mapper.Map<IEnumerable<OrcamentoDTO>>(Orcamentos);
+            var Orcamentoss = await _orcamentosRepository.GetOrcamentossAsync();
+            var OrcamentossDto = _mapper.Map<IEnumerable<OrcamentosDTO>>(Orcamentoss);
 
-            return OrcamentosDto;
+            return OrcamentossDto;
         }
 
-        public async Task<OrcamentoDTO> GetOrcamentoByIdAsync(int id)
+        public async Task<string> GetNumeroUltimoOrcamentosAsync()
         {
-            var orcamento = await _orcamentoRepository.GetOrcamentoByIdAsync(id);
-            return _mapper.Map<OrcamentoDTO>(orcamento);
+            var numeroUltimoOrcamentos = await _orcamentosRepository.GetNumeroUltimoOrcamentosAsync();
+
+            return string.IsNullOrWhiteSpace(numeroUltimoOrcamentos) ? "0" : numeroUltimoOrcamentos;
         }
 
-        public async Task<OrcamentoDTO> AddOrcamentoAsync(OrcamentoDTO orcamentoDTO)
+
+        public async Task<OrcamentosDTO> GetOrcamentosByIdAsync(int id)
+        {
+            var orcamentos = await _orcamentosRepository.GetOrcamentosByIdAsync(id);
+            return _mapper.Map<OrcamentosDTO>(orcamentos);
+        }
+
+        public async Task<OrcamentosDTO> AddOrcamentosAsync(OrcamentosDTO orcamentosDTO)
         {
             try
             {
-                var orcamento = _mapper.Map<Orcamento>(orcamentoDTO);
-                await _orcamentoRepository.AddOrcamentoAsync(orcamento);
+                var orcamentos = _mapper.Map<Orcamentos>(orcamentosDTO);
+                await _orcamentosRepository.AddOrcamentosAsync(orcamentos);
 
-                return _mapper.Map<OrcamentoDTO>(orcamento);
+                return _mapper.Map<OrcamentosDTO>(orcamentos);
             }
             catch (Exception)
             {
-                return new OrcamentoDTO();
+                return new OrcamentosDTO();
             }
         }
 
-        public async Task<OrcamentoDTO> UpdateOrcamentoAsync(OrcamentoDTO orcamento)
+        public async Task<OrcamentosDTO> UpdateOrcamentosAsync(OrcamentosDTO orcamentos)
         {
             try
             {
-                await _orcamentoRepository.UpdateOrcamentoAsync(_mapper.Map<Orcamento>(orcamento));
-                return orcamento;
+                await _orcamentosRepository.UpdateOrcamentosAsync(_mapper.Map<Orcamentos>(orcamentos));
+                return orcamentos;
             }
             catch (Exception)
             {
-                return new OrcamentoDTO();
+                return new OrcamentosDTO();
             }            
         }
 
-        public async Task DeleteOrcamentoAsync(int id)
+        public async Task DeleteOrcamentosAsync(int id)
         {
             try
             {
-                await _orcamentoRepository.DeleteOrcamentoAsync(id);
+                await _orcamentosRepository.DeleteOrcamentosAsync(id);
             }
             catch (Exception ex)
             {

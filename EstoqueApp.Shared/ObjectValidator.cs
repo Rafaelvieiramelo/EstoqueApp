@@ -1,4 +1,4 @@
-﻿namespace EstoqueApp.Shared
+﻿namespace LidyDecorApp.Shared
 {
     public static class ObjectValidator
     {

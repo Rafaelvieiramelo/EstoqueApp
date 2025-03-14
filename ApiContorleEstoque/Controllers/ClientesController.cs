@@ -1,69 +1,70 @@
-using EstoqueApp.Application.DTOs;
-using EstoqueApp.Application.Interfaces;
+using LidyDecorApp.Application.DTOs;
+using LidyDecorApp.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EstoqueApp.API.Controllers
+namespace LidyDecorApp.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     public class ClientesController : ControllerBase
     {
-        private readonly IClienteService _clienteService;
+        private const string id = "{id}";
+        private readonly IClientesService _clientesService;
 
-        public ClientesController(IClienteService clienteService)
+        public ClientesController(IClientesService clientesService)
         {
-            _clienteService = clienteService;
+            _clientesService = clientesService;
         }
 
-        [HttpGet("GetClientes")]
-        public async Task<ActionResult<IEnumerable<ClienteDTO>>> GetClientes()
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<ClientesDTO>>> GetClientes()
         {
-            var clientes = await _clienteService.GetClientesAsync();
+            var clientes = await _clientesService.GetClientesAsync();
             return Ok(clientes);
         }
 
-        [HttpGet("GetClientesById")]
-        public async Task<ActionResult<ClienteDTO>> GetClientesById(int id)
+        [HttpGet(id)]
+        public async Task<ActionResult<ClientesDTO>> GetClientesById(int id)
         {
-            var clientes = await _clienteService.GetClienteByIdAsync(id);
+            var clientes = await _clientesService.GetClientesByIdAsync(id);
             return Ok(clientes);
         }
 
-        [HttpPost("AddClienteAsync")]
-        public async Task<ActionResult<ClienteDTO>> AddClienteAsync(ClienteDTO cliente)
+        [HttpPost]
+        public async Task<ActionResult<ClientesDTO>> AddClientesAsync([FromBody] ClientesDTO clientes)
         {
-            var clientesNovo = await _clienteService.AddClienteAsync(cliente);
+            var clientesNovo = await _clientesService.AddClientesAsync(clientes);
             var objetoDefault = Shared.ObjectValidator.IsObjectDefault(clientesNovo);
 
             if (objetoDefault)
-                return BadRequest("Erro ao adicionar cliente");
+                return BadRequest("Erro ao adicionar clientes");
 
             return Ok(clientesNovo);
         }
 
-        [HttpPatch("UpdateClienteAsync")]
-        public async Task<ActionResult<ClienteDTO>> UpdateClienteAsync(ClienteDTO cliente)
+        [HttpPatch]
+        public async Task<ActionResult<ClientesDTO>> UpdateClientesAsync(ClientesDTO clientes)
         {
-            var clientesAtualizado = await _clienteService.UpdateClienteAsync(cliente);
+            var clientesAtualizado = await _clientesService.UpdateClientesAsync(clientes);
             var objetoDefault = Shared.ObjectValidator.IsObjectDefault(clientesAtualizado);
 
             if (objetoDefault)
-                return BadRequest("Erro ao editar cliente");
+                return BadRequest("Erro ao editar clientes");
 
             return Ok(clientesAtualizado);
         }
 
-        [HttpPatch("DeleteClienteAsync")]
-        public async Task<ActionResult> DeleteClienteAsync(int id)
+        [HttpDelete(id)]
+        public async Task<ActionResult> DeleteClientesAsync(int id)
         {
             try
             {
-                await _clienteService.DeleteClienteAsync(id);
+                await _clientesService.DeleteClientesAsync(id);
                 return Ok();
             }
             catch (Exception ex)
             {
-                return BadRequest($"Erro ao Deletar cliente:{ex.Message}");            
+                return BadRequest($"Erro ao Deletar clientes:{ex.Message}");            
             }
         }
     }

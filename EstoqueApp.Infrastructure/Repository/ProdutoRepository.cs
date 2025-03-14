@@ -1,75 +1,58 @@
-﻿using EstoqueApp.Domain.Interfaces;
-using EstoqueApp.Domain;
+﻿using LidyDecorApp.Domain.Interfaces;
+using LidyDecorApp.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace EstoqueApp.Infrastructure.Repository
+namespace LidyDecorApp.Infrastructure.Repository
 {
-    public class ProdutoRepository : IProdutoRepository
+    public class ProdutosRepository : IProdutosRepository
     {
-        private readonly EstoqueDbContext _context;
+        private readonly LidyDecorDbContext _context;
 
-        public ProdutoRepository(EstoqueDbContext context)
+        public ProdutosRepository(LidyDecorDbContext context)
         {
             _context = context;
         }
 
-        public async Task AddProdutoAsync(Produto produto)
+        public async Task AddProdutosAsync(Produtos produtos)
         {
-            await _context.Produtos.AddAsync(produto);
+            await _context.Produtos.AddAsync(produtos);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Produto>> GetProdutosAsync()
+        public async Task<IEnumerable<Produtos>> GetProdutossAsync()
         {
-            return await _context.Produtos
-                                 .Include(p => p.Categoria)
-                                 .Include(p => p.Fornecedor)
-                                 .ToListAsync();
+            return await _context.Produtos.ToListAsync();
         }
 
-        public async Task<Produto> GetProdutoByIdAsync(int id)
+        public async Task<Produtos> GetProdutosByIdAsync(int id)
         {
-            return await _context.Produtos
-                                 .Include(p => p.Categoria)
-                                 .Include(p => p.Fornecedor)
-                                 .FirstOrDefaultAsync(p => p.Id == id);
+            return await _context.Produtos.FirstAsync(p => p.Id == id);
         }
 
-        public async Task UpdateProdutoAsync(Produto produto)
+        public async Task UpdateProdutosAsync(Produtos produtos)
         {
-            var produtoExistente = await _context.Produtos.FindAsync(produto.Id);
+            var produtosExistente = await _context.Produtos.FindAsync(produtos.Id);
 
-            if (produtoExistente != null)
+            if (produtosExistente != null)
             {
-                produtoExistente.Nome = produto.Nome;
-                produtoExistente.Descricao = produto.Descricao;
-                produtoExistente.Quantidade = produto.Quantidade;
-                produtoExistente.PrecoUnitario = produto.PrecoUnitario;
-                produtoExistente.CategoriaId = produto.CategoriaId;
-                produtoExistente.FornecedorId = produto.FornecedorId;
+                produtosExistente.Nome = produtos.Nome;
+                produtosExistente.Descricao = produtos.Descricao;
+                produtosExistente.Quantidade = produtos.Quantidade;
+                produtosExistente.PrecoUnitario = produtos.PrecoUnitario;                
 
                 await _context.SaveChangesAsync();
             }
         }
 
-        public async Task DeleteProdutoAsync(int id)
+        public async Task DeleteProdutosAsync(int id)
         {
-            var produto = await _context.Produtos.FindAsync(id);
+            var produtos = await _context.Produtos.FindAsync(id);
 
-            if (produto != null)
+            if (produtos != null)
             {
-                _context.Produtos.Remove(produto);
+                _context.Produtos.Remove(produtos);
                 await _context.SaveChangesAsync();
             }
-        }
-
-        public async Task<IEnumerable<Produto>> GetProdutosByCategoriaAsync(int categoriaId)
-        {
-            return await _context.Produtos
-                                 .Include(p => p.Categoria)
-                                 .Include(p => p.Fornecedor)
-                                 .Where(p => p.CategoriaId == categoriaId)
-                                 .ToListAsync();
         }
     }
 }

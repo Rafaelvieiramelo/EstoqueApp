@@ -19,7 +19,7 @@
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="produtos">
                 <span class="bi bi-box-seam" style="font-size: 1.5rem; color: black; margin-bottom: 30px;"></span>
-                <span style="color: black;">Produtos</span>
+                <span style="color: black;">produtos</span>
             </NavLink>
         </div>
 
@@ -44,13 +44,6 @@
             </NavLink>
         </div>
 
-        @* <div class="nav-item px-3">
-            <NavLink class="nav-link" href="categorias">
-                <span class="bi bi-person" style="font-size: 1.5rem; color: black; margin-bottom: 30px"></span>
-                <span style="color: black;">categorias</span>
-            </NavLink>
-        </div> *@
-
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="contrato">
                 <span class="bi bi-file-earmark-text" style="font-size: 1.5rem; color: black; margin-bottom: 30px;"></span>
@@ -63,10 +56,12 @@
 @code {
     private bool collapseNavMenu = true;
 
-    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    // private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+    private string NavMenuCssClass => collapseNavMenu ? "collapse show" : "collapse show";
 
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+        StateHasChanged();
     }
 }

@@ -1,4 +1,4 @@
-namespace EstoqueApp.API.Model
+namespace LidyDecorApp.API.Model
 {
     public class AuthModel
     {

@@ -1,6 +1,6 @@
-﻿using EstoqueApp.Application.DTOs;
+﻿using LidyDecorApp.Application.DTOs;
 
-namespace EstoqueApp.Application.Interfaces
+namespace LidyDecorApp.Application.Interfaces
 {
     public interface ICategoriaService
     {

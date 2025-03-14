@@ -1,22 +1,157 @@
 ﻿@page "/orcamentos"
+@inject OrcamentosService OrcamentosService
+@inject ClientesService ClientesService
+@inject ProdutosService ProdutosService
+@inject SharedService Shared
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
 
-@using EstoqueApp.Web.Models;
+@using LidyDecorApp.Web.Models;
+@using LidyDecorApp.Web.Services
 
-<PageTitle>Lista de Orcamentos</PageTitle>
+<PageTitle>Orcamentos</PageTitle>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Lista de Orcamentos</h1>
-    <button class="btn btn-primary bi bi-plus" @onclick="OpenAddModal"></button>
+    <button class="btn btn-primary bi bi-plus" @onclick="() => Shared.OpenAddModal(ref orcamentosEdicao, ref isEditMode, ref showModal)"></button>
 </div>
 
 @if (!string.IsNullOrEmpty(alertMessage))
 {
     <div class="alert alert-@alertMessageType alert-dismissible fade show" role="alert">
         @alertMessage
-        <button type="button" class="btn-close" aria-label="Close" @onclick="CloseAlert"></button>
+        <button type="button" class="btn-close" aria-label="Close" @onclick="async () => await SharedService.CloseAlert(ref alertMessage, ref alertMessageType, ref alertVisible)"></button>
     </div>
+}
+
+@if (showModal)
+{
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal fade show d-block"
+         tabindex="-1"
+         aria-labelledby="editModalLabel"
+         aria-modal="true"
+         role="dialog"
+    @onclick:stopPropagation
+         @onkeydown="@(e => { if (e.Key == "Escape") showModal =  SharedService.HideModal(HideModalCallback, showModal, StateHasChanged).Result; })">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">@((isEditMode ? "Editar" : "Adicionar") + " Orcamentos")</h5>
+                    <button type="button" class="btn-close" @onclick="async () => showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged)" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <div class="mb-3 row">
+                        <label for="data" class="col-sm-3 col-form-label">Data</label>
+                        <div class="col-sm-9">
+                            <input type="date" id="data" @bind="orcamentosEdicao.Data" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="dataEvento" class="col-sm-3 col-form-label">Data do Evento</label>
+                        <div class="col-sm-9">
+                            <input type="date" id="dataEvento" @bind="orcamentosEdicao.DataEvento" class="form-control" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="observacoes" class="col-sm-3 col-form-label">Observações</label>
+                        <div class="col-sm-9">
+                            <textarea id="observacoes" @bind="orcamentosEdicao.Observacoes" class="form-control" placeholder="Observações"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="valorTotal" class="col-sm-3 col-form-label">Valor Total</label>
+                        <div class="col-sm-9">
+                            <input type="number" id="valorTotal" @bind="orcamentosEdicao.ValorTotal" class="form-control" placeholder="Valor Total" step="0.01" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="clienteId" class="col-sm-3 col-form-label">Cliente</label>
+                        <div class="col-sm-9">
+                            <select class="form-control" id="clienteId" @bind="orcamentosEdicao.ClientesId">
+                                @foreach (var cliente in clientes)
+                                {
+                                    <option value="@cliente.Id">@cliente.Nome</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="tipoEventoId" class="col-sm-3 col-form-label">TipoEvento</label>
+                        <div class="col-sm-9">
+                            <select class="form-control" id="tipoEventoId" @bind="orcamentosEdicao.TipoEventoId">
+                                @foreach (var tipoEvento in tiposEvento)
+                                {
+                                    <option value="@tipoEvento.Id">@tipoEvento.Tipo</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="produtos" class="col-sm-3 col-form-label">Produtos</label>
+                        <div class="col-sm-9">
+                            <button type="button" class="btn btn-primary" @onclick="ShowAddProdutosModal">Adicionar Produtos</button>
+                        </div>
+                    </div>
+
+                    <!-- Lista de produtoss adicionados -->
+                    <div class="mb-3 row">
+                        <div class="col-sm-12">
+                            <ul>
+                                @foreach (var produtos in orcamentosEdicao.ProdutosOrcamentos)
+                                {
+                                    <li>@Produtos.FirstOrDefault(p => p.id == produtos.ProdutosId)?.nome</li>
+                                }
+                            </ul>
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="async () => showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged)">Fechar</button>
+                    <button type="button" class="btn btn-primary" @onclick="SalvarOrcamentos">@((isEditMode ? "Salvar" : "Adicionar"))</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (ShowAddProductModal)
+    {
+        <div class="modal fade show" style="display: block;" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="false">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addProductModalLabel">Adicionar Produtos</h5>
+                        <button type="button" class="btn-close" @onclick="HideAddProductModal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3 row">
+                            <label for="produtosId" class="col-sm-3 col-form-label">Produtos</label>
+                            <div class="col-sm-9">
+                                <select class="form-control" id="produtosId" @bind="ProdutosSelecionadoId">
+                                    @foreach (var produtos in Produtos)
+                                    {
+                                        <option value="@produtos.id">@produtos.nome</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" @onclick="HideAddProductModal">Fechar</button>
+                        <button type="button" class="btn btn-primary" @onclick="AdicionarProdutos">Adicionar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 }
 
 @if (orcamentos == null)
@@ -25,145 +160,132 @@
 }
 else
 {
-    <TabelaOrcamentos Orcamentos="orcamentos" EditarOrcamento="OpenEditModal" ExcluirOrcamento="ExcluirOrcamento" />
+    <TabelaOrcamentos Orcamentos="orcamentos" EditarOrcamentos="(orcamentos) => Shared.OpenEditModal(ref orcamentosEdicao, orcamentos, ref isEditMode, ref showModal)" ExcluirOrcamentos="ExcluirOrcamentos" />
 }
-
-<ModalOrcamento ShowModal="showModal"
-              OrcamentoEdicao="orcamentoEdicao"
-              Clientes="clientes"
-              TiposEvento="tiposEventos"
-              HideModalCallback="HideModal"
-              SalvarOrcamentoCallback="SalvarOrcamento"
-              IsEditMode="isEditMode" />
 
 @code {
     private bool showModal = false;
     private bool isEditMode = false;
-    private OrcamentoModel orcamentoEdicao = new OrcamentoModel();
-    private List<OrcamentoModel>? orcamentos; 
-    private List<Clientes> clientes = new List<Clientes>();
-    private List<TiposEvento> tiposEventos = new List<TiposEvento>();
+    private OrcamentosModel orcamentosEdicao = new OrcamentosModel();
+    private List<ClientesModel> clientes = new List<ClientesModel>();
+    private List<Tipoevento> tiposEvento = new List<Tipoevento>();
+    private List<OrcamentosModel>? orcamentos;
     private string? alertMessage;
     private string? alertMessageType;
     private bool alertVisible;
+    private EventCallback HideModalCallback { get; set; }
+    private EventCallback<OrcamentosModel> SalvarOrcamentosCallback { get; set; }
+    private bool ShowAddProductModal { get; set; }
+    private List<ProdutosModel> Produtos { get; set; } = new List<ProdutosModel>();
+    private int ProdutosSelecionadoId { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        orcamentos = await GetOrcamentosFromApi(); 
-        clientes = await GetClientesFromApi();
-        tiposEventos = await GetTiposEventoFromApi();
+        orcamentos = await OrcamentosService.GetOrcamentosFromApi();
+        clientes = await ClientesService.GetClientesFromApi();
+        tiposEvento = await OrcamentosService.GetTiposEventoFromApi();
+        Produtos = await ProdutosService.GetProdutosFromApi();
     }
-
-    private async Task<List<OrcamentoModel>> GetOrcamentosFromApi()
-    {
-        return await Http.GetFromJsonAsync<List<OrcamentoModel>>("https://localhost:7071/Orcamentos/GetOrcamentos");
-    }
-
-    private async Task<List<Clientes>> GetClientesFromApi()
-    {
-        return await Http.GetFromJsonAsync<List<Clientes>>("https://localhost:7071/Clientes/GetClientes");
-    }
-
-    private async Task<List<TiposEvento>> GetTiposEventoFromApi()
-    {
-        return await Http.GetFromJsonAsync<List<TiposEvento>>("https://localhost:7071/Orcamentos/GetTiposEvento");
-    }
-
-    private void OpenEditModal(OrcamentoModel orcamento)
-    {
-        orcamentoEdicao = orcamento;
-        isEditMode = true;
-        showModal = true;
-    }
-
-    private void OpenAddModal()
-    {
-        orcamentoEdicao = new OrcamentoModel();
-        isEditMode = false;
-        showModal = true;
-    }
-
-    private void HideModal()
-    {
-        showModal = false;
-    }
-
-    private async Task ExcluirOrcamento(int idOrcamento)
+        
+    private async Task ExcluirOrcamentos(int idOrcamentos)
     {
         alertMessage = null;
         alertMessageType = null;
-        HttpResponseMessage response;
-
-        response = await Http.PatchAsJsonAsync($"https://localhost:7071/Orcamentos/DeleteOrcamentoAsync?id={idOrcamento}","");
+        HttpResponseMessage response = await OrcamentosService.ExcluirOrcamentos(idOrcamentos);
 
         if (response.IsSuccessStatusCode)
         {
-            alertMessage = "Orcamento exluido com sucesso!";
+            alertMessage = "Orcamentos exluido com sucesso!";
             alertMessageType = "success";
-            orcamentos = await GetOrcamentosFromApi();
+            orcamentos = await OrcamentosService.GetOrcamentosFromApi();
+            StateHasChanged();
         }
         else
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            alertMessage = $"Erro ao excluir o orcamento: {errorContent}";
+            alertMessage = $"Erro ao excluir o orcamentos: {errorContent}";
             alertMessageType = "danger";
         }
     }
-
-    private async Task SalvarOrcamento(OrcamentoModel orcamento)
+        
+    private async Task SalvarOrcamentos()
     {
         alertMessage = null;
         alertMessageType = null;
 
-        HttpResponseMessage response;
-        if (isEditMode)
-        {
-            response = await Http.PatchAsJsonAsync("https://localhost:7071/Orcamentos/UpdateOrcamentoAsync", orcamento);
-        }
-        else
-        {
-            response = await Http.PostAsJsonAsync("https://localhost:7071/Orcamentos/AddOrcamentoAsync", orcamento);
-        }
+        HttpResponseMessage response = await OrcamentosService.SalvarOrcamentos(orcamentosEdicao, isEditMode);
 
         if (response.IsSuccessStatusCode)
         {
-            alertMessage = isEditMode ? "Orcamento editado com sucesso!" : "Orcamento adicionado com sucesso!";
+            alertMessage = isEditMode ? "Orcamentos editado com sucesso!" : "Orcamentos adicionado com sucesso!";
             alertMessageType = "success";
-            orcamentos = await GetOrcamentosFromApi(); // Atualiza a lista de orcamentos
+            orcamentos = await OrcamentosService.GetOrcamentosFromApi();
         }
         else
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            alertMessage = $"Erro ao {(isEditMode ? "salvar" : "adicionar")} o orcamento: {errorContent}";
+            alertMessage = $"Erro ao {(isEditMode ? "salvar" : "adicionar")} o orcamentos: {errorContent}";
             alertMessageType = "danger";
         }
 
-        ShowAlert();
-        HideModal();
+        SharedService.ShowAlert(ref alertVisible);
+        showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged);
     }
 
-    private void ShowAlert()
-    {
-        alertVisible = true;
-        StateHasChanged(); // Força a renderização da interface com o novo estado
-    }
-
-    private void CloseAlert()
+    private async Task ObterClientes()
     {
         alertMessage = null;
         alertMessageType = null;
-        alertVisible = false;
+
+        HttpResponseMessage response = await OrcamentosService.SalvarOrcamentos(orcamentosEdicao, isEditMode);
+
+        if (response.IsSuccessStatusCode)
+        {
+            alertMessage = isEditMode ? "Orcamentos editado com sucesso!" : "Orcamentos adicionado com sucesso!";
+            alertMessageType = "success";
+            orcamentos = await OrcamentosService.GetOrcamentosFromApi();
+        }
+        else
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            alertMessage = $"Erro ao {(isEditMode ? "salvar" : "adicionar")} o orcamentos: {errorContent}";
+            alertMessageType = "danger";
+        }
+
+        SharedService.ShowAlert(ref alertVisible);
+        showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged);
     }
 
-    public class Clientes
+    private void ShowAddProdutosModal()
     {
-        public int id { get; set; }
-        public string nome { get; set; }
+        ShowAddProductModal = true;
+        StateHasChanged();
     }
 
-    public class TiposEvento
+    private void HideAddProductModal()
     {
-        public int id { get; set; }
-        public string tipo { get; set; }
+        ShowAddProductModal = false;
+        StateHasChanged();
+    }
+
+    private void AdicionarProdutos()
+    {
+        var produtos = Produtos.FirstOrDefault(p => p.id == ProdutosSelecionadoId);
+        if (produtos != null)
+        {
+            if (orcamentosEdicao.ProdutosOrcamentos == null)
+            {
+                orcamentosEdicao.ProdutosOrcamentos = new List<ProdutosOrcamentos>();
+            }
+
+            orcamentosEdicao.ProdutosOrcamentos.Add(new ProdutosOrcamentos()
+                {
+                    ProdutosId = produtos.id,
+                    OrcamentosId = orcamentosEdicao.Id,
+                    Produtos = produtos
+                });
+        }
+        HideAddProductModal();
+        StateHasChanged();
     }
 }

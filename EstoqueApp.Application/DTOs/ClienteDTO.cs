@@ -1,6 +1,6 @@
-﻿namespace EstoqueApp.Application.DTOs
+﻿namespace LidyDecorApp.Application.DTOs
 {
-    public class ClienteDTO
+    public class ClientesDTO
     {
         public int Id { get; set; }
         public string Nome { get; set; }

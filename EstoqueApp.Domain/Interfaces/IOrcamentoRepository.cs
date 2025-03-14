@@ -1,12 +1,13 @@
-﻿namespace EstoqueApp.Domain.Interfaces
+﻿namespace LidyDecorApp.Domain.Interfaces
 {
-    public interface IOrcamentoRepository
+    public interface IOrcamentosRepository
     {
-        Task<Orcamento> GetOrcamentoByIdAsync(int id);
-        Task<IEnumerable<Orcamento>> GetOrcamentosAsync();
-        Task<IEnumerable<TipoEvento>> GetTiposEventoAsync();
-        Task AddOrcamentoAsync(Orcamento orcamento);
-        Task UpdateOrcamentoAsync(Orcamento orcamento);
-        Task DeleteOrcamentoAsync(int id);
+        Task<Orcamentos> GetOrcamentosByIdAsync(int id);
+        Task<string?> GetNumeroUltimoOrcamentosAsync();
+        Task<IEnumerable<Orcamentos>> GetOrcamentossAsync();
+        Task<IEnumerable<TipoEventos>> GetTiposEventoAsync();
+        Task AddOrcamentosAsync(Orcamentos orcamentos);
+        Task UpdateOrcamentosAsync(Orcamentos orcamentos);
+        Task DeleteOrcamentosAsync(int id);
     }
 }

@@ -1,87 +1,70 @@
 ﻿using AutoMapper;
-using EstoqueApp.Application.DTOs;
-using EstoqueApp.Application.Exceptions;
-using EstoqueApp.Application.Interfaces;
-using EstoqueApp.Domain;
-using EstoqueApp.Domain.Interfaces;
+using LidyDecorApp.Application.DTOs;
+using LidyDecorApp.Application.Exceptions;
+using LidyDecorApp.Application.Interfaces;
+using LidyDecorApp.Domain;
+using LidyDecorApp.Domain.Interfaces;
 
-namespace EstoqueApp.Application.Services
+namespace LidyDecorApp.Application.Services
 {
-    public class ProdutoService : IProdutoService
+    public class ProdutosService : IProdutosService
     {
-        private readonly IProdutoRepository _produtoRepository;
-        private readonly ICategoriaRepository _categoriaRepository;
-        private readonly IFornecedorRepository _fornecedorRepository;
+        private readonly IProdutosRepository _produtosRepository;
         private readonly IMapper _mapper;
 
-        public ProdutoService(IProdutoRepository produtoRepository, ICategoriaRepository categoriaRepository, IFornecedorRepository fornecedorRepository,  IMapper mapper)
+        public ProdutosService(IProdutosRepository produtosRepository, IMapper mapper)
         {
-            _produtoRepository = produtoRepository;
-            _categoriaRepository = categoriaRepository;
-            _fornecedorRepository = fornecedorRepository;
+            _produtosRepository = produtosRepository;
             _mapper = mapper;
         }
 
-        public async Task<IEnumerable<ProdutoDTO>> GetProdutosAsync()
+        public async Task<IEnumerable<ProdutosDTO>> GetProdutosAsync()
         {
-            var produtos = await _produtoRepository.GetProdutosAsync();
-            var produtosDto = _mapper.Map<IEnumerable<ProdutoDTO>>(produtos);
+            var produtoss = await _produtosRepository.GetProdutossAsync();
+            var produtossDto = _mapper.Map<IEnumerable<ProdutosDTO>>(produtoss);
 
-            if (produtosDto != null && produtosDto.Any())
-            {
-                foreach (var produtoDto in produtosDto)
-                {
-                    var fronecedor = await _fornecedorRepository.GetFornecedorByIdAsync(produtoDto.FornecedorId);
-                    var categoria = await _categoriaRepository.GetCategoriaByIdAsync(produtoDto.CategoriaId);
-                    
-                    produtoDto.NomeFornecedor = fronecedor.Nome;
-                    produtoDto.NomeCategoria = categoria.Nome
-                        ;
-                }
-            }
-
-            return produtosDto;
+            return produtossDto;
         }
 
-        public async Task<ProdutoDTO> GetProdutoByIdAsync(int id)
+        public async Task<ProdutosDTO> GetProdutosByIdAsync(int id)
         {
-            var produto = await _produtoRepository.GetProdutoByIdAsync(id);
-            return _mapper.Map<ProdutoDTO>(produto);
+            var produtos = await _produtosRepository.GetProdutosByIdAsync(id);
+            return _mapper.Map<ProdutosDTO>(produtos);
         }
 
-        public async Task<ProdutoDTO> AddProdutoAsync(ProdutoDTO produtoDTO)
+        public async Task<ProdutosDTO> AddProdutosAsync(ProdutosDTO produtosDTO)
         {
             try
             {
-                var produto = _mapper.Map<Produto>(produtoDTO);
-                await _produtoRepository.AddProdutoAsync(produto);
+                var produtos = _mapper.Map<Produtos>(produtosDTO);
+                await _produtosRepository.AddProdutosAsync(produtos);
 
-                return _mapper.Map<ProdutoDTO>(produto);
+                return _mapper.Map<ProdutosDTO>(produtos);
             }
             catch (Exception)
             {
-                return new ProdutoDTO();
+                return new ProdutosDTO();
             }
         }
 
-        public async Task<ProdutoDTO> UpdateProdutoAsync(ProdutoDTO produto)
+        public async Task<ProdutosDTO> UpdateProdutosAsync(ProdutosDTO produtos)
         {
             try
             {
-                await _produtoRepository.UpdateProdutoAsync(_mapper.Map<Produto>(produto));
-                return produto;
+                await _produtosRepository.UpdateProdutosAsync(_mapper.Map<Produtos>(produtos));
+                return produtos;
             }
             catch (Exception)
             {
-                return new ProdutoDTO();
+                return new ProdutosDTO();
             }            
         }
 
-        public async Task DeleteProdutoAsync(int id)
+        public async Task DeleteProdutosAsync(int id)
         {
             try
             {
-                await _produtoRepository.DeleteProdutoAsync(id);
+                await _produtosRepository.DeleteProdutosAsync(id);
             }
             catch (Exception ex)
             {

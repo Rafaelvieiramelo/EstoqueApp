@@ -1,4 +1,4 @@
-namespace EstoqueApp.Tests;
+namespace LidyDecorApp.Tests;
 
 public class UnitTest1
 {
