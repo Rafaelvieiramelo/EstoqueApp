@@ -1,21 +1,84 @@
 ﻿@page "/usuarios"
+@inject UsuariosService UsuariosService
+@inject SharedService Shared
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
 
-@using EstoqueApp.Web.Models;
+@using LidyDecorApp.Web.Models;
+@using LidyDecorApp.Web.Services
 
-<PageTitle>Lista de Usuarios</PageTitle>
+<PageTitle>Usuarios</PageTitle>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Lista de Usuarios</h1>
-    <button class="btn btn-primary bi bi-plus" @onclick="OpenAddModal"></button>
+    <button class="btn btn-primary bi bi-plus" @onclick="() => Shared.OpenAddModal(ref usuariosEdicao, ref isEditMode, ref showModal)"></button>
 </div>
 
 @if (!string.IsNullOrEmpty(alertMessage))
 {
     <div class="alert alert-@alertMessageType alert-dismissible fade show" role="alert">
         @alertMessage
-        <button type="button" class="btn-close" aria-label="Close" @onclick="CloseAlert"></button>
+        <button type="button" class="btn-close" aria-label="Close" @onclick="async () => await SharedService.CloseAlert(ref alertMessage, ref alertMessageType, ref alertVisible)"></button>
+    </div>
+}
+
+@if (showModal)
+{
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal fade show d-block"
+         tabindex="-1"
+         aria-labelledby="editModalLabel"
+         aria-modal="true"
+         role="dialog"
+    @onclick:stopPropagation
+         @onkeydown="@(e => { if (e.Key == "Escape") showModal =  SharedService.HideModal(HideModalCallback, showModal, StateHasChanged).Result; })">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">@((isEditMode ? "Editar" : "Adicionar") + " Usuarios")</h5>
+                    <button type="button" class="btn-close" @onclick="async () => showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged)" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <label for="nome" class="col-sm-3 col-form-label">Nome</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="nome" @bind="usuariosEdicao.nome" class="form-control" placeholder="Nome" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="email" class="col-sm-3 col-form-label">E-mail</label>
+                        <div class="col-sm-9">
+                            <textarea id="email" @bind="usuariosEdicao.email" class="form-control" placeholder="E-mail"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="senha" class="col-sm-3 col-form-label">Senha</label>
+                        <div class="col-sm-9">
+                            <input type="password" id="senha" @bind="usuariosEdicao.senhaHash" class="form-control" placeholder="Senha" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="perfil" class="col-sm-3 col-form-label">Perfil</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="perfil" @bind="usuariosEdicao.role" class="form-control" placeholder="perfil" />
+                        </div>
+                    </div>
+                    <div class="mb-3 row">
+                        <label for="ativo" class="col-sm-3 col-form-label">Ativo</label>
+                        <div class="col-sm-9">
+                            <input type="checkbox" id="ativo" @bind="usuariosEdicao.ativo" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="async () => showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged)">Fechar</button>
+                    <button type="button" class="btn btn-primary" @onclick="SalvarUsuarios">@((isEditMode ? "Salvar" : "Adicionar"))</button>
+                </div>
+            </div>
+        </div>
     </div>
 }
 
@@ -25,131 +88,66 @@
 }
 else
 {
-    <TabelaUsuarios Usuarios="usuarios" EditarUsuario="OpenEditModal" ExcluirUsuario="ExcluirUsuario" />
+    <TabelaUsuarios Usuarios="usuarios" EditarUsuarios="(usuarios) => Shared.OpenEditModal(ref usuariosEdicao, usuarios, ref isEditMode, ref showModal)" ExcluirUsuarios="ExcluirUsuarios" />
 }
-
-<ModalUsuario ShowModal="showModal"
-              UsuarioEdicao="usuarioEdicao"
-              HideModalCallback="HideModal"
-              SalvarUsuarioCallback="SalvarUsuario"
-              IsEditMode="isEditMode" />
 
 @code {
     private bool showModal = false;
     private bool isEditMode = false;
-    private UsuarioModel usuarioEdicao = new UsuarioModel();
-    private List<UsuarioModel>? usuarios;
-    private List<Categoria> categorias = new List<Categoria>();
-    private List<Fornecedor> fornecedores = new List<Fornecedor>();
+    private UsuariosModel usuariosEdicao = new UsuariosModel();
+    private List<UsuariosModel>? usuarios;
     private string? alertMessage;
     private string? alertMessageType;
     private bool alertVisible;
+    private EventCallback HideModalCallback { get; set; }
+    private EventCallback<UsuariosModel> SalvarUsuariosCallback { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        usuarios = await GetUsuariosFromApi();
+        usuarios = await UsuariosService.GetUsuariosFromApi();
     }
-
-    private async Task<List<UsuarioModel>> GetUsuariosFromApi()
-    {
-        return await Http.GetFromJsonAsync<List<UsuarioModel>>("https://localhost:7071/Usuario/GetUsuarios");
-    }
-
-    private void OpenEditModal(UsuarioModel usuario)
-    {
-        usuarioEdicao = usuario;
-        isEditMode = true;
-        showModal = true;
-    }
-
-    private void OpenAddModal()
-    {
-        usuarioEdicao = new UsuarioModel();
-        isEditMode = false;
-        showModal = true;
-    }
-
-    private void HideModal()
-    {
-        showModal = false;
-    }
-
-    private async Task ExcluirUsuario(int idUsuario)
+        
+    private async Task ExcluirUsuarios(int idUsuarios)
     {
         alertMessage = null;
         alertMessageType = null;
-        HttpResponseMessage response;
-
-        response = await Http.PatchAsJsonAsync($"https://localhost:7071/Usuario/DeleteUsuario?id={idUsuario}","");
+        HttpResponseMessage response = await UsuariosService.ExcluirUsuarios(idUsuarios);
 
         if (response.IsSuccessStatusCode)
         {
-            alertMessage = "Usuario exluido com sucesso!";
+            alertMessage = "Usuarios exluido com sucesso!";
             alertMessageType = "success";
-            usuarios = await GetUsuariosFromApi();
+            usuarios = await UsuariosService.GetUsuariosFromApi();
         }
         else
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            alertMessage = $"Erro ao excluir o usuario: {errorContent}";
+            alertMessage = $"Erro ao excluir o usuarios: {errorContent}";
             alertMessageType = "danger";
         }
     }
-
-    private async Task SalvarUsuario(UsuarioModel usuario)
+        
+    private async Task SalvarUsuarios()
     {
         alertMessage = null;
         alertMessageType = null;
 
-        HttpResponseMessage response;
-        if (isEditMode)
-        {
-            response = await Http.PatchAsJsonAsync("https://localhost:7071/Usuario/UpdateUsuario", usuario);
-        }
-        else
-        {
-            response = await Http.PostAsJsonAsync("https://localhost:7071/Usuario/AddUsuario", usuario);
-        }
+        HttpResponseMessage response = await UsuariosService.SalvarUsuarios(usuariosEdicao, isEditMode);
 
         if (response.IsSuccessStatusCode)
         {
-            alertMessage = isEditMode ? "Usuario editado com sucesso!" : "Usuario adicionado com sucesso!";
+            alertMessage = isEditMode ? "Usuarios editado com sucesso!" : "Usuarios adicionado com sucesso!";
             alertMessageType = "success";
-            usuarios = await GetUsuariosFromApi(); // Atualiza a lista de usuarios
+            usuarios = await UsuariosService.GetUsuariosFromApi();
         }
         else
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            alertMessage = $"Erro ao {(isEditMode ? "salvar" : "adicionar")} o usuario: {errorContent}";
+            alertMessage = $"Erro ao {(isEditMode ? "salvar" : "adicionar")} o usuarios: {errorContent}";
             alertMessageType = "danger";
         }
 
-        ShowAlert();
-        HideModal();
-    }
-
-    private void ShowAlert()
-    {
-        alertVisible = true;
-        StateHasChanged();
-    }
-
-    private void CloseAlert()
-    {
-        alertMessage = null;
-        alertMessageType = null;
-        alertVisible = false;
-    }
-
-    public class Categoria
-    {
-        public int id { get; set; }
-        public string nome { get; set; }
-    }
-
-    public class Fornecedor
-    {
-        public int id { get; set; }
-        public string nome { get; set; }
+        SharedService.ShowAlert(ref alertVisible);
+        showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged);
     }
 }

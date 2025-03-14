@@ -1,11 +1,11 @@
-﻿namespace EstoqueApp.Domain.Interfaces
+﻿namespace LidyDecorApp.Domain.Interfaces
 {
-    public interface IClienteRepository
+    public interface IClientesRepository
     {
-        Task<Cliente> GetClienteByIdAsync(int id);
-        Task<IEnumerable<Cliente>> GetClientesAsync();
-        Task AddClienteAsync(Cliente cliente);
-        Task UpdateClienteAsync(Cliente cliente);
-        Task DeleteClienteAsync(int id);
+        Task<Clientes> GetClientesByIdAsync(int id);
+        Task<IEnumerable<Clientes>> GetClientessAsync();
+        Task AddClientesAsync(Clientes clientes);
+        Task UpdateClientesAsync(Clientes clientes);
+        Task DeleteClientesAsync(int id);
     }
 }

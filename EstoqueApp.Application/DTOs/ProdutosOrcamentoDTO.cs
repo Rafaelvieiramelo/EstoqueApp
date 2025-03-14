@@ -1,13 +1,16 @@
-﻿namespace EstoqueApp.Application.DTOs
+﻿using System.Text.Json.Serialization;
+
+namespace LidyDecorApp.Application.DTOs
 {
-    public class ProdutosOrcamentoDTO
+    public class ProdutosOrcamentosDTO
     {
         public int Id { get; set; }
-        public int ProdutoId { get; set; }
-        public int OrcamentoId { get; set; }
-        public DateOnly Inclusao { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+        public int ProdutosId { get; set; }
+        public int OrcamentosId { get; set; }
 
-        public ProdutoDTO? Produto { get; set; }
-        public OrcamentoDTO? Orcamento { get; set; }
+        [JsonIgnore]
+        public ProdutosDTO? Produtos { get; set; }
+        [JsonIgnore]
+        public OrcamentosDTO? Orcamentos { get; set; }
     }
 }

@@ -1,62 +1,62 @@
-﻿using EstoqueApp.Domain.Interfaces;
-using EstoqueApp.Domain;
+﻿using LidyDecorApp.Domain.Interfaces;
+using LidyDecorApp.Domain;
 using Microsoft.EntityFrameworkCore;
 
-namespace EstoqueApp.Infrastructure.Repository
+namespace LidyDecorApp.Infrastructure.Repository
 {
-    public class ClienteRepository : IClienteRepository
+    public class ClientesRepository : IClientesRepository
     {
-        private readonly EstoqueDbContext _context;
+        private readonly LidyDecorDbContext _context;
 
-        public ClienteRepository(EstoqueDbContext context)
+        public ClientesRepository(LidyDecorDbContext context)
         {
             _context = context;
         }
 
-        public async Task AddClienteAsync(Cliente cliente)
+        public async Task AddClientesAsync(Clientes clientes)
         {
-            await _context.Cliente.AddAsync(cliente);
+            await _context.Clientes.AddAsync(clientes);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Cliente>> GetClientesAsync()
+        public async Task<IEnumerable<Clientes>> GetClientessAsync()
         {
-            return await _context.Cliente.ToListAsync();
+            return await _context.Clientes.ToListAsync();
         }
 
-        public async Task<Cliente> GetClienteByIdAsync(int id)
+        public async Task<Clientes> GetClientesByIdAsync(int id)
         {
-            return await _context.Cliente.FirstOrDefaultAsync(p => p.Id == id);
+            return await _context.Clientes.FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public async Task UpdateClienteAsync(Cliente cliente)
+        public async Task UpdateClientesAsync(Clientes clientes)
         {
-            var clienteExistente = await _context.Cliente.FindAsync(cliente.Id);
+            var clientesExistente = await _context.Clientes.FindAsync(clientes.Id);
 
-            if (clienteExistente != null)
+            if (clientesExistente != null)
             {
-                clienteExistente.Nome = cliente.Nome;
-                clienteExistente.Email = cliente.Email;
-                clienteExistente.Telefone = cliente.Telefone;
-                clienteExistente.CpfCnpj = cliente.CpfCnpj;
-                clienteExistente.Logradouro = cliente.Logradouro;
-                clienteExistente.Numero = cliente.Numero;
-                clienteExistente.Bairro = cliente.Bairro;
-                clienteExistente.Cidade = cliente.Cidade;
-                clienteExistente.Estado = cliente.Estado;
-                clienteExistente.Cep = cliente.Cep;
+                clientesExistente.Nome = clientes.Nome;
+                clientesExistente.Email = clientes.Email;
+                clientesExistente.Telefone = clientes.Telefone;
+                clientesExistente.CpfCnpj = clientes.CpfCnpj;
+                clientesExistente.Logradouro = clientes.Logradouro;
+                clientesExistente.Numero = clientes.Numero;
+                clientesExistente.Bairro = clientes.Bairro;
+                clientesExistente.Cidade = clientes.Cidade;
+                clientesExistente.Estado = clientes.Estado;
+                clientesExistente.Cep = clientes.Cep;
 
                 await _context.SaveChangesAsync();
             }
         }
 
-        public async Task DeleteClienteAsync(int id)
+        public async Task DeleteClientesAsync(int id)
         {
-            var cliente = await _context.Cliente.FindAsync(id);
+            var clientes = await _context.Clientes.FindAsync(id);
 
-            if (cliente != null)
+            if (clientes != null)
             {
-                _context.Cliente.Remove(cliente);
+                _context.Clientes.Remove(clientes);
                 await _context.SaveChangesAsync();
             }
         }

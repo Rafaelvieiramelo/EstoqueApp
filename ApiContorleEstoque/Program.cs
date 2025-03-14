@@ -1,10 +1,10 @@
-using EstoqueApp.Application.Interfaces;
-using EstoqueApp.Application.Mapping;
-using EstoqueApp.Application.Services;
-using EstoqueApp.Domain.Interfaces;
-using EstoqueApp.Infrastructure;
-using EstoqueApp.Infrastructure.Filters;
-using EstoqueApp.Infrastructure.Repository;
+using LidyDecorApp.Application.Interfaces;
+using LidyDecorApp.Application.Mapping;
+using LidyDecorApp.Application.Services;
+using LidyDecorApp.Domain.Interfaces;
+using LidyDecorApp.Infrastructure;
+using LidyDecorApp.Infrastructure.Filters;
+using LidyDecorApp.Infrastructure.Repository;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -20,7 +20,12 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader());
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+        options.JsonSerializerOptions.MaxDepth = 64; // Opcional: aumentar a profundidade máxima permitida
+    });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
@@ -44,7 +49,7 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         ValidIssuer = builder.Configuration["Jwt:Issuer"],
         ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is not configured.")))
     };
 });
 
@@ -54,26 +59,22 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("User", policy => policy.RequireRole("User"));
 });
 
-builder.Services.AddScoped<IProdutoService, ProdutoService>();
-builder.Services.AddScoped<ICategoriaService, CategoriaService>();
-builder.Services.AddScoped<IFornecedorService, FornecedorService>();
-builder.Services.AddScoped<IUsuarioService, UsuarioService>();
-builder.Services.AddScoped<IClienteService, ClienteService>();
-builder.Services.AddScoped<IOrcamentoService, OrcamentoService>();
+builder.Services.AddScoped<IProdutosService, ProdutosService>();
+builder.Services.AddScoped<IUsuariosService, UsuariosService>();
+builder.Services.AddScoped<IClientesService, ClientesService>();
+builder.Services.AddScoped<IOrcamentosService, OrcamentosService>();
 
-builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
-builder.Services.AddScoped<ICategoriaRepository, CategoriaRepository>();
-builder.Services.AddScoped<IFornecedorRepository, FornecedorRepository>();
-builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
-builder.Services.AddScoped<IClienteRepository, ClienteRepository>();
-builder.Services.AddScoped<IOrcamentoRepository, OrcamentoRepository>();
+builder.Services.AddScoped<IProdutosRepository, ProdutosRepository>();
+builder.Services.AddScoped<IUsuariosRepository, UsuariosRepository>();
+builder.Services.AddScoped<IClientesRepository, ClientesRepository>();
+builder.Services.AddScoped<IOrcamentosRepository, OrcamentosRepository>();
 
 builder.Services.AddTransient<IJwtTokenService, JwtTokenService>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<EstoqueDbContext>(options =>
+builder.Services.AddDbContext<LidyDecorDbContext>(options =>
     options.UseSqlite(connectionString));
 
 var app = builder.Build();
@@ -91,4 +92,4 @@ app.UseCors("AllowAll");
 
 app.MapControllers();
 
-app.Run();
+await app.RunAsync();

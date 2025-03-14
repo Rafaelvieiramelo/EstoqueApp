@@ -1,71 +1,72 @@
-using EstoqueApp.Application.DTOs;
-using EstoqueApp.Application.Interfaces;
+using LidyDecorApp.Application.DTOs;
+using LidyDecorApp.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EstoqueApp.API.Controllers
+namespace LidyDecorApp.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class UsuarioController : ControllerBase
+    public class UsuariosController : ControllerBase
     {
-        private readonly IUsuarioService _usuarioService;
+        private const string id = "{id}";
+        private readonly IUsuariosService _usuariosService;
 
-        public UsuarioController(IUsuarioService usuarioService)
+        public UsuariosController(IUsuariosService usuariosService)
         {
-            _usuarioService = usuarioService;
+            _usuariosService = usuariosService;
         }
 
-        [HttpGet("GetUsuarios")]
-        public async Task<ActionResult<IEnumerable<UsuarioDTO>>> GetUsuarios()
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<UsuarioReadDTO>>> GetUsuarios()
         {
-            var usuario = await _usuarioService.GetUsuariosAsync();
-            return Ok(usuario);
+            var usuarios = await _usuariosService.GetUsuariosAsync();
+            return Ok(usuarios);
         }
 
-        [HttpGet("GeUsuarioById")]
-        public async Task<ActionResult<UsuarioDTO>> GeUsuarioById(int id)
+        [HttpGet(id)]
+        public async Task<ActionResult<UsuarioReadDTO>> GeUsuariosById(int id)
         {
-            var usuario = await _usuarioService.GetUsuarioByIdAsync(id);
-            return Ok(usuario);
+            var usuarios = await _usuariosService.GetUsuariosByIdAsync(id);
+            return Ok(usuarios);
         }
 
-        [HttpPost("AddUsuario")]
-        public async Task<ActionResult<UsuarioDTO>> AddUsuario(UsuarioDTO usuario)
+        [HttpPost]
+        public async Task<ActionResult<UsuarioWriteDTO>> AddUsuarios(UsuarioWriteDTO usuarios)
         {
-            usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(usuario.SenhaHash);
-            var usuarioNovo = await _usuarioService.AddUsuarioAsync(usuario);
-            var objetoDefault = Shared.ObjectValidator.IsObjectDefault(usuarioNovo);
+            usuarios.SenhaHash = BCrypt.Net.BCrypt.HashPassword(usuarios.SenhaHash);
+            var usuariosNovo = await _usuariosService.AddUsuariosAsync(usuarios);
+            var objetoDefault = Shared.ObjectValidator.IsObjectDefault(usuariosNovo);
 
             if (objetoDefault)
-                return BadRequest("Erro ao adicionar usuario");
+                return BadRequest("Erro ao adicionar usuarios");
 
-            return Ok(usuarioNovo);
+            return Ok(usuariosNovo);
         }
 
-        [HttpPatch("UpdateUsuario")]
-        public async Task<ActionResult<UsuarioDTO>> UpdateUsuario(UsuarioDTO usuario)
+        [HttpPatch]
+        public async Task<ActionResult<UsuarioWriteDTO>> UpdateUsuarios(UsuarioWriteDTO usuarios)
         {
-            usuario.SenhaHash = BCrypt.Net.BCrypt.HashPassword(usuario.SenhaHash);
-            var usuarioAtualizado = await _usuarioService.UpdateUsuarioAsync(usuario);
-            var objetoDefault = Shared.ObjectValidator.IsObjectDefault(usuarioAtualizado);
+            usuarios.SenhaHash = BCrypt.Net.BCrypt.HashPassword(usuarios.SenhaHash);
+            var usuariosAtualizado = await _usuariosService.UpdateUsuariosAsync(usuarios);
+            var objetoDefault = Shared.ObjectValidator.IsObjectDefault(usuariosAtualizado);
 
             if (objetoDefault)
-                return BadRequest("Erro ao editar usuario");
+                return BadRequest("Erro ao editar usuarios");
 
-            return Ok(usuarioAtualizado);
+            return Ok(usuariosAtualizado);
         }
 
-        [HttpPatch("DeleteUsuario")]
-        public async Task<ActionResult> DeleteUsuario(int id)
+        [HttpDelete(id)]
+        public async Task<ActionResult> DeleteUsuarios(int id)
         {
             try
             {
-                await _usuarioService.DeleteUsuarioAsync(id);
+                await _usuariosService.DeleteUsuariosAsync(id);
                 return Ok();
             }
             catch (Exception ex)
             {
-                return BadRequest($"Erro ao Deletar usuario:{ex.Message}");            
+                return BadRequest($"Erro ao Deletar usuarios:{ex.Message}");            
             }
         }
     }

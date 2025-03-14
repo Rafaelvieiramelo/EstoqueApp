@@ -1,35 +1,45 @@
 ﻿using AutoMapper;
-using EstoqueApp.Application.DTOs;
-using EstoqueApp.Domain;
+using LidyDecorApp.Application.DTOs;
+using LidyDecorApp.Domain;
 
-namespace EstoqueApp.Application.Mapping
+namespace LidyDecorApp.Application.Mapping
 {
     public class MappingProfile : Profile
     {
         public MappingProfile()
         {
-            CreateMap<Produto, ProdutoDTO>();
-            CreateMap<ProdutoDTO, Produto>()
-                .ForMember(dest => dest.CategoriaId, opt => opt.MapFrom(src => src.CategoriaId))
-                .ForMember(dest => dest.FornecedorId, opt => opt.MapFrom(src => src.FornecedorId));
+            CreateMap<Usuarios, UsuariosBaseDTO>()
+                .ReverseMap();
 
-            CreateMap<Categoria, CategoriaDTO>();
-            CreateMap<CategoriaDTO, Categoria>();
+            CreateMap<Usuarios, UsuarioWriteDTO>()
+                .ReverseMap();
 
-            CreateMap<Fornecedor, FornecedorDTO>();
-            CreateMap<FornecedorDTO, Fornecedor>();
+            CreateMap<Usuarios, UsuarioReadDTO>()
+               .ReverseMap();
 
-            CreateMap<Usuario, UsuarioDTO>();
-            CreateMap<UsuarioDTO, Usuario>();
+            CreateMap<Clientes, ClientesDTO>()
+                .ReverseMap();
 
-            CreateMap<Cliente, ClienteDTO>();
-            CreateMap<ClienteDTO, Cliente>();
+            CreateMap<Produtos, ProdutosDTO>()
+                .ReverseMap();
 
-            CreateMap<Orcamento, OrcamentoDTO>();
-            CreateMap<OrcamentoDTO, Orcamento>();
+            // Orcamentos -> OrcamentosDTO
+            CreateMap<Orcamentos, OrcamentosDTO>()
+                .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.Data))
+                .ForMember(dest => dest.DataEvento, opt => opt.MapFrom(src => src.DataEvento))
+                .ForMember(dest => dest.ProdutosOrcamentos, opt => opt.MapFrom(src => src.ProdutosOrcamento))
+                .PreserveReferences() // Adicione esta linha
+                .ReverseMap();
 
-            CreateMap<TipoEvento, TipoEventoDTO>();
-            CreateMap<TipoEventoDTO, TipoEvento>();
+            // ProdutossOrcamentos -> ProdutossOrcamentosDTO
+            CreateMap<ProdutosOrcamento, ProdutosOrcamentosDTO>()
+                .ForMember(dest => dest.Produtos, opt => opt.MapFrom(src => src.Produtoss))
+                .ForMember(dest => dest.Orcamentos, opt => opt.MapFrom(src => src.Orcamentos))
+                .PreserveReferences() // Adicione esta linha
+                .ReverseMap();
+
+            CreateMap<TipoEventos, TipoEventoDTO>()
+                .ReverseMap(); ;
         }
     }
 }

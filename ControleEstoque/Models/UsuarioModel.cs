@@ -1,6 +1,6 @@
-﻿namespace EstoqueApp.Web.Models
+﻿namespace LidyDecorApp.Web.Models
 {
-    public class UsuarioModel
+    public class UsuariosModel
     {
         public int id { get; set; }
         public string nome { get; set; }

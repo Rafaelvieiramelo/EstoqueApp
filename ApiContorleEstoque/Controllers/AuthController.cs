@@ -1,19 +1,19 @@
-using EstoqueApp.Application.Interfaces;
+using LidyDecorApp.Application.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using static EstoqueApp.API.Model.AuthModel;
+using static LidyDecorApp.API.Model.AuthModel;
 
-namespace EstoqueApp.API.Controllers
+namespace LidyDecorApp.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     public class AuthController : ControllerBase
     {
-        private readonly IUsuarioService _usuarioService;
+        private readonly IUsuariosService _usuariosService;
         private readonly IJwtTokenService _jwtTokenService;
 
-        public AuthController(IUsuarioService usuarioService, IJwtTokenService jwtTokenService)
+        public AuthController(IUsuariosService usuariosService, IJwtTokenService jwtTokenService)
         {
-            _usuarioService = usuarioService;
+            _usuariosService = usuariosService;
             _jwtTokenService = jwtTokenService;
         }
 
@@ -23,7 +23,7 @@ namespace EstoqueApp.API.Controllers
             if (string.IsNullOrEmpty(userLogin.Email) || string.IsNullOrEmpty(userLogin.Senha))
                 return BadRequest("Username and password must be provided.");
 
-            var user = await _usuarioService.GetUsuarioByEmailSenhaAsync(userLogin.Email);
+            var user = await _usuariosService.GetUsuariosByEmailSenhaAsync(userLogin.Email);
 
             if (user == null)
                 return Unauthorized("Invalid username or password.");

@@ -1,5 +1,5 @@
 ﻿
-namespace EstoqueApp.Application.DTOs
+namespace LidyDecorApp.Application.DTOs
 {
     public class CategoriaDTO
     {

@@ -1,12 +1,12 @@
-﻿@using EstoqueApp.Web.Pages.Orcamento
-@using EstoqueApp.Web.Models
+﻿@using LidyDecorApp.Web.Pages.Orcamento
+@using LidyDecorApp.Web.Models
 
-<table id="orcamentosTable" class="table">
+<table id="orcamentossTable" class="table">
     <thead>
         <tr>
             <th class="d-none">Id</th>
             <th>Número</th>
-            <th>Cliente</th>
+            <th>Clientes</th>
             <th>Tipo de Evento</th>
             <th>Data</th>
             <th>Data do Evento</th>
@@ -16,23 +16,26 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var orcamento in Orcamentos)
+        @foreach (var orcamentos in Orcamentos)
         {
             <tr>
-                <td class="d-none">@orcamento.Id</td>
-                <td>@orcamento.Numero</td>
-                <td>@orcamento.Cliente?.Nome</td>
-                <td>@orcamento.TipoEvento?.Tipo</td>
-                <td>@orcamento.Data.ToString("dd/MM/yyyy")</td>
-                <td>@(orcamento.DataEvento?.ToString("dd/MM/yyyy") ?? "Não definida")</td>
-                <td>@orcamento.Observacoes</td>
-                <td>@orcamento.ValorTotal.ToString("C")</td>
+                <td class="d-none">@orcamentos.Id</td>
+                <td>@orcamentos.Numero</td>
+                <td>@orcamentos.Clientes?.Nome</td>
+                <td>@orcamentos.TipoEvento?.Tipo</td>
+                <td>@orcamentos.Data.ToString("dd/MM/yyyy")</td>
+                <td>@orcamentos.DataEvento.ToString("dd/MM/yyyy")</td>
+                <td>@orcamentos.Observacoes</td>
+                <td>@orcamentos.ValorTotal.ToString("C")</td>
                 <td>
-                    <button class="btn btn-primary" @onclick="() => OnEdit(orcamento)">
+                    <button class="btn btn-primary" @onclick="() => OnEdit(orcamentos)">
                         <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-danger" @onclick="() => DeleteOrcamento(orcamento.Id)">
+                    <button class="btn btn-danger" @onclick="() => DeleteOrcamentos(orcamentos.Id)">
                         <i class="bi bi-trash3"></i>
+                    </button>
+                    <button class="btn btn-info" @onclick="() => ShowDetails(orcamentos)">
+                        <i class="bi bi-eye"></i> Ver Detalhes
                     </button>
                 </td>
             </tr>
@@ -40,28 +43,70 @@
     </tbody>
 </table>
 
+<!-- Modal -->
+@if (selectedOrcamentos != null)
+{
+    <div class="modal fade show" tabindex="-1" style="display: block;" aria-modal="true" role="dialog">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalhes do Orçamento</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+                </div>
+                <div class="modal-body">
+                    <p><strong>Número:</strong> @selectedOrcamentos.Numero</p>
+                    <p><strong>Clientes:</strong> @selectedOrcamentos.Clientes?.Nome</p>
+                    <p><strong>Email:</strong> @selectedOrcamentos.Clientes?.Email</p>
+                    <p><strong>Tipo de Evento:</strong> @selectedOrcamentos.TipoEvento?.Tipo</p>
+                    <p><strong>Data:</strong> @selectedOrcamentos.Data.ToString("dd/MM/yyyy")</p>
+                    <p><strong>Data do Evento:</strong> @(selectedOrcamentos.DataEvento.ToString("dd/MM/yyyy") ?? "Não definida")</p>
+                    <p><strong>Observações:</strong> @selectedOrcamentos.Observacoes</p>
+                    <p><strong>Valor Total:</strong> @selectedOrcamentos.ValorTotal.ToString("C")</p>
+                    <h5>Produtoss</h5>
+                    <ul>
+                        @foreach (var produtosOrcamentos in selectedOrcamentos.ProdutosOrcamentos)
+                        {
+                            <li>
+                                <p><strong>Nome:</strong> @produtosOrcamentos.Produtos.nome</p>
+                                <p><strong>Descrição:</strong> @produtosOrcamentos.Produtos.descricao</p>
+                                <p><strong>Quantidade:</strong> @produtosOrcamentos.Produtos.quantidade</p>
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Fechar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 
 @code {
-    [Parameter] public List<OrcamentoModel> Orcamentos { get; set; }
-    [Parameter] public EventCallback<OrcamentoModel> EditarOrcamento { get; set; }
-    [Parameter] public EventCallback<int> ExcluirOrcamento { get; set; }
+    [Parameter] public List<LidyDecorApp.Web.Models.OrcamentosModel> Orcamentos { get; set; }
+    [Parameter] public EventCallback<LidyDecorApp.Web.Models.OrcamentosModel> EditarOrcamentos { get; set; }
+    [Parameter] public EventCallback<int> ExcluirOrcamentos { get; set; }
     [Inject] private IJSRuntime JSRuntime { get; set; }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private LidyDecorApp.Web.Models.OrcamentosModel selectedOrcamentos;
+
+    private void OnEdit(LidyDecorApp.Web.Models.OrcamentosModel orcamentos)
     {
-        if (firstRender)
-        {
-            await JSRuntime.InvokeVoidAsync("initializeDataTable");
-        }
+        EditarOrcamentos.InvokeAsync(orcamentos);
     }
 
-    private void OnEdit(OrcamentoModel orcamento)
+    private void DeleteOrcamentos(int idOrcamentos)
     {
-        EditarOrcamento.InvokeAsync(orcamento);
+        ExcluirOrcamentos.InvokeAsync(idOrcamentos);
     }
 
-    private void DeleteOrcamento(int idOrcamento)
+    private void ShowDetails(LidyDecorApp.Web.Models.OrcamentosModel orcamentos)
     {
-        ExcluirOrcamento.InvokeAsync(idOrcamento);
+        selectedOrcamentos = orcamentos;
+    }
+
+    private void CloseModal()
+    {
+        selectedOrcamentos = null;
     }
 }

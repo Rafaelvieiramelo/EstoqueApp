@@ -1,14 +1,15 @@
-﻿using EstoqueApp.Application.DTOs;
+﻿using LidyDecorApp.Application.DTOs;
 
-namespace EstoqueApp.Application.Interfaces
+namespace LidyDecorApp.Application.Interfaces
 {
-    public interface IOrcamentoService
+    public interface IOrcamentosService
     {
-        Task<IEnumerable<OrcamentoDTO>> GetOrcamentosAsync();
+        Task<IEnumerable<OrcamentosDTO>> GetOrcamentosAsync();
+        Task<string> GetNumeroUltimoOrcamentosAsync();
         Task<IEnumerable<TipoEventoDTO>> GetTiposEventoAsync();
-        Task<OrcamentoDTO> GetOrcamentoByIdAsync(int id);
-        Task<OrcamentoDTO> AddOrcamentoAsync(OrcamentoDTO categoria);
-        Task<OrcamentoDTO> UpdateOrcamentoAsync(OrcamentoDTO categoria);
-        Task DeleteOrcamentoAsync(int id);
+        Task<OrcamentosDTO> GetOrcamentosByIdAsync(int id);
+        Task<OrcamentosDTO> AddOrcamentosAsync(OrcamentosDTO categoria);
+        Task<OrcamentosDTO> UpdateOrcamentosAsync(OrcamentosDTO categoria);
+        Task DeleteOrcamentosAsync(int id);
     }
 }

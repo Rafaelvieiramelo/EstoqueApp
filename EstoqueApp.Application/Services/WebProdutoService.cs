@@ -1,29 +1,29 @@
 ﻿// Camada de Aplicação (Application)
-using EstoqueApp.Application.DTOs;
+using LidyDecorApp.Application.DTOs;
 using System.Net.Http.Json;
 
-namespace EstoqueApp.Application.Services
+namespace LidyDecorApp.Application.Services
 {
-    public class WebProdutoService
+    public class WebProdutosService
     {
         private readonly HttpClient _httpClient;
 
-        public WebProdutoService(HttpClient httpClient)
+        public WebProdutosService(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
 
-        public async Task<List<ProdutoDTO>> GetProdutosAsync()
+        public async Task<List<ProdutosDTO>> GetProdutossAsync()
         {
             try
             {
-                var response = await _httpClient.GetFromJsonAsync<List<ProdutoDTO>>("https://localhost:7071/Produtos/GetProdutos");
-                return response ?? new List<ProdutoDTO>();
+                var response = await _httpClient.GetFromJsonAsync<List<ProdutosDTO>>("https://localhost:7071/Produtoss/GetProdutoss");
+                return response ?? new List<ProdutosDTO>();
             }
             catch (Exception ex)
             {
                 Console.Error.WriteLine($"Erro ao chamar a API: {ex.Message}");
-                return new List<ProdutoDTO>(); // Retorna uma lista vazia em caso de erro
+                return new List<ProdutosDTO>(); // Retorna uma lista vazia em caso de erro
             }
         }
     }

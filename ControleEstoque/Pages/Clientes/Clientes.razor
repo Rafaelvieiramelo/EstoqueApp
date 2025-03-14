@@ -1,21 +1,122 @@
 ﻿@page "/clientes"
+@inject ClientesService ClientesService
+@inject SharedService Shared
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
 
-@using EstoqueApp.Web.Models;
+@using LidyDecorApp.Web.Models;
+@using LidyDecorApp.Web.Services
 
 <PageTitle>Clientes</PageTitle>
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Lista de Clientes</h1>
-    <button class="btn btn-primary bi bi-plus" @onclick="OpenAddModal"></button>
+    <button class="btn btn-primary bi bi-plus" @onclick="() => Shared.OpenAddModal(ref clientesEdicao, ref isEditMode, ref showModal)"></button>
 </div>
 
 @if (!string.IsNullOrEmpty(alertMessage))
 {
     <div class="alert alert-@alertMessageType alert-dismissible fade show" role="alert">
         @alertMessage
-        <button type="button" class="btn-close" aria-label="Close" @onclick="CloseAlert"></button>
+        <button type="button" class="btn-close" aria-label="Close" @onclick="async () => await SharedService.CloseAlert(ref alertMessage, ref alertMessageType, ref alertVisible)"></button>
+    </div>
+}
+
+@if (showModal)
+{
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal fade show d-block"
+         tabindex="-1"
+         aria-labelledby="editModalLabel"
+         aria-modal="true"
+         role="dialog"
+    @onclick:stopPropagation
+         @onkeydown="@(e => { if (e.Key == "Escape") showModal =  SharedService.HideModal(HideModalCallback, showModal, StateHasChanged).Result; })">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">@((isEditMode ? "Editar" : "Adicionar") + " Clientes")</h5>
+                    <button type="button" class="btn-close" @onclick="async () => showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged)" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3 row">
+                        <label for="nome" class="col-sm-3 col-form-label">Nome</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="nome" @bind="clientesEdicao.Nome" class="form-control" placeholder="Nome" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="email" class="col-sm-3 col-form-label">E-mail</label>
+                        <div class="col-sm-9">
+                            <input type="email" id="email" @bind="clientesEdicao.Email" class="form-control" placeholder="E-mail"></input>
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="telefone" class="col-sm-3 col-form-label">Telefone</label>
+                        <div class="col-sm-9">
+                            <input type="tel" id="telefone" @bind="clientesEdicao.Telefone" class="form-control" placeholder="Telefone" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="cpfCnpj" class="col-sm-3 col-form-label">Cpf/Cnpj</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="cpfCnpj" @bind="clientesEdicao.CpfCnpj" class="form-control" placeholder="Cpf/Cnpj" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="logradouro" class="col-sm-3 col-form-label">Logradouro</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="logradouro" @bind="clientesEdicao.Logradouro" class="form-control" placeholder="Logradouro" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="numero" class="col-sm-3 col-form-label">Numero</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="numero" @bind="clientesEdicao.Numero" class="form-control" placeholder="Numero" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="bairro" class="col-sm-3 col-form-label">Bairro</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="bairro" @bind="clientesEdicao.Bairro" class="form-control" placeholder="Bairro" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="cidade" class="col-sm-3 col-form-label">Cidade</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="cidade" @bind="clientesEdicao.Cidade" class="form-control" placeholder="Cidade" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="estado" class="col-sm-3 col-form-label">Estado</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="estado" @bind="clientesEdicao.Estado" class="form-control" placeholder="Estado" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="cep" class="col-sm-3 col-form-label">Cep</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="cep" @bind="clientesEdicao.Cep" class="form-control" placeholder="Cep" />
+                        </div>
+                    </div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="async () => showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged)">Fechar</button>
+                    <button type="button" class="btn btn-primary" @onclick="SalvarClientes">@((isEditMode ? "Salvar" : "Adicionar"))</button>
+                </div>
+            </div>
+        </div>
     </div>
 }
 
@@ -25,117 +126,66 @@
 }
 else
 {
-    <TabelaClientes Clientes="clientes" EditarCliente="OpenEditModal" ExcluirCliente="ExcluirCliente" />
+    <TabelaClientes Clientes="clientes" EditarClientes="(clientes) => Shared.OpenEditModal(ref clientesEdicao, clientes, ref isEditMode, ref showModal)" ExcluirClientes="ExcluirClientes" />
 }
-
-<ModalCliente ShowModal="showModal"
-              ClienteEdicao="clienteEdicao"
-              HideModalCallback="HideModal"
-              SalvarClienteCallback="SalvarCliente"
-              IsEditMode="isEditMode" />
 
 @code {
     private bool showModal = false;
     private bool isEditMode = false;
-    private ClienteModel clienteEdicao = new ClienteModel();
-    private List<ClienteModel>? clientes;
+    private ClientesModel clientesEdicao = new ClientesModel();
+    private List<ClientesModel>? clientes;
     private string? alertMessage;
     private string? alertMessageType;
     private bool alertVisible;
+    private EventCallback HideModalCallback { get; set; }
+    private EventCallback<ClientesModel> SalvarClientesCallback { get; set; }
 
     protected override async Task OnInitializedAsync()
     {
-        clientes = await GetClientesFromApi();
+        clientes = await ClientesService.GetClientesFromApi();
     }
-
-    private async Task<List<ClienteModel>> GetClientesFromApi()
-    {
-        return await Http.GetFromJsonAsync<List<ClienteModel>>("https://localhost:7071/Clientes/GetClientes");
-    }
-
-    private void OpenEditModal(ClienteModel cliente)
-    {
-        clienteEdicao = cliente;
-        isEditMode = true;
-        showModal = true;
-    }
-
-    private void OpenAddModal()
-    {
-        clienteEdicao = new ClienteModel();
-        isEditMode = false;
-        showModal = true;
-    }
-
-    private void HideModal()
-    {
-        showModal = false;
-    }
-
-    private async Task ExcluirCliente(int idCliente)
+        
+    private async Task ExcluirClientes(int idClientes)
     {
         alertMessage = null;
         alertMessageType = null;
-        HttpResponseMessage response;
-
-        response = await Http.PatchAsJsonAsync($"https://localhost:7071/Clientes/DeleteClienteAsync?id={idCliente}","");
+        HttpResponseMessage response = await ClientesService.ExcluirClientes(idClientes);
 
         if (response.IsSuccessStatusCode)
         {
-            alertMessage = "Cliente exluido com sucesso!";
+            alertMessage = "Clientes exluido com sucesso!";
             alertMessageType = "success";
-            clientes = await GetClientesFromApi();
+            clientes = await ClientesService.GetClientesFromApi();
         }
         else
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            alertMessage = $"Erro ao excluir o cliente: {errorContent}";
+            alertMessage = $"Erro ao excluir o clientes: {errorContent}";
             alertMessageType = "danger";
         }
     }
-
-    private async Task SalvarCliente(ClienteModel cliente)
+        
+    private async Task SalvarClientes()
     {
         alertMessage = null;
         alertMessageType = null;
 
-        HttpResponseMessage response;
-        if (isEditMode)
-        {
-            response = await Http.PatchAsJsonAsync("https://localhost:7071/Clientes/UpdateClienteAsync", cliente);
-        }
-        else
-        {
-            response = await Http.PostAsJsonAsync("https://localhost:7071/Clientes/AddClienteAsync", cliente);
-        }
+        HttpResponseMessage response = await ClientesService.SalvarClientes(clientesEdicao, isEditMode);
 
         if (response.IsSuccessStatusCode)
         {
-            alertMessage = isEditMode ? "Cliente editado com sucesso!" : "Cliente adicionado com sucesso!";
+            alertMessage = isEditMode ? "Clientes editado com sucesso!" : "Clientes adicionado com sucesso!";
             alertMessageType = "success";
-            clientes = await GetClientesFromApi(); // Atualiza a lista de clientes
+            clientes = await ClientesService.GetClientesFromApi();
         }
         else
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            alertMessage = $"Erro ao {(isEditMode ? "salvar" : "adicionar")} o cliente: {errorContent}";
+            alertMessage = $"Erro ao {(isEditMode ? "salvar" : "adicionar")} o clientes: {errorContent}";
             alertMessageType = "danger";
         }
 
-        ShowAlert();
-        HideModal();
-    }
-
-    private void ShowAlert()
-    {
-        alertVisible = true;
-        StateHasChanged(); // Força a renderização da interface com o novo estado
-    }
-
-    private void CloseAlert()
-    {
-        alertMessage = null;
-        alertMessageType = null;
-        alertVisible = false;
+        SharedService.ShowAlert(ref alertVisible);
+        showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged);
     }
 }

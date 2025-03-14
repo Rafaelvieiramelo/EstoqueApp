@@ -1,5 +1,5 @@
-﻿@using EstoqueApp.Web.Pages.Clientes
-@using EstoqueApp.Web.Models
+﻿@using LidyDecorApp.Web.Pages.Clientes
+@using LidyDecorApp.Web.Models
 
 <table id="clientesTable" class="table">
     <thead>
@@ -19,25 +19,25 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var cliente in Clientes)
+        @foreach (var clientes in Clientes)
         {
             <tr>
-                <td class="hide">@cliente.Id</td>
-                <td>@cliente.Nome</td>
-                <td>@cliente.Email</td>
-                <td>@cliente.Telefone</td>
-                <td>@cliente.CpfCnpj</td>
-                <td>@cliente.Logradouro</td>
-                <td>@cliente.Numero</td>
-                <td>@cliente.Bairro</td>
-                <td>@cliente.Cidade</td>
-                <td>@cliente.Estado</td>
-                <td>@cliente.Cep</td>
+                <td class="hide">@clientes.Id</td>
+                <td>@clientes.Nome</td>
+                <td>@clientes.Email</td>
+                <td>@clientes.Telefone</td>
+                <td>@clientes.CpfCnpj</td>
+                <td>@clientes.Logradouro</td>
+                <td>@clientes.Numero</td>
+                <td>@clientes.Bairro</td>
+                <td>@clientes.Cidade</td>
+                <td>@clientes.Estado</td>
+                <td>@clientes.Cep</td>
                 <td>
-                    <button class="btn btn-primary" @onclick="() => OnEdit(cliente)">
+                    <button class="btn btn-primary" @onclick="() => OnEdit(clientes)">
                         <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-danger" @onclick="() => DeleteCliente(cliente.Id)">
+                    <button class="btn btn-danger" @onclick="() => DeleteClientes(clientes.Id)">
                         <i class="bi bi-trash3"></i>
                     </button>
                 </td>
@@ -47,26 +47,18 @@
 </table>
 
 @code {
-    [Parameter] public List<ClienteModel> Clientes { get; set; }
-    [Parameter] public EventCallback<ClienteModel> EditarCliente { get; set; }
-    [Parameter] public EventCallback<int> ExcluirCliente { get; set; }
+    [Parameter] public List<ClientesModel> Clientes { get; set; }
+    [Parameter] public EventCallback<ClientesModel> EditarClientes { get; set; }
+    [Parameter] public EventCallback<int> ExcluirClientes { get; set; }
     [Inject] private IJSRuntime JSRuntime { get; set; }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    
+    private void OnEdit(ClientesModel clientes)
     {
-        if (firstRender)
-        {
-            await JSRuntime.InvokeVoidAsync("initializeDataTable");
-        }
+        EditarClientes.InvokeAsync(clientes);
     }
 
-    private void OnEdit(ClienteModel cliente)
+    private void DeleteClientes(int idClientes)
     {
-        EditarCliente.InvokeAsync(cliente);
-    }
-
-    private void DeleteCliente(int idCliente)
-    {
-        ExcluirCliente.InvokeAsync(idCliente);
+        ExcluirClientes.InvokeAsync(idClientes);
     }
 }

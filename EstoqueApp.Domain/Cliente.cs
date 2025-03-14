@@ -1,6 +1,6 @@
-﻿namespace EstoqueApp.Domain
+﻿namespace LidyDecorApp.Domain
 {
-    public class Cliente
+    public class Clientes
     {
         public int Id { get; set; }
         public string Nome { get; set; }

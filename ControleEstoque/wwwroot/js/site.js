@@ -1,9 +1,9 @@
 ﻿//function initializeDataTable() {
 //    $(document).ready(function () {
-//        if ($.fn.DataTable.isDataTable('#produtosTable')) {
-//            $('#produtosTable').DataTable().destroy();
+//        if ($.fn.DataTable.isDataTable('#produtossTable')) {
+//            $('#produtossTable').DataTable().destroy();
 //        }
-//        $('#produtosTable').DataTable({
+//        $('#produtossTable').DataTable({
 //            searching: true,
 //            language: {
 //                search: "Pesquisar:", // Altera o texto da barra de pesquisa
