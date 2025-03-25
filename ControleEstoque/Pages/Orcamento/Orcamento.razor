@@ -1,4 +1,5 @@
 ﻿@page "/orcamentos"
+@attribute [Authorize]
 @inject OrcamentosService OrcamentosService
 @inject ClientesService ClientesService
 @inject ProdutosService ProdutosService
@@ -8,6 +9,7 @@
 
 @using LidyDecorApp.Web.Models;
 @using LidyDecorApp.Web.Services
+@using Microsoft.AspNetCore.Authorization
 
 <PageTitle>Orcamentos</PageTitle>
 
