@@ -20,7 +20,7 @@ namespace LidyDecorApp.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] UserLogin userLogin)
         {
-            if (string.IsNullOrEmpty(userLogin.Email) || string.IsNullOrEmpty(userLogin.Senha))
+            if (string.IsNullOrEmpty(userLogin.Email) || string.IsNullOrEmpty(userLogin.Password))
                 return BadRequest("Username and password must be provided.");
 
             var user = await _usuariosService.GetUsuariosByEmailSenhaAsync(userLogin.Email);
@@ -28,7 +28,7 @@ namespace LidyDecorApp.API.Controllers
             if (user == null)
                 return Unauthorized("Invalid username or password.");
 
-            if (!BCrypt.Net.BCrypt.Verify(userLogin.Senha, user.SenhaHash))
+            if (!BCrypt.Net.BCrypt.Verify(userLogin.Password, user.SenhaHash))
                 return Unauthorized("Invalid username or password.");
 
             var token = _jwtTokenService.GenerateToken(user.Email, user.Role);

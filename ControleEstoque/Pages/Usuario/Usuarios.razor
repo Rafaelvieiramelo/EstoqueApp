@@ -1,4 +1,5 @@
 ﻿@page "/usuarios"
+@attribute [Authorize]
 @inject UsuariosService UsuariosService
 @inject SharedService Shared
 @inject HttpClient Http
@@ -6,6 +7,7 @@
 
 @using LidyDecorApp.Web.Models;
 @using LidyDecorApp.Web.Services
+@using Microsoft.AspNetCore.Authorization
 
 <PageTitle>Usuarios</PageTitle>
 

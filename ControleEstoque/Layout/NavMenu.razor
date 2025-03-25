@@ -1,14 +1,12 @@
-﻿@* <div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">EstoqueApp.Web</a>
-        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-    </div>
-</div> *@
+﻿@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject Blazored.LocalStorage.ILocalStorageService LocalStorage
+@inject NavigationManager Navigation
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
+        <br />
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
                 <span style="display: inline-block; width: 35px; height: 35px; background-image: url('../image/logo-LIDYDECOR-Icon-preto.png'); background-size: contain; background-repeat: no-repeat;"></span>
@@ -16,52 +14,107 @@
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="produtos">
-                <span class="bi bi-box-seam" style="font-size: 1.5rem; color: black; margin-bottom: 30px;"></span>
-                <span style="color: black;">produtos</span>
-            </NavLink>
-        </div>
+        @if (IsInRole("Admin") || IsInRole("User"))
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="produtos">
+                    <span class="bi bi-box-seam" style="font-size: 1.5rem; color: black; margin-bottom: 30px;"></span>
+                    <span style="color: black;">Produtos</span>
+                </NavLink>
+            </div>
+        }
+
+        @if (IsInRole("Admin"))
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="usuarios">
+                    <span class="bi bi-people" style="font-size: 1.5rem; color: black; margin-bottom: 30px;"></span>
+                    <span style="color: black;">Usuários</span>
+                </NavLink>
+            </div>
+        }
+
+        @if (IsInRole("Admin") || IsInRole("User"))
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="clientes">
+                    <span class="bi bi-person-badge" style="font-size: 1.5rem; color: black; margin-bottom: 30px;"></span>
+                    <span style="color: black;">Clientes</span>
+                </NavLink>
+            </div>
+        }
+
+        @if (IsInRole("Admin"))
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="orcamentos">
+                    <span class="bi bi-cash-stack" style="font-size: 1.5rem; color: black; margin-bottom: 30px;"></span>
+                    <span style="color: black;">Orçamentos</span>
+                </NavLink>
+            </div>
+
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="contrato">
+                    <span class="bi bi-file-earmark-text" style="font-size: 1.5rem; color: black; margin-bottom: 30px;"></span>
+                    <span style="color: black;">Contrato</span>
+                </NavLink>
+            </div>
+        }
 
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="usuarios">
-                <span class="bi bi-person" style="font-size: 1.5rem; color: black; margin-bottom: 30px;"></span>
-                <span style="color: black;">Usuarios</span>
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="clientes">
-                <span class="bi bi-person-lines-fill" style="font-size: 1.5rem; color: black; margin-bottom: 30px;"></span>
-                <span style="color: black;">Clientes</span>
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="orcamentos">
-                <span class="bi bi-person-lines-fill" style="font-size: 1.5rem; color: black; margin-bottom: 30px;"></span>
-                <span style="color: black;">Orçamentos</span>
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="contrato">
-                <span class="bi bi-file-earmark-text" style="font-size: 1.5rem; color: black; margin-bottom: 30px;"></span>
-                <span style="color: black;">Contrato</span>
-            </NavLink>
+            <button class="btn btn-link nav-link" @onclick="Logout">
+                <span class="bi bi-box-arrow-right" style="font-size: 1.5rem; color: black; margin-bottom: 30px;"></span>
+                <span style="color: black;">Logout</span>
+            </button>
         </div>
     </nav>
 </div>
 
+<style>
+    body, html {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .nav-scrollable {
+        background: linear-gradient(to bottom, #F27A9D, #EFE6DE);
+        height: 100vh; /* Certifique-se de que o menu ocupe toda a altura da tela */
+        overflow-y: auto; /* Permite rolagem se o conteúdo for maior que a altura da tela */
+        margin: -20px;
+        padding: 0;
+        top: 0;
+        left: 0;
+        width: 100%;
+    }
+</style>
+
 @code {
     private bool collapseNavMenu = true;
-
-    // private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
     private string NavMenuCssClass => collapseNavMenu ? "collapse show" : "collapse show";
+    private ClaimsPrincipal userClaims;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        userClaims = authState.User;
+    }
+
+    private bool IsInRole(string role)
+    {
+        return userClaims?.IsInRole(role) ?? false;
+    }
 
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
         StateHasChanged();
+    }
+
+    private async Task Logout()
+    {
+        await LocalStorage.RemoveItemAsync("jwtToken");
+        ((AuthStateProvider)AuthenticationStateProvider).NotifyUserLogout();
+        Navigation.NavigateTo("/login");
     }
 }
