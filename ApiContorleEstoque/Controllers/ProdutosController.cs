@@ -1,11 +1,14 @@
 using LidyDecorApp.Application.DTOs;
 using LidyDecorApp.Application.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LidyDecorApp.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
+    [Authorize(Policy = "AcessoProdutosClientes")]
     public class ProdutosController : ControllerBase
     {
         private const string id = "{id}";
