@@ -96,7 +96,7 @@ namespace LidyDecorApp.Infrastructure
                     .HasForeignKey(po => po.OrcamentosId)
                     .IsRequired();
 
-                entity.HasOne(po => po.Produtoss)
+                entity.HasOne(po => po.Produtos)
                     .WithMany(p => p.ProdutosOrcamento)
                     .HasForeignKey(po => po.ProdutosId)
                     .IsRequired();

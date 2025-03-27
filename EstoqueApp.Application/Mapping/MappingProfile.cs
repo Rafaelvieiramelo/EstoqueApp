@@ -33,7 +33,7 @@ namespace LidyDecorApp.Application.Mapping
 
             // ProdutossOrcamentos -> ProdutossOrcamentosDTO
             CreateMap<ProdutosOrcamento, ProdutosOrcamentosDTO>()
-                .ForMember(dest => dest.Produtos, opt => opt.MapFrom(src => src.Produtoss))
+                .ForMember(dest => dest.Produtos, opt => opt.MapFrom(src => src.Produtos))
                 .ForMember(dest => dest.Orcamentos, opt => opt.MapFrom(src => src.Orcamentos))
                 .PreserveReferences() // Adicione esta linha
                 .ReverseMap();

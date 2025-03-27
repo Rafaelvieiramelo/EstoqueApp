@@ -46,36 +46,53 @@
 <!-- Modal -->
 @if (selectedOrcamentos != null)
 {
-    <div class="modal fade show" tabindex="-1" style="display: block;" aria-modal="true" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Detalhes do Orçamento</h5>
-                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+    <div class="modal fade show" tabindex="-1" style="display: block; background: rgba(0, 0, 0, 0.5);" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content shadow-lg">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">📋 Detalhes do Orçamento</h5>
+                    <button type="button" class="btn-close text-white" @onclick="CloseModal"></button>
                 </div>
                 <div class="modal-body">
-                    <p><strong>Número:</strong> @selectedOrcamentos.Numero</p>
-                    <p><strong>Clientes:</strong> @selectedOrcamentos.Clientes?.Nome</p>
-                    <p><strong>Email:</strong> @selectedOrcamentos.Clientes?.Email</p>
-                    <p><strong>Tipo de Evento:</strong> @selectedOrcamentos.TipoEvento?.Tipo</p>
-                    <p><strong>Data:</strong> @selectedOrcamentos.Data.ToString("dd/MM/yyyy")</p>
-                    <p><strong>Data do Evento:</strong> @(selectedOrcamentos.DataEvento.ToString("dd/MM/yyyy") ?? "Não definida")</p>
-                    <p><strong>Observações:</strong> @selectedOrcamentos.Observacoes</p>
-                    <p><strong>Valor Total:</strong> @selectedOrcamentos.ValorTotal.ToString("C")</p>
-                    <h5>Produtoss</h5>
-                    <ul>
-                        @foreach (var produtosOrcamentos in selectedOrcamentos.ProdutosOrcamentos)
-                        {
-                            <li>
-                                <p><strong>Nome:</strong> @produtosOrcamentos.Produtos.nome</p>
-                                <p><strong>Descrição:</strong> @produtosOrcamentos.Produtos.descricao</p>
-                                <p><strong>Quantidade:</strong> @produtosOrcamentos.Produtos.quantidade</p>
-                            </li>
-                        }
-                    </ul>
+                    <!-- Informações Principais -->
+                    <div class="mb-3">
+                        <h4 class="text-primary">🔹 Orçamento #@selectedOrcamentos.Numero</h4>
+                        <p><strong>Cliente:</strong> @selectedOrcamentos.Clientes?.Nome</p>
+                        <p><strong>Email:</strong> <a href="mailto:@selectedOrcamentos.Clientes?.Email">@selectedOrcamentos.Clientes?.Email</a></p>
+                        <p><strong>Tipo de Evento:</strong> <span class="badge bg-info">@selectedOrcamentos.TipoEvento?.Tipo</span></p>
+                        <p><strong>Data do Orçamento:</strong> @selectedOrcamentos.Data.ToString("dd/MM/yyyy")</p>
+                        <p><strong>Data do Evento:</strong> @(selectedOrcamentos.DataEvento.ToString("dd/MM/yyyy") ?? "Não definida")</p>
+                        <p><strong>Observações:</strong> @selectedOrcamentos.Observacoes</p>
+                        <h5 class="text-success mt-3"><strong>Total:</strong> @selectedOrcamentos.ValorTotal.ToString("C")</h5>
+                    </div>
+
+                    <!-- Lista de Produtos -->
+                    <h5 class="mt-4">📦 Produtos</h5>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>Descrição</th>
+                                    <th>Quantidade</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var produto in selectedOrcamentos.ProdutosOrcamentos)
+                                {
+                                    <tr>
+                                        <td>@produto.Produtos.nome</td>
+                                        <td>@produto.Produtos.descricao</td>
+                                        <td>@produto.Produtos.quantidade</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Fechar</button>
+                    <button type="button" class="btn btn-danger" @onclick="CloseModal">❌ Fechar</button>
                 </div>
             </div>
         </div>
