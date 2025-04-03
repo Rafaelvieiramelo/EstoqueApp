@@ -1,31 +1,20 @@
 ﻿@page "/contrato"
+@using Microsoft.AspNetCore.Components.WebAssembly.Hosting
 
 @using System.Globalization
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Contrato de Locação de Decoração</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-@* <div class="container my-5"> *@  
-    <h1 class="text-center mb-4">Contrato de Locação de Decoração</h1>
+<div class="container my-5">  
+    <h1 class="text-center mb-4">Contrato de Decoração para Eventos</h1>
 
-    <p>Pelo presente instrumento particular, de um lado, como LOCADOR, <b>Lidiane Martins Candeira</b>, inscrito no CPF/CNPJ sob o n° <b>021.663.943-37</b>, residente/sediado em <b>Rua Mogi Mirim 130, Jardim Novo Campos Eliseos</b>, e de outro lado, como LOCATÁRIO, <b>____________________________________</b>, inscrito no CPF/CNPJ sob o n° <b>______________________</b>, residente/sediado em <b>___________________________________________</b>, têm justo e acertado o presente Contrato de Locação de Decoração, que se regerá pelas cláusulas e condições abaixo:</p>
+    <p>Pelo presente instrumento particular, de um lado, como LOCADOR, <b>Lidiane Martins Candeira</b>, inscrito no CPF/CNPJ sob o n° <b>021.663.943-37</b>, residente/sediado em <b>Rua Mogi Mirim 130, Jardim Novo Campos Eliseos</b>, e de outro lado, como LOCATÁRIO, <b>@NomeCliente</b>, inscrito no CPF/CNPJ sob o n° <b>@CpfCliente</b>, residente/sediado em <b>___________________________________________</b>, têm justo e acertado o presente Contrato de Decoração para Eventos, que se regerá pelas cláusulas e condições abaixo:</p>
 
     <h2 class="mt-4">Cláusula 1 – Objeto do Contrato</h2>
     <p>O presente contrato tem como objeto a locação dos seguintes itens de decoração:</p>
     <ul>
-        <li>1_______________________________________________________</li>
-        <li>2_______________________________________________________</li>
-        <li>3_______________________________________________________</li>
-        <li>4_______________________________________________________</li>
-        <li>5_______________________________________________________</li>
-        <li>6_______________________________________________________</li>
-        <li>7_______________________________________________________</li>
-        <li>8_______________________________________________________</li>
-        <li>9_______________________________________________________</li>
-        <li>10_______________________________________________________</li>
+        @for (int i = 0; i < ListaProdutos.Count; i++)
+        {
+            <li>@(i + 1) - <b>@ListaProdutos[i]</b></li>
+        }
     </ul>
 
     <h2 class="mt-4">Cláusula 2 – Prazo da Locação</h2>
@@ -38,7 +27,7 @@
     </p>
 
     <h2 class="mt-4">Cláusula 3 – Valor e Forma de Pagamento</h2>
-    <p>O locatário pagará ao locador o valor de <b>@* @ValorLocacao.ToString("C", CultureInfo.CreateSpecificCulture("pt-BR")) *@_____________________</b>, referente à locação dos itens descritos.</p>
+    <p>O locatário pagará ao locador o valor de <b>@ValorTotal</b>, referente à locação dos itens descritos.</p>
     <p>O pagamento deverá ser efetuado da seguinte forma:</p>
     <ul>
         <li><input type="checkbox" class="form-check-input me-2">Dinheiro</li>
@@ -51,7 +40,7 @@
 
     <h2 class="mt-4">Cláusula 4 – Entrega e Devolução</h2>
     <p>
-        Os itens de decoração serão entregues pelo locador no endereço <b>___________________________________________</b>, no dia
+        o evento será no endereço <b>___________________________________________</b>, no dia
         <input type="text" id="entrega-locacao" class="form-control d-inline w-auto" placeholder="Selecione a data">, em horário previamente combinado.
     </p>
     <p>O locatário se compromete a devolver os itens no estado em que foram recebidos, salvo desgaste natural decorrente do uso.</p>
@@ -86,7 +75,7 @@
     <div class="text-center mt-5">
         <button class="btn btn-primary" onclick="window.print()">Imprimir Contrato</button>
     </div>
-@* </div> *@
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 <script>
@@ -94,3 +83,22 @@
     flatpickr("#fim-locacao", { dateFormat: "d/m/Y" });
     flatpickr("#entrega-locacao", { dateFormat: "d/m/Y" });
 </script>
+
+@code {
+    [Parameter, SupplyParameterFromQuery] public string NomeCliente { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string CpfCliente { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string TipoEvento { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string DataEvento { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string ValorTotal { get; set; }
+    [Parameter, SupplyParameterFromQuery] public string Produtos { get; set; }
+
+    private List<string> ListaProdutos { get; set; } = new();
+
+    protected override void OnParametersSet()
+    {
+        if (!string.IsNullOrEmpty(Produtos))
+        {
+            ListaProdutos = Produtos.Split(',').ToList();
+        }
+    }
+}

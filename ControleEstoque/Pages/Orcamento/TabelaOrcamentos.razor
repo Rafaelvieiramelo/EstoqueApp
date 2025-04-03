@@ -1,5 +1,6 @@
 ﻿@using LidyDecorApp.Web.Pages.Orcamento
 @using LidyDecorApp.Web.Models
+@using System.Globalization
 
 <table id="orcamentossTable" class="table">
     <thead>
@@ -92,6 +93,7 @@
                 </div>
 
                 <div class="modal-footer">
+                    <button class="btn btn-success" @onclick="OpenContrato">Abrir Contrato</button>
                     <button type="button" class="btn btn-danger" @onclick="CloseModal">❌ Fechar</button>
                 </div>
             </div>
@@ -125,5 +127,21 @@
     private void CloseModal()
     {
         selectedOrcamentos = null;
+    }
+
+    private void OpenContrato()
+    {
+        var produtos = string.Join(", ", selectedOrcamentos.ProdutosOrcamentos.Select(p => p.Produtos.nome));
+        var valorFormatado = selectedOrcamentos.ValorTotal.ToString("F2", CultureInfo.InvariantCulture);
+
+        var contratoUrl = $"/contrato" +
+        $"?nomeCliente={Uri.EscapeDataString(selectedOrcamentos.Clientes?.Nome ?? "")}" +
+        $"&cpfCliente={Uri.EscapeDataString(selectedOrcamentos.Clientes?.CpfCnpj ?? "")}" +
+        $"&tipoEvento={Uri.EscapeDataString(selectedOrcamentos.TipoEvento?.Tipo ?? "")}" +
+        $"&dataEvento={selectedOrcamentos.DataEvento.ToString("yyyy-MM-dd")}" +
+        $"&valorTotal={selectedOrcamentos.ValorTotal.ToString("F2", CultureInfo.InvariantCulture)}" +
+        $"&produtos={Uri.EscapeDataString(produtos)}";
+
+        JSRuntime.InvokeVoidAsync("window.open", contratoUrl, "_blank");
     }
 }
