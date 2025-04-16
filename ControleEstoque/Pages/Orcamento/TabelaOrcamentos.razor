@@ -47,54 +47,89 @@
 <!-- Modal -->
 @if (selectedOrcamentos != null)
 {
-    <div class="modal fade show" tabindex="-1" style="display: block; background: rgba(0, 0, 0, 0.5);" aria-modal="true" role="dialog">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content shadow-lg">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">📋 Detalhes do Orçamento</h5>
-                    <button type="button" class="btn-close text-white" @onclick="CloseModal"></button>
+    <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content shadow rounded-3">
+                <!-- Cabeçalho -->
+                <div class="modal-header bg-light border-bottom">
+                    <h5 class="modal-title">
+                        <i class="bi bi-clipboard-data text-primary me-2"></i>
+                        Detalhes do Orçamento
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal" aria-label="Fechar"></button>
                 </div>
+
+                <!-- Corpo -->
                 <div class="modal-body">
-                    <!-- Informações Principais -->
-                    <div class="mb-3">
-                        <h4 class="text-primary">🔹 Orçamento #@selectedOrcamentos.Numero</h4>
-                        <p><strong>Cliente:</strong> @selectedOrcamentos.Clientes?.Nome</p>
-                        <p><strong>Email:</strong> <a href="mailto:@selectedOrcamentos.Clientes?.Email">@selectedOrcamentos.Clientes?.Email</a></p>
-                        <p><strong>Tipo de Evento:</strong> <span class="badge bg-info">@selectedOrcamentos.TipoEvento?.Tipo</span></p>
-                        <p><strong>Data do Orçamento:</strong> @selectedOrcamentos.Data.ToString("dd/MM/yyyy")</p>
-                        <p><strong>Data do Evento:</strong> @(selectedOrcamentos.DataEvento.ToString("dd/MM/yyyy") ?? "Não definida")</p>
-                        <p><strong>Observações:</strong> @selectedOrcamentos.Observacoes</p>
-                        <h5 class="text-success mt-3"><strong>Total:</strong> @selectedOrcamentos.ValorTotal.ToString("C")</h5>
+                    <!-- Info do cliente e orçamento -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Cliente:</strong> @selectedOrcamentos.Clientes?.Nome</p>
+                            <p>
+                                <strong>Email:</strong>
+                                <a href="mailto:@selectedOrcamentos.Clientes?.Email">
+                                    @selectedOrcamentos.Clientes?.Email
+                                </a>
+                            </p>
+                            <p>
+                                <strong>Data do Orçamento:</strong>
+                                @selectedOrcamentos.Data.ToString("dd/MM/yyyy")
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p>
+                                <strong>Tipo de Evento:</strong>
+                                <span class="badge bg-info text-dark">
+                                    @selectedOrcamentos.TipoEvento?.Tipo
+                                </span>
+                            </p>
+                            <p>
+                                <strong>Data do Evento:</strong>
+                                @(selectedOrcamentos.DataEvento.ToString("dd/MM/yyyy") ?? "Não definida")
+                            </p>
+                            <p>
+                                <strong>Observações:</strong>
+                                @selectedOrcamentos.Observacoes
+                            </p>
+                        </div>
                     </div>
 
-                    <!-- Lista de Produtos -->
-                    <h5 class="mt-4">📦 Produtos</h5>
-                    <div class="table-responsive">
-                        <table class="table table-bordered">
-                            <thead class="table-light">
+                    <hr />
+
+                    <!-- Produtos do orçamento -->
+                    <h6 class="mt-4 mb-3 text-primary">
+                        <i class="bi bi-box-seam me-1"></i> Produtos do Orçamento
+                    </h6>
+
+                    <table class="table table-striped table-hover table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nome</th>
+                                <th>Descricao</th>
+                                <th>Quantidade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var produto in selectedOrcamentos.ProdutosOrcamentos)
+                            {
                                 <tr>
-                                    <th>Nome</th>
-                                    <th>Descrição</th>
-                                    <th>Quantidade</th>
+                                    <td>@produto.Produtos?.nome</td>
+                                    <td>@produto.Produtos.descricao</td>
+                                    <td>@produto.Produtos.quantidade</td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var produto in selectedOrcamentos.ProdutosOrcamentos)
-                                {
-                                    <tr>
-                                        <td>@produto.Produtos.nome</td>
-                                        <td>@produto.Produtos.descricao</td>
-                                        <td>@produto.Produtos.quantidade</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
+                            }
+                        </tbody>
+                    </table>
                 </div>
 
-                <div class="modal-footer">
-                    <button class="btn btn-success" @onclick="OpenContrato">Abrir Contrato</button>
-                    <button type="button" class="btn btn-danger" @onclick="CloseModal">❌ Fechar</button>
+                <!-- Rodapé -->
+                <div class="modal-footer justify-content-end">
+                    <button class="btn btn-success me-2" @onclick="OpenContrato">
+                        <i class="bi bi-file-earmark-text me-1"></i> Abrir Contrato
+                    </button>
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">
+                        <i class="bi bi-x-circle me-1"></i> Fechar
+                    </button>
                 </div>
             </div>
         </div>

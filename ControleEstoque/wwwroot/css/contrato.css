@@ -1,0 +1,64 @@
+<style >
+/* Estilo global para os campos do contrato */
+#contrato input {
+    border: none;
+    border-bottom: 1px solid #000;
+    background-color: transparent;
+    font-size: 1rem;
+    line-height: 1.6;
+    padding: 2px 4px;
+    display: inline;
+    width: auto;
+    min-width: 80px;
+    vertical-align: baseline;
+    margin: 0 2px;
+}
+
+#contrato input:focus {
+    outline: none;
+}
+
+#contrato {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+    line-height: 1.6;
+}
+
+/* Estilo específico para impressão e geração de PDF */
+@media print {
+    body * {
+        visibility: hidden;
+        /*background: red;*/
+    }
+
+    #contrato, #contrato * {
+        visibility: visible;
+    }
+
+    #contrato {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        font-size: 12pt;
+    }
+
+    .no-print {
+        display: none !important;
+    }
+
+    #contrato input {
+        border: none;
+        border-bottom: 1px solid #000;
+        background-color: transparent;
+        font-size: 1em;
+        padding: 2px 4px;
+        display: inline;
+        width: auto;
+        min-width: 80px;
+        vertical-align: baseline;
+        margin: 0 2px;
+    }
+}

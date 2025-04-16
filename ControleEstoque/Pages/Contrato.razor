@@ -1,79 +1,109 @@
 ﻿@page "/contrato"
 @using Microsoft.AspNetCore.Components.WebAssembly.Hosting
-
 @using System.Globalization
 
-<div class="container my-5">  
-    <h1 class="text-center mb-4">Contrato de Decoração para Eventos</h1>
+<link href="~/css/contrato.css" rel="stylesheet" />
 
-    <p>Pelo presente instrumento particular, de um lado, como LOCADOR, <b>Lidiane Martins Candeira</b>, inscrito no CPF/CNPJ sob o n° <b>021.663.943-37</b>, residente/sediado em <b>Rua Mogi Mirim 130, Jardim Novo Campos Eliseos</b>, e de outro lado, como LOCATÁRIO, <b>@NomeCliente</b>, inscrito no CPF/CNPJ sob o n° <b>@CpfCliente</b>, residente/sediado em <b>___________________________________________</b>, têm justo e acertado o presente Contrato de Decoração para Eventos, que se regerá pelas cláusulas e condições abaixo:</p>
+<div class="container my-5">
+    <div id="contrato">
+        <h2 class="text-center text-xl mb-4">Contrato de Decoração para Eventos</h2>
 
-    <h2 class="mt-4">Cláusula 1 – Objeto do Contrato</h2>
-    <p>O presente contrato tem como objeto a locação dos seguintes itens de decoração:</p>
-    <ul>
-        @for (int i = 0; i < ListaProdutos.Count; i++)
-        {
-            <li>@(i + 1) - <b>@ListaProdutos[i]</b></li>
-        }
-    </ul>
+        <p>
+            Pelo presente instrumento particular, de um lado, como LOCADOR, <b>Lidiane Martins Candeira</b>, inscrito no CPF/CNPJ sob o n° <b>021.663.943-37</b>, residente/sediado em <b>Rua Mogi Mirim 130, Jardim Novo Campos Eliseos</b>, e de outro lado, como LOCATÁRIO,
+            <b>
+                @if (string.IsNullOrWhiteSpace(NomeCliente))
+                {
+                    <input type="text" class="form-control d-inline w-50" placeholder="Nome do Cliente" asp-for="NomeCliente">
+                }
+                else
+                {
+                    @NomeCliente
+                }
+            </b>, inscrito no CPF/CNPJ sob o n°
+            <b>
+                @if (string.IsNullOrWhiteSpace(CpfCliente))
+                {
+                    <input type="text" class="form-control d-inline w-auto" placeholder="CPF/CNPJ" asp-for="CpfCliente">
+                }
+                else
+                {
+                    @CpfCliente
+                }
+            </b>, residente/sediado em
+            <input type="text" class="form-control d-inline w-50" placeholder="Local do Evento" asp-for="TipoEvento">, têm justo e acertado o presente Contrato de Decoração para Eventos, que se regerá pelas cláusulas e condições abaixo:
+        </p>
 
-    <h2 class="mt-4">Cláusula 2 – Prazo da Locação</h2>
-    <p>
-        A locação terá início em
-        <input type="text" id="inicio-locacao" class="form-control d-inline w-auto" placeholder="Selecione a data">
-        e os itens deverão ser devolvidos em perfeito estado até o dia
-        <input type="text" id="fim-locacao" class="form-control d-inline w-auto" placeholder="Selecione a data">
-        , salvo prorrogação previamente acordada entre as partes.
-    </p>
+        <h3 class="mt-4">Cláusula 1 – Objeto do Contrato</h3>
+        <p>O presente contrato tem como objeto a locação dos seguintes itens de decoração:</p>
+        <ul>
+            @for (int i = 0; i < ListaProdutos.Count; i++)
+            {
+                <li>@(i + 1) - <b>@ListaProdutos[i]</b></li>
+            }
+        </ul>
 
-    <h2 class="mt-4">Cláusula 3 – Valor e Forma de Pagamento</h2>
-    <p>O locatário pagará ao locador o valor de <b>@ValorTotal</b>, referente à locação dos itens descritos.</p>
-    <p>O pagamento deverá ser efetuado da seguinte forma:</p>
-    <ul>
-        <li><input type="checkbox" class="form-check-input me-2">Dinheiro</li>
-        <li><input type="checkbox" class="form-check-input me-2">Crédito</li>
-        <li><input type="checkbox" class="form-check-input me-2">Débito</li>
-        <li><input type="checkbox" class="form-check-input me-2">Pix</li>
-    </ul>
+        <h3 class="mt-4">Cláusula 2 – Data e Local do Evento</h3>
+        <p>
+            O serviço será realizado no endereço <input type="text" class="form-control d-inline w-50" placeholder="Local do Evento" asp-for="TipoEvento">, no dia
+            <input type="date" class="form-control d-inline w-auto" asp-for="DataEvento">, em horário previamente combinado entre as partes.
+        </p>
 
-    <p>O não pagamento no prazo implicará multa de <b>____________%</b> e juros de <b>______________%</b> ao mês.</p>
+        <h3 class="mt-4">Cláusula 3 – Valor e Forma de Pagamento</h3>
+        <p>
+            O CONTRATANTE pagará ao CONTRATADO o valor de
+            <input type="text" class="form-control d-inline w-auto" placeholder="Valor Total" asp-for="ValorTotal">, referente à prestação dos serviços descritos.
+        </p>
 
-    <h2 class="mt-4">Cláusula 4 – Entrega e Devolução</h2>
-    <p>
-        o evento será no endereço <b>___________________________________________</b>, no dia
-        <input type="text" id="entrega-locacao" class="form-control d-inline w-auto" placeholder="Selecione a data">, em horário previamente combinado.
-    </p>
-    <p>O locatário se compromete a devolver os itens no estado em que foram recebidos, salvo desgaste natural decorrente do uso.</p>
+        <h3 class="mt-4">Cláusula 5 – Cancelamento</h3>
+        <p>
+            O cancelamento do contrato deverá ser informado com antecedência mínima de
+            <input type="text" class="form-control d-inline w-auto" placeholder="dias" id="diasCancelamento"> dias, sob pena de multa no valor de
+            <input type="text" class="form-control d-inline w-auto" placeholder="%" id="multaCancelamento">% do total do contrato.
+        </p>
 
-    <h2 class="mt-4">Cláusula 5 – Responsabilidade</h2>
-    <p>O locatário será responsável por qualquer dano, perda ou extravio dos itens alugados, devendo ressarcir o locador no valor correspondente ao item danificado ou perdido.</p>
-    <p>Caso algum item apresente avarias, o locador deverá ser informado imediatamente.</p>
+        <h3 class="mt-4">Cláusula 6 – Disposições Gerais</h3>
+        <p>O CONTRATADO não será responsável por atrasos ou prejuízos decorrentes de caso fortuito ou força maior.</p>
+        <p>Este contrato poderá ser alterado apenas por acordo mútuo entre as partes, por escrito.</p>
 
-    <h2 class="mt-4">Cláusula 6 – Cancelamento</h2>
-    <p>O cancelamento da locação deverá ser informado com antecedência mínima de <b>_______</b> dias, sob pena de multa no valor de <b>_______%</b> do total do contrato.</p>
+        <p class="mt-4">E por estarem assim justos e contratados, assinam o presente contrato em <b>2</b> vias de igual teor e forma.</p>
 
-    <h2 class="mt-4">Cláusula 7 – Disposições Gerais</h2>
-    <p>O locador não será responsável por atrasos ou prejuízos decorrentes de caso fortuito ou força maior.</p>
-    <p>Este contrato poderá ser alterado apenas por acordo mútuo entre as partes, por escrito.</p>
+        <p><b>Local e Data:</b> __________________________________________________, _________________________________</p>
 
-    <h2 class="mt-4">Cláusula 8 – Foro</h2>
-    <p>Fica eleito o foro da comarca de <b>________________________</b> para dirimir quaisquer dúvidas ou controvérsias oriundas deste contrato, com exclusão de qualquer outro.</p>
+        <div class="mt-5">
+            <p><b>Assinatura do Locador:</b> ______________________________________</p>
+            <p><b>Nome:</b> Lidiane Martins Candeira</p>
+            <p><b>CPF/CNPJ:</b> 021.663.943-37</p>
 
-    <p class="mt-4">E por estarem assim justos e contratados, assinam o presente contrato em <b>2</b> vias de igual teor e forma.</p>
-
-    <p><b>Local e Data:</b> __________________________________________________, _________________________________</p>
-
-    <div class="mt-5">
-        <p><b>Assinatura do Locador:</b> ______________________________________</p>
-        <p><b>Nome:</b> Lidiane Martins Candeira</p>
-        <p><b>CPF/CNPJ:</b>021.663.943-37</p>
-
-        <p class="mt-4"><b>Assinatura do Locatário:</b> ______________________________________</p>
-        <p><b>Nome:</b> ________________________________</p>
-        <p><b>CPF/CNPJ:</b> __________________________</p>
-    </div>
-    <div class="text-center mt-5">
-        <button class="btn btn-primary" onclick="window.print()">Imprimir Contrato</button>
+            <p class="mt-4"><b>Assinatura do Locatário:</b> ______________________________________</p>
+            <p>
+                <b>Nome:</b>
+                @if (string.IsNullOrWhiteSpace(NomeCliente))
+                {
+                    <input type="text" class="form-control d-inline w-50" placeholder="Nome do Cliente" asp-for="NomeCliente">
+                }
+                else
+                {
+                    @NomeCliente
+                }
+            </p>
+            <p>
+                <b>CPF/CNPJ:</b>
+                @if (string.IsNullOrWhiteSpace(CpfCliente))
+                {
+                    <input type="text" class="form-control d-inline w-auto" placeholder="CPF/CNPJ" asp-for="CpfCliente">
+                }
+                else
+                {
+                    @CpfCliente
+                }
+            </p>
+        </div>
+        <div class="text-center mt-5">
+            <button class="btn btn-primary" onclick="window.print()">Imprimir Contrato</button>
+            <button class="btn btn-success" onclick="salvarContrato()">Salvar Contrato</button>
+            @* <button class="btn btn-primary" onclick="gerarPDF()">Baixar PDF</button> *@
+            <button onclick="gerarPDF()" class="no-print">Gerar PDF</button>
+        </div>
     </div>
 </div>
 
@@ -82,6 +112,49 @@
     flatpickr("#inicio-locacao", { dateFormat: "d/m/Y" });
     flatpickr("#fim-locacao", { dateFormat: "d/m/Y" });
     flatpickr("#entrega-locacao", { dateFormat: "d/m/Y" });
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<script>
+    // function gerarPDF() {
+    //     const { jsPDF } = window.jspdf;
+    //     const doc = new jsPDF();
+
+    //     doc.html(document.getElementById("contrato"), {
+    //         callback: function (pdf) {
+    //             pdf.save("Contrato.pdf");
+    //         },
+    //         x: 10,
+    //         y: 10,
+    //         width: 180,
+    //     });
+    // }
+
+        async function gerarPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        // Esconde menu temporariamente
+        document.querySelectorAll(".no-print").forEach(el => el.style.display = "none");
+
+        const contrato = document.getElementById("contrato");
+
+        await html2canvas(contrato, { scale: 2 }).then(canvas => {
+            const imgData = canvas.toDataURL("image/png");
+            const imgProps = doc.getImageProperties(imgData);
+            const pdfWidth = doc.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+
+            doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            doc.save("Contrato.pdf");
+        });
+
+        // Restaura elementos escondidos
+        document.querySelectorAll(".no-print").forEach(el => el.style.display = "");
+    }
+
 </script>
 
 @code {
