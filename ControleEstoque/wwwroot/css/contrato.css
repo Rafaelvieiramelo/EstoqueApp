@@ -1,5 +1,3 @@
-<style >
-/* Estilo global para os campos do contrato */
 #contrato input {
     border: none;
     border-bottom: 1px solid #000;
@@ -26,11 +24,9 @@
     line-height: 1.6;
 }
 
-/* Estilo específico para impressão e geração de PDF */
 @media print {
     body * {
         visibility: hidden;
-        /*background: red;*/
     }
 
     #contrato, #contrato * {
