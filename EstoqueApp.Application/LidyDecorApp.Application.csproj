@@ -8,10 +8,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EstoqueApp.Domain\LidyDecorApp.Domain.csproj" />
+    <ProjectReference Include="..\EstoqueApp.Shared\LidyDecorApp.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

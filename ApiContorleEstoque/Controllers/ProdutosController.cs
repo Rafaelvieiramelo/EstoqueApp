@@ -1,5 +1,7 @@
+using FluentValidation;
 using LidyDecorApp.Application.DTOs;
 using LidyDecorApp.Application.Interfaces;
+using LidyDecorApp.Shared.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -9,65 +11,103 @@ namespace LidyDecorApp.API.Controllers
     [Route("[controller]")]
     [Authorize]
     [Authorize(Policy = "AcessoProdutosClientes")]
-    public class ProdutosController : ControllerBase
+    public class ProdutosController(IProdutosService produtosService, IValidator<ProdutosDTO> validator) : ControllerBase
+
     {
         private const string id = "{id}";
-        private readonly IProdutosService _produtosService;
-
-        public ProdutosController(IProdutosService produtosService)
-        {
-            _produtosService = produtosService;
-        }
+        private readonly IProdutosService _produtosService = produtosService;
+        private readonly IValidator<ProdutosDTO> _validator = validator;
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ProdutosDTO>>> GetProdutos()
         {
             var produtos = await _produtosService.GetProdutosAsync();
-            return Ok(produtos);
+            return produtos.HasNotValue() ? NotFound() : Ok(produtos);
         }
 
         [HttpGet(id)]
         public async Task<ActionResult<ProdutosDTO>> GetProdutosById(int id)
         {
+            if (id == 0)
+                return BadRequest();
+
             var produtos = await _produtosService.GetProdutosByIdAsync(id);
-            return Ok(produtos);
+            return produtos == null ? NotFound() : Ok(produtos);
         }
 
         [HttpPost]
         public async Task<ActionResult<ProdutosDTO>> AddProdutosAsync(ProdutosDTO produtos)
         {
-            var produtosNovo = await _produtosService.AddProdutosAsync(produtos);
-            var objetoDefault = Shared.ObjectValidator.IsObjectDefault(produtosNovo);
+            try
+            {
+                var validation = await _validator.ValidateAsync(produtos);
 
-            if (objetoDefault)
-                return BadRequest("Erro ao adicionar produtos");
+                if (!validation.IsValid)
+                {
+                    var errors = validation.Errors.Select(e => new
+                    {
+                        Campo = e.PropertyName,
+                        Erro = e.ErrorMessage
+                    });
 
-            return Ok(produtosNovo);
+                    return BadRequest(errors);
+                }
+
+                var produtosNovo = await _produtosService.AddProdutosAsync(produtos);
+
+                return Ok(produtosNovo);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
 
         [HttpPatch]
         public async Task<ActionResult<ProdutosDTO>> UpdateProdutosAsync(ProdutosDTO produtos)
         {
-            var produtosAtualizado = await _produtosService.UpdateProdutosAsync(produtos);
-            var objetoDefault = Shared.ObjectValidator.IsObjectDefault(produtosAtualizado);
+            try
+            {
+                var validation = await _validator.ValidateAsync(produtos);
 
-            if (objetoDefault)
-                return BadRequest("Erro ao editar produtos");
+                if (!validation.IsValid)
+                {
+                    var errors = validation.Errors.Select(e => new
+                    {
+                        Campo = e.PropertyName,
+                        Erro = e.ErrorMessage
+                    });
 
-            return Ok(produtosAtualizado);
+                    return BadRequest(errors);
+                }
+
+                var produtosAtualizado = await _produtosService.UpdateProdutosAsync(produtos);
+
+                if (produtosAtualizado == null)
+                    return NotFound();
+
+                return Ok(produtosAtualizado);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
 
         [HttpDelete(id)]
         public async Task<ActionResult> DeleteProdutosAsync(int id)
         {
+            if (id == 0)
+                return BadRequest();
+
             try
             {
                 await _produtosService.DeleteProdutosAsync(id);
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return BadRequest($"Erro ao Deletar produtos:{ex.Message}");            
+                return BadRequest();            
             }
         }
     }

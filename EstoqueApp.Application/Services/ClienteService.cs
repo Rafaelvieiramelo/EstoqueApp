@@ -7,16 +7,10 @@ using LidyDecorApp.Domain.Interfaces;
 
 namespace LidyDecorApp.Application.Services
 {
-    public class ClientesService : IClientesService
+    public class ClientesService(IClientesRepository clientesRepository, IMapper mapper) : IClientesService
     {
-        private readonly IClientesRepository _clientesRepository;
-        private readonly IMapper _mapper;
-
-        public ClientesService(IClientesRepository clientesRepository, IMapper mapper)
-        {
-            _clientesRepository = clientesRepository;
-            _mapper = mapper;
-        }
+        private readonly IClientesRepository _clientesRepository = clientesRepository;
+        private readonly IMapper _mapper = mapper;
 
         public async Task<IEnumerable<ClientesDTO>> GetClientesAsync()
         {
@@ -28,8 +22,22 @@ namespace LidyDecorApp.Application.Services
 
         public async Task<ClientesDTO> GetClientesByIdAsync(int id)
         {
-            var clientes = await _clientesRepository.GetClientesByIdAsync(id);
-            return _mapper.Map<ClientesDTO>(clientes);
+            if (id == 0)
+                throw new ArgumentNullException(nameof(id), "Id não pode ser nulo ou zero");
+
+            try
+            {
+                var clientes = await _clientesRepository.GetClientesByIdAsync(id);
+                return _mapper.Map<ClientesDTO>(clientes);
+            }
+            catch (AutoMapperMappingException ex)
+            {
+                throw new InvalidOperationException("Erro ao mapear o cliente para DTO.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Erro ao buscar o cliente.", ex);
+            }
         }
 
         public async Task<ClientesDTO> AddClientesAsync(ClientesDTO clientesDTO)
@@ -57,7 +65,7 @@ namespace LidyDecorApp.Application.Services
             catch (Exception)
             {
                 return new ClientesDTO();
-            }            
+            }
         }
 
         public async Task DeleteClientesAsync(int id)

@@ -9,11 +9,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using FluentValidation;
+using LidyDecorApp.Application.Validators;
 using Microsoft.Extensions.Options;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuração do CORS
+// ConfiguraÃ§Ã£o do CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
@@ -22,7 +24,7 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader());
 });
 
-// Configuração dos controllers e JSON
+// ConfiguraÃ§Ã£o dos controllers e JSON
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
@@ -36,7 +38,7 @@ builder.Services.AddSwaggerGen(options =>
     options.SchemaFilter<SwaggerExcludeFilter>();
 });
 
-// Configuração da autenticação JWT
+// ConfiguraÃ§Ã£o da autenticaÃ§Ã£o JWT
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("JWT Key is not configured.");
 var jwtIssuer = builder.Configuration["Jwt:Issuer"];
 var jwtAudience = builder.Configuration["Jwt:Audience"];
@@ -58,19 +60,19 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Configuração de autorização com roles
+// ConfiguraÃ§Ã£o de autorizaÃ§Ã£o com roles
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
     options.AddPolicy("User", policy => policy.RequireRole("User"));
 
     options.AddPolicy("AcessoProdutosClientes", policy => policy.RequireRole("Admin", "User")); // Admin e User acessam
-    options.AddPolicy("AcessoTotal", policy => policy.RequireRole("Admin")); // Só Admin acessa
+    options.AddPolicy("AcessoTotal", policy => policy.RequireRole("Admin")); // SÃ³ Admin acessa
 });
 
 
 
-// Injeção de dependências para os serviços e repositórios
+// InjeÃ§Ã£o de dependÃªncias para os serviÃ§os e repositÃ³rios
 builder.Services.AddScoped<IProdutosService, ProdutosService>();
 builder.Services.AddScoped<IUsuariosService, UsuariosService>();
 builder.Services.AddScoped<IClientesService, ClientesService>();
@@ -85,14 +87,18 @@ builder.Services.AddTransient<IJwtTokenService, JwtTokenService>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
-// Configuração do banco de dados
+// ConfiguraÃ§Ã£o do banco de dados
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<LidyDecorDbContext>(options =>
-    options.UseSqlite(connectionString));
+builder.Services.AddDbContext<LidyDecorDbContext>(options => options.UseSqlite(connectionString));
+
+builder.Services.AddValidatorsFromAssemblyContaining<ClientesDTOValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<OrcamentoDTOValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<ProdutosDTOValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<UsuarioWriteDTOValidator>();
 
 var app = builder.Build();
 
-// Configuração do middleware
+// ConfiguraÃ§Ã£o do middleware
 app.UseSwagger();
 app.UseSwaggerUI();
 

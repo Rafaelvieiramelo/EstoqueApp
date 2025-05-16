@@ -1,72 +1,113 @@
+using FluentValidation;
 using LidyDecorApp.Application.DTOs;
 using LidyDecorApp.Application.Interfaces;
+using LidyDecorApp.Shared.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace LidyDecorApp.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
     [Authorize(Policy = "AcessoProdutosClientes")]
-    public class ClientesController : ControllerBase
+    public class ClientesController(IClientesService clientesService, IValidator<ClientesDTO> validator) : ControllerBase
+
     {
         private const string id = "{id}";
-        private readonly IClientesService _clientesService;
-
-        public ClientesController(IClientesService clientesService)
-        {
-            _clientesService = clientesService;
-        }
+        private readonly IClientesService _clientesService = clientesService;
+        private readonly IValidator<ClientesDTO> _validator = validator;
 
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ClientesDTO>>> GetClientes()
         {
             var clientes = await _clientesService.GetClientesAsync();
-            return Ok(clientes);
+            return clientes.HasNotValue() ? NotFound() : Ok(clientes);
         }
 
         [HttpGet(id)]
         public async Task<ActionResult<ClientesDTO>> GetClientesById(int id)
         {
+            if (id == 0)
+                return BadRequest();
+            
             var clientes = await _clientesService.GetClientesByIdAsync(id);
-            return Ok(clientes);
+            return clientes == null ? NotFound() :  Ok(clientes);
         }
 
         [HttpPost]
         public async Task<ActionResult<ClientesDTO>> AddClientesAsync([FromBody] ClientesDTO clientes)
         {
-            var clientesNovo = await _clientesService.AddClientesAsync(clientes);
-            var objetoDefault = Shared.ObjectValidator.IsObjectDefault(clientesNovo);
+            try
+            {
+                var validation = await _validator.ValidateAsync(clientes);
 
-            if (objetoDefault)
-                return BadRequest("Erro ao adicionar clientes");
+                if (!validation.IsValid)
+                {
+                    var errors = validation.Errors.Select(e => new
+                    {
+                        Campo = e.PropertyName,
+                        Erro = e.ErrorMessage
+                    });
 
-            return Ok(clientesNovo);
+                    return BadRequest(errors);
+                }
+
+                var clientesNovo = await _clientesService.AddClientesAsync(clientes);
+
+                return Ok(clientesNovo);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
 
         [HttpPatch]
         public async Task<ActionResult<ClientesDTO>> UpdateClientesAsync(ClientesDTO clientes)
         {
-            var clientesAtualizado = await _clientesService.UpdateClientesAsync(clientes);
-            var objetoDefault = Shared.ObjectValidator.IsObjectDefault(clientesAtualizado);
+            try
+            {
+                var validation = await _validator.ValidateAsync(clientes);
 
-            if (objetoDefault)
-                return BadRequest("Erro ao editar clientes");
+                if (!validation.IsValid)
+                {
+                    var errors = validation.Errors.Select(e => new
+                    {
+                        Campo = e.PropertyName,
+                        Erro = e.ErrorMessage
+                    });
 
-            return Ok(clientesAtualizado);
+                    return BadRequest(errors);
+                }
+
+                var clientesAtualizado = await _clientesService.UpdateClientesAsync(clientes);
+                
+                if (clientesAtualizado == null)
+                    return NotFound();
+
+                return Ok(clientesAtualizado);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
 
         [HttpDelete(id)]
         public async Task<ActionResult> DeleteClientesAsync(int id)
         {
+            if (id == 0)
+                return BadRequest();
+
             try
             {
                 await _clientesService.DeleteClientesAsync(id);
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return BadRequest($"Erro ao Deletar clientes:{ex.Message}");            
+                return BadRequest();            
             }
         }
     }

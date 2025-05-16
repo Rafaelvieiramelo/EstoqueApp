@@ -7,16 +7,10 @@ using LidyDecorApp.Domain.Interfaces;
 
 namespace LidyDecorApp.Application.Services
 {
-    public class UsuariosService : IUsuariosService
+    public class UsuariosService(IUsuariosRepository usuariosRepository, IMapper mapper) : IUsuariosService
     {
-        private readonly IUsuariosRepository _usuariosRepository;
-        private readonly IMapper _mapper;
-
-        public UsuariosService(IUsuariosRepository usuariosRepository, IMapper mapper)
-        {
-            _usuariosRepository = usuariosRepository;
-            _mapper = mapper;
-        }
+        private readonly IUsuariosRepository _usuariosRepository = usuariosRepository;
+        private readonly IMapper _mapper = mapper;
 
         public async Task<UsuarioReadDTO> GetUsuariosByEmailSenhaAsync(string email)
         {
@@ -34,8 +28,22 @@ namespace LidyDecorApp.Application.Services
 
         public async Task<UsuarioReadDTO> GetUsuariosByIdAsync(int id)
         {
-            var usuarios = await _usuariosRepository.GetUsuariosByIdAsync(id);
-            return _mapper.Map<UsuarioReadDTO>(usuarios);
+            if (id == 0)
+                throw new ArgumentNullException(nameof(id), "Id não pode ser nulo ou zero");
+
+            try
+            {
+                var usuarios = await _usuariosRepository.GetUsuariosByIdAsync(id);
+                return _mapper.Map<UsuarioReadDTO>(usuarios);
+            }
+            catch (AutoMapperMappingException ex)
+            {
+                throw new InvalidOperationException("Erro ao mapear o usuario para DTO.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Erro ao buscar o usuario.", ex);
+            }
         }
 
         public async Task<UsuarioWriteDTO> AddUsuariosAsync(UsuarioWriteDTO UsuariosDTO)

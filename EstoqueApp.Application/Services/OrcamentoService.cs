@@ -4,19 +4,14 @@ using LidyDecorApp.Application.Exceptions;
 using LidyDecorApp.Application.Interfaces;
 using LidyDecorApp.Domain;
 using LidyDecorApp.Domain.Interfaces;
+using LidyDecorApp.Shared.Extensions;
 
 namespace LidyDecorApp.Application.Services
 {
-    public class OrcamentosService : IOrcamentosService
+    public class OrcamentosService(IOrcamentosRepository orcamentosRepository, IMapper mapper) : IOrcamentosService
     {
-        private readonly IOrcamentosRepository _orcamentosRepository;
-        private readonly IMapper _mapper;
-
-        public OrcamentosService(IOrcamentosRepository orcamentosRepository, IMapper mapper)
-        {
-            _orcamentosRepository = orcamentosRepository;
-            _mapper = mapper;
-        }
+        private readonly IOrcamentosRepository _orcamentosRepository = orcamentosRepository;
+        private readonly IMapper _mapper = mapper;
 
         public async Task<IEnumerable<TipoEventoDTO>> GetTiposEventoAsync()
         {
@@ -44,23 +39,30 @@ namespace LidyDecorApp.Application.Services
 
         public async Task<OrcamentosDTO> GetOrcamentosByIdAsync(int id)
         {
-            var orcamentos = await _orcamentosRepository.GetOrcamentosByIdAsync(id);
-            return _mapper.Map<OrcamentosDTO>(orcamentos);
+            if (id == 0)
+                throw new ArgumentNullException(nameof(id), "Id não pode ser nulo ou zero");
+
+            try
+            {
+                var orcamentos = await _orcamentosRepository.GetOrcamentosByIdAsync(id);
+                return _mapper.Map<OrcamentosDTO>(orcamentos);
+            }
+            catch (AutoMapperMappingException ex)
+            {
+                throw new InvalidOperationException("Erro ao mapear o orçamento para DTO.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Erro ao buscar o orçamento.", ex);
+            }
         }
 
         public async Task<OrcamentosDTO> AddOrcamentosAsync(OrcamentosDTO orcamentosDTO)
         {
-            try
-            {
-                var orcamentos = _mapper.Map<Orcamentos>(orcamentosDTO);
-                await _orcamentosRepository.AddOrcamentosAsync(orcamentos);
+            var orcamentos = _mapper.Map<Orcamentos>(orcamentosDTO);
+            await _orcamentosRepository.AddOrcamentosAsync(orcamentos);
 
-                return _mapper.Map<OrcamentosDTO>(orcamentos);
-            }
-            catch (Exception)
-            {
-                return new OrcamentosDTO();
-            }
+            return _mapper.Map<OrcamentosDTO>(orcamentos);
         }
 
         public async Task<OrcamentosDTO> UpdateOrcamentosAsync(OrcamentosDTO orcamentos)
@@ -73,7 +75,7 @@ namespace LidyDecorApp.Application.Services
             catch (Exception)
             {
                 return new OrcamentosDTO();
-            }            
+            }
         }
 
         public async Task DeleteOrcamentosAsync(int id)
