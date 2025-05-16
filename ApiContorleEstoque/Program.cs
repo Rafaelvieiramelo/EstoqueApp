@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using FluentValidation;
+using LidyDecorApp.Application.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -74,8 +76,12 @@ builder.Services.AddTransient<IJwtTokenService, JwtTokenService>();
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<LidyDecorDbContext>(options =>
-    options.UseSqlite(connectionString));
+builder.Services.AddDbContext<LidyDecorDbContext>(options => options.UseSqlite(connectionString));
+
+builder.Services.AddValidatorsFromAssemblyContaining<ClientesDTOValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<OrcamentoDTOValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<ProdutosDTOValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<UsuarioWriteDTOValidator>();
 
 var app = builder.Build();
 

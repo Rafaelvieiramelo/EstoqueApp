@@ -7,16 +7,10 @@ using LidyDecorApp.Domain.Interfaces;
 
 namespace LidyDecorApp.Application.Services
 {
-    public class ProdutosService : IProdutosService
+    public class ProdutosService(IProdutosRepository produtosRepository, IMapper mapper) : IProdutosService
     {
-        private readonly IProdutosRepository _produtosRepository;
-        private readonly IMapper _mapper;
-
-        public ProdutosService(IProdutosRepository produtosRepository, IMapper mapper)
-        {
-            _produtosRepository = produtosRepository;
-            _mapper = mapper;
-        }
+        private readonly IProdutosRepository _produtosRepository = produtosRepository;
+        private readonly IMapper _mapper = mapper;
 
         public async Task<IEnumerable<ProdutosDTO>> GetProdutosAsync()
         {
@@ -28,8 +22,22 @@ namespace LidyDecorApp.Application.Services
 
         public async Task<ProdutosDTO> GetProdutosByIdAsync(int id)
         {
-            var produtos = await _produtosRepository.GetProdutosByIdAsync(id);
-            return _mapper.Map<ProdutosDTO>(produtos);
+            if (id == 0)
+                throw new ArgumentNullException(nameof(id), "Id não pode ser nulo ou zero");
+
+            try
+            {
+                var produtos = await _produtosRepository.GetProdutosByIdAsync(id);
+                return _mapper.Map<ProdutosDTO>(produtos);
+            }
+            catch (AutoMapperMappingException ex)
+            {
+                throw new InvalidOperationException("Erro ao mapear o produto para DTO.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Erro ao buscar o produto.", ex);
+            }
         }
 
         public async Task<ProdutosDTO> AddProdutosAsync(ProdutosDTO produtosDTO)

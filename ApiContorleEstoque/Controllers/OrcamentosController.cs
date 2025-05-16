@@ -1,21 +1,19 @@
+using FluentValidation;
 using LidyDecorApp.Application.DTOs;
 using LidyDecorApp.Application.Interfaces;
+using LidyDecorApp.Shared.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LidyDecorApp.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class OrcamentosController : ControllerBase
+    public class OrcamentosController(IOrcamentosService orcamentosService, IValidator<OrcamentosDTO> validator) : ControllerBase
     {
         private const string id = "{id}";
-        private readonly IOrcamentosService _orcamentosService;
+        private readonly IOrcamentosService _orcamentosService = orcamentosService;
+        private readonly IValidator<OrcamentosDTO> _validator = validator;
 
-        public OrcamentosController(IOrcamentosService orcamentosService)
-        {
-            _orcamentosService = orcamentosService;
-        }
-        
         [HttpGet("GetTiposEvento")]
         public async Task<ActionResult<IEnumerable<TipoEventoDTO>>> GetTiposEvento()
         {
@@ -26,55 +24,109 @@ namespace LidyDecorApp.API.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<OrcamentosDTO>>> GetOrcamentos()
         {
-            var orcamentos = await _orcamentosService.GetOrcamentosAsync();
-            return Ok(orcamentos);
+            try
+            {
+                var orcamentos = await _orcamentosService.GetOrcamentosAsync();
+
+                if (orcamentos.HasNotValue())
+                    return NotFound();
+
+                return Ok(orcamentos);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
 
         [HttpGet(id)]
         public async Task<ActionResult<OrcamentosDTO>> GetOrcamentosById(int id)
         {
-            var orcamentos = await _orcamentosService.GetOrcamentosByIdAsync(id);
-            return Ok(orcamentos);
+            if (id == 0)
+                return BadRequest();
+
+            var orcamento = await _orcamentosService.GetOrcamentosByIdAsync(id);
+
+            return orcamento == null ? NotFound() : Ok(orcamento);
         }
 
         [HttpPost]
         public async Task<ActionResult<OrcamentosDTO>> AddOrcamentosAsync(OrcamentosDTO orcamentos)
         {
-            var numeroUltimoOrcamentos = await _orcamentosService.GetNumeroUltimoOrcamentosAsync();
-            var proximoNumero = int.Parse(numeroUltimoOrcamentos) + 1;
-            orcamentos.Numero = proximoNumero.ToString();
-            var orcamentosNovo = await _orcamentosService.AddOrcamentosAsync(orcamentos);
-            var objetoDefault = Shared.ObjectValidator.IsObjectDefault(orcamentosNovo);
+            try
+            {
+                var validation = await _validator.ValidateAsync(orcamentos);
 
-            if (objetoDefault)
-                return BadRequest("Erro ao adicionar orcamentos");
+                if (!validation.IsValid)
+                {
+                    var errors = validation.Errors.Select(e => new
+                    {
+                        Campo = e.PropertyName,
+                        Erro = e.ErrorMessage
+                    });
 
-            return Ok(orcamentosNovo);
+                    return BadRequest(errors);
+                }
+
+                var numeroUltimoOrcamentos = await _orcamentosService.GetNumeroUltimoOrcamentosAsync();
+                var proximoNumero = int.Parse(numeroUltimoOrcamentos) + 1;
+                orcamentos.Numero = proximoNumero.ToString();
+
+                var orcamentosNovo = await _orcamentosService.AddOrcamentosAsync(orcamentos);
+
+                return Ok(orcamentosNovo);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
 
         [HttpPatch]
         public async Task<ActionResult<OrcamentosDTO>> UpdateOrcamentosAsync(OrcamentosDTO orcamentos)
         {
-            var orcamentosAtualizado = await _orcamentosService.UpdateOrcamentosAsync(orcamentos);
-            var objetoDefault = Shared.ObjectValidator.IsObjectDefault(orcamentosAtualizado);
+            try
+            {
+                var validation = await _validator.ValidateAsync(orcamentos);
 
-            if (objetoDefault)
-                return BadRequest("Erro ao editar orcamentos");
+                if (!validation.IsValid)
+                {
+                    var errors = validation.Errors.Select(e => new
+                    {
+                        Campo = e.PropertyName,
+                        Erro = e.ErrorMessage
+                    });
 
-            return Ok(orcamentosAtualizado);
+                    return BadRequest(errors);
+                }
+
+                var orcamentosAtualizado = await _orcamentosService.UpdateOrcamentosAsync(orcamentos);
+
+                if (orcamentosAtualizado == null)
+                    return NotFound();
+
+                return Ok(orcamentosAtualizado);
+            }
+            catch (Exception)
+            {
+                return BadRequest();
+            }
         }
 
         [HttpDelete(id)]
         public async Task<ActionResult> DeleteOrcamentosAsync(int id)
         {
+            if (id == 0)
+                return BadRequest();
+
             try
             {
                 await _orcamentosService.DeleteOrcamentosAsync(id);
                 return Ok();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                return BadRequest($"Erro ao Deletar orcamentos:{ex.Message}");            
+                return BadRequest();            
             }
         }
     }
