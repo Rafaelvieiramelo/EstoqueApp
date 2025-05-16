@@ -3,6 +3,7 @@ using LidyDecorApp.Application.DTOs;
 using LidyDecorApp.Application.Interfaces;
 using LidyDecorApp.Application.Services;
 using LidyDecorApp.Shared.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -10,7 +11,9 @@ namespace LidyDecorApp.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize(Policy = "AcessoTotal")]
     public class UsuariosController(IUsuariosService usuariosService, IValidator<UsuarioWriteDTO> validator) : ControllerBase
+
     {
         private const string id = "{id}";
         private readonly IUsuariosService _usuariosService = usuariosService;

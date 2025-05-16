@@ -2,12 +2,14 @@ using FluentValidation;
 using LidyDecorApp.Application.DTOs;
 using LidyDecorApp.Application.Interfaces;
 using LidyDecorApp.Shared.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LidyDecorApp.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize(Policy = "AcessoTotal")]
     public class OrcamentosController(IOrcamentosService orcamentosService, IValidator<OrcamentosDTO> validator) : ControllerBase
     {
         private const string id = "{id}";

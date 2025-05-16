@@ -2,6 +2,7 @@ using FluentValidation;
 using LidyDecorApp.Application.DTOs;
 using LidyDecorApp.Application.Interfaces;
 using LidyDecorApp.Shared.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -9,7 +10,9 @@ namespace LidyDecorApp.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize(Policy = "AcessoProdutosClientes")]
     public class ClientesController(IClientesService clientesService, IValidator<ClientesDTO> validator) : ControllerBase
+
     {
         private const string id = "{id}";
         private readonly IClientesService _clientesService = clientesService;
