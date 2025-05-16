@@ -1,5 +1,6 @@
 ﻿@using LidyDecorApp.Web.Pages.Orcamento
 @using LidyDecorApp.Web.Models
+@using System.Globalization
 
 <table id="orcamentossTable" class="table">
     <thead>
@@ -46,36 +47,89 @@
 <!-- Modal -->
 @if (selectedOrcamentos != null)
 {
-    <div class="modal fade show" tabindex="-1" style="display: block;" aria-modal="true" role="dialog">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Detalhes do Orçamento</h5>
-                    <button type="button" class="btn-close" @onclick="CloseModal"></button>
+    <div class="modal fade show d-block" tabindex="-1" role="dialog" style="background-color: rgba(0, 0, 0, 0.5);">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content shadow rounded-3">
+                <!-- Cabeçalho -->
+                <div class="modal-header bg-light border-bottom">
+                    <h5 class="modal-title">
+                        <i class="bi bi-clipboard-data text-primary me-2"></i>
+                        Detalhes do Orçamento
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal" aria-label="Fechar"></button>
                 </div>
+
+                <!-- Corpo -->
                 <div class="modal-body">
-                    <p><strong>Número:</strong> @selectedOrcamentos.Numero</p>
-                    <p><strong>Clientes:</strong> @selectedOrcamentos.Clientes?.Nome</p>
-                    <p><strong>Email:</strong> @selectedOrcamentos.Clientes?.Email</p>
-                    <p><strong>Tipo de Evento:</strong> @selectedOrcamentos.TipoEvento?.Tipo</p>
-                    <p><strong>Data:</strong> @selectedOrcamentos.Data.ToString("dd/MM/yyyy")</p>
-                    <p><strong>Data do Evento:</strong> @(selectedOrcamentos.DataEvento.ToString("dd/MM/yyyy") ?? "Não definida")</p>
-                    <p><strong>Observações:</strong> @selectedOrcamentos.Observacoes</p>
-                    <p><strong>Valor Total:</strong> @selectedOrcamentos.ValorTotal.ToString("C")</p>
-                    <h5>Produtoss</h5>
-                    <ul>
-                        @foreach (var produtosOrcamentos in selectedOrcamentos.ProdutosOrcamentos)
-                        {
-                            <li>
-                                <p><strong>Nome:</strong> @produtosOrcamentos.Produtos.nome</p>
-                                <p><strong>Descrição:</strong> @produtosOrcamentos.Produtos.descricao</p>
-                                <p><strong>Quantidade:</strong> @produtosOrcamentos.Produtos.quantidade</p>
-                            </li>
-                        }
-                    </ul>
+                    <!-- Info do cliente e orçamento -->
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Cliente:</strong> @selectedOrcamentos.Clientes?.Nome</p>
+                            <p>
+                                <strong>Email:</strong>
+                                <a href="mailto:@selectedOrcamentos.Clientes?.Email">
+                                    @selectedOrcamentos.Clientes?.Email
+                                </a>
+                            </p>
+                            <p>
+                                <strong>Data do Orçamento:</strong>
+                                @selectedOrcamentos.Data.ToString("dd/MM/yyyy")
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <p>
+                                <strong>Tipo de Evento:</strong>
+                                <span class="badge bg-info text-dark">
+                                    @selectedOrcamentos.TipoEvento?.Tipo
+                                </span>
+                            </p>
+                            <p>
+                                <strong>Data do Evento:</strong>
+                                @(selectedOrcamentos.DataEvento.ToString("dd/MM/yyyy") ?? "Não definida")
+                            </p>
+                            <p>
+                                <strong>Observações:</strong>
+                                @selectedOrcamentos.Observacoes
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr />
+
+                    <!-- Produtos do orçamento -->
+                    <h6 class="mt-4 mb-3 text-primary">
+                        <i class="bi bi-box-seam me-1"></i> Produtos do Orçamento
+                    </h6>
+
+                    <table class="table table-striped table-hover table-bordered align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Nome</th>
+                                <th>Descricao</th>
+                                <th>Quantidade</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var produto in selectedOrcamentos.ProdutosOrcamentos)
+                            {
+                                <tr>
+                                    <td>@produto.Produtos?.nome</td>
+                                    <td>@produto.Produtos.descricao</td>
+                                    <td>@produto.Produtos.quantidade</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Fechar</button>
+
+                <!-- Rodapé -->
+                <div class="modal-footer justify-content-end">
+                    <button class="btn btn-success me-2" @onclick="OpenContrato">
+                        <i class="bi bi-file-earmark-text me-1"></i> Abrir Contrato
+                    </button>
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">
+                        <i class="bi bi-x-circle me-1"></i> Fechar
+                    </button>
                 </div>
             </div>
         </div>
@@ -108,5 +162,21 @@
     private void CloseModal()
     {
         selectedOrcamentos = null;
+    }
+
+    private void OpenContrato()
+    {
+        var produtos = string.Join(", ", selectedOrcamentos.ProdutosOrcamentos.Select(p => p.Produtos.nome));
+        var valorFormatado = selectedOrcamentos.ValorTotal.ToString("F2", CultureInfo.InvariantCulture);
+
+        var contratoUrl = $"/contrato" +
+        $"?nomeCliente={Uri.EscapeDataString(selectedOrcamentos.Clientes?.Nome ?? "")}" +
+        $"&cpfCliente={Uri.EscapeDataString(selectedOrcamentos.Clientes?.CpfCnpj ?? "")}" +
+        $"&tipoEvento={Uri.EscapeDataString(selectedOrcamentos.TipoEvento?.Tipo ?? "")}" +
+        $"&dataEvento={selectedOrcamentos.DataEvento.ToString("yyyy-MM-dd")}" +
+        $"&valorTotal={selectedOrcamentos.ValorTotal.ToString("F2", CultureInfo.InvariantCulture)}" +
+        $"&produtos={Uri.EscapeDataString(produtos)}";
+
+        JSRuntime.InvokeVoidAsync("window.open", contratoUrl, "_blank");
     }
 }

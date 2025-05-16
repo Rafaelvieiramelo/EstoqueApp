@@ -28,7 +28,6 @@ namespace LidyDecorApp.Infrastructure.Repository
             }
             catch (Exception ex)
             {
-
                 return null;
             }
         }
@@ -41,12 +40,11 @@ namespace LidyDecorApp.Infrastructure.Repository
                     .Include(o => o.Clientes)
                     .Include(o => o.TipoEvento)
                     .Include(o => o.ProdutosOrcamento)
-                        .ThenInclude(po => po.Produtoss) // Inclui informações dos Produtoss
+                        .ThenInclude(po => po.Produtos)
                     .ToListAsync();
             }
             catch (Exception ex)
             {
-
                 return null;
             }
 
@@ -79,7 +77,7 @@ namespace LidyDecorApp.Infrastructure.Repository
 
                 foreach (var item in orcamentos.ProdutosOrcamento.Where(p => p.Id == 0))
                 {
-                    item.Produtoss = null;
+                    item.Produtos = null;
                     await _context.ProdutosOrcamento.AddAsync(item);
                 }
             }

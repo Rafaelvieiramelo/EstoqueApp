@@ -13,9 +13,7 @@ namespace LidyDecorApp.Application.DTOs
         public string? Observacoes { get; set; }
         public decimal ValorTotal { get; set; }
 
-        [JsonIgnore]
         public TipoEventoDTO? TipoEvento { get; set; }
-        [JsonIgnore]
         public ClientesDTO? Clientes { get; set; }
         public ICollection<ProdutosOrcamentosDTO> ProdutosOrcamentos { get; set; } = new List<ProdutosOrcamentosDTO>();
     }

@@ -28,8 +28,8 @@ namespace LidyDecorApp.Application.Services
 
         public async Task<IEnumerable<OrcamentosDTO>> GetOrcamentosAsync()
         {
-            var Orcamentoss = await _orcamentosRepository.GetOrcamentossAsync();
-            var OrcamentossDto = _mapper.Map<IEnumerable<OrcamentosDTO>>(Orcamentoss);
+            var Orcamentos = await _orcamentosRepository.GetOrcamentossAsync();
+            var OrcamentossDto = _mapper.Map<IEnumerable<OrcamentosDTO>>(Orcamentos);
 
             return OrcamentossDto;
         }

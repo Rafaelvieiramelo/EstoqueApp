@@ -8,7 +8,6 @@ namespace LidyDecorApp.Application.DTOs
         public int ProdutosId { get; set; }
         public int OrcamentosId { get; set; }
 
-        [JsonIgnore]
         public ProdutosDTO? Produtos { get; set; }
         [JsonIgnore]
         public OrcamentosDTO? Orcamentos { get; set; }

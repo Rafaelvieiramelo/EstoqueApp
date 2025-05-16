@@ -8,7 +8,7 @@ namespace LidyDecorApp.Domain
         public int OrcamentosId { get; set; }
         public DateOnly Inclusao { get; set; } = DateOnly.FromDateTime(DateTime.Now);
 
-        public Produtos? Produtoss { get; set; }
+        public Produtos? Produtos { get; set; }
         public Orcamentos? Orcamentos { get; set; }
     }
 }

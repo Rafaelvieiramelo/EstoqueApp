@@ -13,10 +13,8 @@ namespace LidyDecorApp.Web.Models
         public string Observacoes { get; set; }
         public decimal ValorTotal { get; set; }
 
-        [JsonIgnore]
         public Tipoevento TipoEvento { get; set; }
-
-        [JsonIgnore]
+        
         public ClientesModel Clientes { get; set; }
 
         public List<ProdutosOrcamentos> ProdutosOrcamentos { get; set; } = [];
@@ -34,8 +32,8 @@ namespace LidyDecorApp.Web.Models
         public int ProdutosId { get; set; }
         public int OrcamentosId { get; set; }
 
-        [JsonIgnore]
         public ProdutosModel Produtos { get; set; }
+
         [JsonIgnore]
         public object Orcamentos { get; set; }
     }
