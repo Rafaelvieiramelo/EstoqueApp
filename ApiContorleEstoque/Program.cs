@@ -1,17 +1,18 @@
+using FluentValidation;
 using LidyDecorApp.Application.Interfaces;
 using LidyDecorApp.Application.Mapping;
 using LidyDecorApp.Application.Services;
+using LidyDecorApp.Application.Validators;
 using LidyDecorApp.Domain.Interfaces;
 using LidyDecorApp.Infrastructure;
 using LidyDecorApp.Infrastructure.Filters;
 using LidyDecorApp.Infrastructure.Repository;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-using FluentValidation;
-using LidyDecorApp.Application.Validators;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,33 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SchemaFilter<SwaggerExcludeFilter>();
+
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Sua API", Version = "v1" });
+
+    var securityScheme = new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Description = "Insira o token JWT no formato: Bearer {seu token}",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Reference = new OpenApiReference
+        {
+            Type = ReferenceType.SecurityScheme,
+            Id = "Bearer"
+        }
+    };
+
+    options.AddSecurityDefinition("Bearer", securityScheme);
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            securityScheme,
+            Array.Empty<string>()
+        }
+    });
 });
 
 // Configuração da autenticação JWT
