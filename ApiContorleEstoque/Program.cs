@@ -177,6 +177,12 @@ app.UseCors("AllowAll");
 app.MapControllers();
 app.MapHealthChecks("/health");
 
+var port = Environment.GetEnvironmentVariable("PORT");
+if (!string.IsNullOrEmpty(port))
+{
+    app.Urls.Add($"http://*:{port}");
+}
+
 await app.RunAsync();
 
 // Local helper function to convert postgres:// url to Npgsql connection string
