@@ -137,6 +137,32 @@ builder.Services.AddValidatorsFromAssemblyContaining<UsuarioWriteDTOValidator>()
 
 var app = builder.Build();
 
+// 1. CORS no início para garantir cabeçalhos em respostas de sucesso ou erro (500)
+app.UseCors("AllowAll");
+
+// 2. Manipulador de erros global com cabeçalhos CORS explícitos
+app.UseExceptionHandler(errorApp =>
+{
+    errorApp.Run(async context =>
+    {
+        context.Response.StatusCode = 500;
+        context.Response.ContentType = "application/json";
+        
+        context.Response.Headers.AccessControlAllowOrigin = "*";
+        context.Response.Headers.AccessControlAllowMethods = "*";
+        context.Response.Headers.AccessControlAllowHeaders = "*";
+
+        var exceptionHandlerPathFeature = context.Features.Get<Microsoft.AspNetCore.Diagnostics.IExceptionHandlerPathFeature>();
+        var exception = exceptionHandlerPathFeature?.Error;
+        var errorMsg = exception != null ? exception.Message : "Erro desconhecido";
+        
+        await context.Response.WriteAsJsonAsync(new { 
+            error = "Internal Server Error", 
+            message = errorMsg
+        });
+    });
+});
+
 // Execução de migrações e seed de dados
 using (var scope = app.Services.CreateScope())
 {
@@ -172,7 +198,6 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors("AllowAll");
 
 app.MapControllers();
 app.MapHealthChecks("/health");
