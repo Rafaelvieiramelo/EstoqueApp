@@ -144,16 +144,28 @@
 
                 <!-- Rodapé -->
                 <div class="modal-footer justify-content-end">
-                    <button class="btn btn-success me-2" @onclick="GerarContratoWord" disabled="@isDownloading">
-                        @if (isDownloading)
+                    <button class="btn btn-success me-2" @onclick="GerarContratoWord" disabled="@(isDownloadingWord || isDownloadingPdf)">
+                        @if (isDownloadingWord)
                         {
                             <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                            <span>Gerando...</span>
+                            <span>Gerando Word...</span>
                         }
                         else
                         {
                             <i class="bi bi-file-earmark-word me-1"></i>
-                            <span>Gerar Contrato</span>
+                            <span>Gerar Word</span>
+                        }
+                    </button>
+                    <button class="btn btn-danger me-2" @onclick="GerarContratoPdf" disabled="@(isDownloadingWord || isDownloadingPdf)">
+                        @if (isDownloadingPdf)
+                        {
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span>Gerando PDF...</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-file-earmark-pdf me-1"></i>
+                            <span>Gerar PDF</span>
                         }
                     </button>
                     <button type="button" class="btn btn-secondary" @onclick="CloseModal">
@@ -193,12 +205,13 @@
         selectedOrcamentos = null;
     }
 
-    private bool isDownloading = false;
+    private bool isDownloadingWord = false;
+    private bool isDownloadingPdf = false;
 
     private async Task GerarContratoWord()
     {
         if (selectedOrcamentos == null) return;
-        isDownloading = true;
+        isDownloadingWord = true;
 
         try
         {
@@ -226,7 +239,42 @@
         }
         finally
         {
-            isDownloading = false;
+            isDownloadingWord = false;
+        }
+    }
+
+    private async Task GerarContratoPdf()
+    {
+        if (selectedOrcamentos == null) return;
+        isDownloadingPdf = true;
+
+        try
+        {
+            var response = await OrcamentosService.GetContratoPdfFileStreamAsync(selectedOrcamentos.Id);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var fileStream = await response.Content.ReadAsStreamAsync();
+                var nomeCliente = selectedOrcamentos.Clientes?.Nome ?? "Cliente";
+                var nomeClienteLimpo = nomeCliente.Replace(" ", "_");
+                var fileName = $"Contrato_{selectedOrcamentos.Numero}_{nomeClienteLimpo}.pdf";
+                
+                using var streamRef = new DotNetStreamReference(stream: fileStream);
+                await JSRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+            }
+            else
+            {
+                var errorText = await response.Content.ReadAsStringAsync();
+                await JSRuntime.InvokeVoidAsync("alert", $"Erro ao gerar o contrato em PDF: {errorText}");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erro de conexão: {ex.Message}");
+        }
+        finally
+        {
+            isDownloadingPdf = false;
         }
     }
 }
