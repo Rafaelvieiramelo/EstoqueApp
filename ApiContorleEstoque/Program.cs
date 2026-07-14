@@ -112,6 +112,7 @@ builder.Services.AddScoped<IClientesRepository, ClientesRepository>();
 builder.Services.AddScoped<IOrcamentosRepository, OrcamentosRepository>();
 
 builder.Services.AddTransient<IJwtTokenService, JwtTokenService>();
+builder.Services.AddScoped<LidyDecorApp.Application.Interfaces.IContratoService, LidyDecorApp.Infrastructure.Services.ContratoService>();
 
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 

@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
 
@@ -8,9 +8,15 @@ namespace LidyDecorApp.Infrastructure
     {
         public LidyDecorDbContext CreateDbContext(string[] args)
         {
-            // Carregar as configurações do arquivo appsettings.json
+            var basePath = AppContext.BaseDirectory;
+            var projectPath = Path.GetFullPath(Path.Combine(basePath, "..", "..", "..", "..", "ApiContorleEstoque"));
+            if (!Directory.Exists(projectPath))
+            {
+                projectPath = Directory.GetCurrentDirectory();
+            }
+
             var configuration = new ConfigurationBuilder()
-                .SetBasePath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "C:\\Users\\rafael.melo\\source\\repos\\ControleEstoque\\ApiContorleEstoque"))
+                .SetBasePath(projectPath)
                 .AddJsonFile("appsettings.json")
                 .Build();
 

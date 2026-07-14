@@ -1,4 +1,4 @@
-﻿using LidyDecorApp.Domain;
+using LidyDecorApp.Domain;
 using System.Text.Json.Serialization;
 namespace LidyDecorApp.Application.DTOs
 {
@@ -11,6 +11,12 @@ namespace LidyDecorApp.Application.DTOs
         public DateOnly Data { get; set; } = DateOnly.FromDateTime(DateTime.Now);
         public DateOnly? DataEvento { get; set; }
         public string? Observacoes { get; set; }
+        public string? EnderecoEntrega { get; set; }
+        public string? FormaPagamento { get; set; }
+        public string? TemaPacote { get; set; }
+        public decimal ValorSinal { get; set; }
+        public decimal PorcentagemSinal { get; set; }
+        public string? CidadeContrato { get; set; }
         public decimal ValorTotal { get; set; }
 
         public TipoEventoDTO? TipoEvento { get; set; }

@@ -15,7 +15,7 @@ public class OrcamentosControllerTests
     public OrcamentosControllerTests()
     {
         _mockService = new Mock<IOrcamentosService>();
-        _controller = new OrcamentosController(_mockService.Object, null);
+        _controller = new OrcamentosController(_mockService.Object, null, Moq.Mock.Of<LidyDecorApp.Application.Interfaces.IContratoService>());
     }
 
     [Fact]
@@ -93,7 +93,7 @@ public class OrcamentosControllerTests
         _mockService.Setup(s => s.GetNumeroUltimoOrcamentosAsync()).ReturnsAsync("123");
         _mockService.Setup(s => s.AddOrcamentosAsync(It.IsAny<OrcamentosDTO>())).ReturnsAsync(orcamento);
 
-        var controller = new OrcamentosController(_mockService.Object, mockValidator.Object);
+        var controller = new OrcamentosController(_mockService.Object, mockValidator.Object, Moq.Mock.Of<LidyDecorApp.Application.Interfaces.IContratoService>());
 
         // Act
         var result = await controller.AddOrcamentosAsync(orcamento);
@@ -117,7 +117,7 @@ public class OrcamentosControllerTests
         _mockService.Setup(s => s.AddOrcamentosAsync(It.IsAny<OrcamentosDTO>()))
                      .ThrowsAsync(new Exception("Erro ao adicionar orçamento"));
 
-        var controller = new OrcamentosController(_mockService.Object, mockValidator.Object);
+        var controller = new OrcamentosController(_mockService.Object, mockValidator.Object, Moq.Mock.Of<LidyDecorApp.Application.Interfaces.IContratoService>());
 
         // Act
         var result = await controller.AddOrcamentosAsync(orcamento);
@@ -138,7 +138,7 @@ public class OrcamentosControllerTests
 
         _mockService.Setup(s => s.UpdateOrcamentosAsync(It.IsAny<OrcamentosDTO>())).ReturnsAsync(orcamento);
 
-        var controller = new OrcamentosController(_mockService.Object, mockValidator.Object);
+        var controller = new OrcamentosController(_mockService.Object, mockValidator.Object, Moq.Mock.Of<LidyDecorApp.Application.Interfaces.IContratoService>());
 
         // Act
         var result = await controller.UpdateOrcamentosAsync(orcamento);
@@ -161,7 +161,7 @@ public class OrcamentosControllerTests
         _mockService.Setup(s => s.UpdateOrcamentosAsync(It.IsAny<OrcamentosDTO>()))
                     .ThrowsAsync(new Exception("Erro ao atualizar orçamento"));
 
-        var controller = new OrcamentosController(_mockService.Object, mockValidator.Object);
+        var controller = new OrcamentosController(_mockService.Object, mockValidator.Object, Moq.Mock.Of<LidyDecorApp.Application.Interfaces.IContratoService>());
 
         // Act
         var result = await controller.UpdateOrcamentosAsync(orcamento);
@@ -177,7 +177,7 @@ public class OrcamentosControllerTests
         var id = 1;
         _mockService.Setup(s => s.DeleteOrcamentosAsync(id)).Returns(Task.CompletedTask);
 
-        var controller = new OrcamentosController(_mockService.Object, null);
+        var controller = new OrcamentosController(_mockService.Object, null, Moq.Mock.Of<LidyDecorApp.Application.Interfaces.IContratoService>());
 
         // Act
         var result = await controller.DeleteOrcamentosAsync(id);
@@ -193,7 +193,7 @@ public class OrcamentosControllerTests
         var id = 1;
         _mockService.Setup(s => s.DeleteOrcamentosAsync(id)).ThrowsAsync(new Exception("Erro ao deletar"));
 
-        var controller = new OrcamentosController(_mockService.Object, null);
+        var controller = new OrcamentosController(_mockService.Object, null, Moq.Mock.Of<LidyDecorApp.Application.Interfaces.IContratoService>());
 
         // Act
         var result = await controller.DeleteOrcamentosAsync(id);
@@ -208,7 +208,7 @@ public class OrcamentosControllerTests
         // Arrange
         var id = 0;
 
-        var controller = new OrcamentosController(_mockService.Object, null);
+        var controller = new OrcamentosController(_mockService.Object, null, Moq.Mock.Of<LidyDecorApp.Application.Interfaces.IContratoService>());
 
         // Act
         var result = await controller.DeleteOrcamentosAsync(id);

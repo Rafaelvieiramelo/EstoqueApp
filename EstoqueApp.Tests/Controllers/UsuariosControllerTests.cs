@@ -87,8 +87,8 @@ namespace LidyDecorApp.Tests.Controllers
             var usuarios = new UsuarioWriteDTO { Nome = "Teste", SenhaHash = "123456" };
             var validationResult = new FluentValidation.Results.ValidationResult();
 
-            var mockValidator = new Mock<IValidator<UsuarioWriteDTO>>();
-            mockValidator.Setup(v => v.ValidateAsync(usuarios, default)).ReturnsAsync(validationResult);
+            var mockValidator = new Mock<IValidator<UsuariosBaseDTO>>();
+            mockValidator.Setup(v => v.ValidateAsync(It.IsAny<UsuariosBaseDTO>(), default)).ReturnsAsync(validationResult);
 
             _mockService.Setup(s => s.AddUsuariosAsync(It.IsAny<UsuarioWriteDTO>())).ReturnsAsync(usuarios);
 
@@ -109,8 +109,8 @@ namespace LidyDecorApp.Tests.Controllers
             var usuarios = new UsuarioWriteDTO { Nome = "Teste" };
             var validationResult = new FluentValidation.Results.ValidationResult();
 
-            var mockValidator = new Mock<IValidator<UsuarioWriteDTO>>();
-            mockValidator.Setup(v => v.ValidateAsync(usuarios, default)).ReturnsAsync(validationResult);
+            var mockValidator = new Mock<IValidator<UsuariosBaseDTO>>();
+            mockValidator.Setup(v => v.ValidateAsync(It.IsAny<UsuariosBaseDTO>(), default)).ReturnsAsync(validationResult);
 
             _mockService.Setup(s => s.AddUsuariosAsync(It.IsAny<UsuarioWriteDTO>()))
                          .ThrowsAsync(new Exception("Erro ao adicionar usuarios"));
@@ -131,8 +131,8 @@ namespace LidyDecorApp.Tests.Controllers
             var usuarios = new UsuarioWriteDTO { Id = 1, Nome = "Teste", SenhaHash = "123456" };
             var validationResult = new FluentValidation.Results.ValidationResult();
 
-            var mockValidator = new Mock<IValidator<UsuarioWriteDTO>>();
-            mockValidator.Setup(v => v.ValidateAsync(usuarios, default)).ReturnsAsync(validationResult);
+            var mockValidator = new Mock<IValidator<UsuariosBaseDTO>>();
+            mockValidator.Setup(v => v.ValidateAsync(It.IsAny<UsuariosBaseDTO>(), default)).ReturnsAsync(validationResult);
 
             _mockService.Setup(s => s.UpdateUsuariosAsync(It.IsAny<UsuarioWriteDTO>())).ReturnsAsync(usuarios);
 
@@ -153,8 +153,8 @@ namespace LidyDecorApp.Tests.Controllers
             var usuarios = new UsuarioWriteDTO { Id = 1, Nome = "123" };
             var validationResult = new FluentValidation.Results.ValidationResult();
 
-            var mockValidator = new Mock<IValidator<UsuarioWriteDTO>>();
-            mockValidator.Setup(v => v.ValidateAsync(usuarios, default)).ReturnsAsync(validationResult);
+            var mockValidator = new Mock<IValidator<UsuariosBaseDTO>>();
+            mockValidator.Setup(v => v.ValidateAsync(It.IsAny<UsuariosBaseDTO>(), default)).ReturnsAsync(validationResult);
 
             _mockService.Setup(s => s.UpdateUsuariosAsync(It.IsAny<UsuarioWriteDTO>()))
                         .ThrowsAsync(new Exception("Erro ao atualizar usuarios"));

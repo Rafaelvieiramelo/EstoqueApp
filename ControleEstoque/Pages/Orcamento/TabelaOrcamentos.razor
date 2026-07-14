@@ -1,6 +1,7 @@
-﻿@using LidyDecorApp.Web.Pages.Orcamento
+@using LidyDecorApp.Web.Pages.Orcamento
 @using LidyDecorApp.Web.Models
 @using System.Globalization
+@inject OrcamentosService OrcamentosService
 
 <table id="orcamentossTable" class="table">
     <thead>
@@ -96,6 +97,25 @@
 
                     <hr />
 
+                    <!-- Informações do Contrato -->
+                    <h6 class="mt-3 mb-3 text-primary">
+                        <i class="bi bi-file-earmark-word me-1"></i> Informações do Contrato
+                    </h6>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p><strong>Tema e Pacote:</strong> @selectedOrcamentos.TemaPacote</p>
+                            <p><strong>Cidade de Assinatura:</strong> @selectedOrcamentos.CidadeContrato</p>
+                            <p><strong>Forma de Pagamento:</strong> @selectedOrcamentos.FormaPagamento</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Valor do Sinal:</strong> @(selectedOrcamentos.ValorSinal.ToString("C"))</p>
+                            <p><strong>% do Sinal:</strong> @(selectedOrcamentos.PorcentagemSinal > 0 ? $"{selectedOrcamentos.PorcentagemSinal:F0}%" : "-")</p>
+                            <p><strong>Endereço de Entrega:</strong> @selectedOrcamentos.EnderecoEntrega</p>
+                        </div>
+                    </div>
+
+                    <hr />
+
                     <!-- Produtos do orçamento -->
                     <h6 class="mt-4 mb-3 text-primary">
                         <i class="bi bi-box-seam me-1"></i> Produtos do Orçamento
@@ -124,8 +144,17 @@
 
                 <!-- Rodapé -->
                 <div class="modal-footer justify-content-end">
-                    <button class="btn btn-success me-2" @onclick="OpenContrato">
-                        <i class="bi bi-file-earmark-text me-1"></i> Abrir Contrato
+                    <button class="btn btn-success me-2" @onclick="GerarContratoWord" disabled="@isDownloading">
+                        @if (isDownloading)
+                        {
+                            <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                            <span>Gerando...</span>
+                        }
+                        else
+                        {
+                            <i class="bi bi-file-earmark-word me-1"></i>
+                            <span>Gerar Contrato</span>
+                        }
                     </button>
                     <button type="button" class="btn btn-secondary" @onclick="CloseModal">
                         <i class="bi bi-x-circle me-1"></i> Fechar
@@ -164,19 +193,40 @@
         selectedOrcamentos = null;
     }
 
-    private void OpenContrato()
+    private bool isDownloading = false;
+
+    private async Task GerarContratoWord()
     {
-        var produtos = string.Join(", ", selectedOrcamentos.ProdutosOrcamentos.Select(p => p.Produtos.nome));
-        var valorFormatado = selectedOrcamentos.ValorTotal.ToString("F2", CultureInfo.InvariantCulture);
+        if (selectedOrcamentos == null) return;
+        isDownloading = true;
 
-        var contratoUrl = $"/contrato" +
-        $"?nomeCliente={Uri.EscapeDataString(selectedOrcamentos.Clientes?.Nome ?? "")}" +
-        $"&cpfCliente={Uri.EscapeDataString(selectedOrcamentos.Clientes?.CpfCnpj ?? "")}" +
-        $"&tipoEvento={Uri.EscapeDataString(selectedOrcamentos.TipoEvento?.Tipo ?? "")}" +
-        $"&dataEvento={selectedOrcamentos.DataEvento.ToString("yyyy-MM-dd")}" +
-        $"&valorTotal={selectedOrcamentos.ValorTotal.ToString("F2", CultureInfo.InvariantCulture)}" +
-        $"&produtos={Uri.EscapeDataString(produtos)}";
-
-        JSRuntime.InvokeVoidAsync("window.open", contratoUrl, "_blank");
+        try
+        {
+            var response = await OrcamentosService.GetContratoFileStreamAsync(selectedOrcamentos.Id);
+            
+            if (response.IsSuccessStatusCode)
+            {
+                var fileStream = await response.Content.ReadAsStreamAsync();
+                var nomeCliente = selectedOrcamentos.Clientes?.Nome ?? "Cliente";
+                var nomeClienteLimpo = nomeCliente.Replace(" ", "_");
+                var fileName = $"Contrato_{selectedOrcamentos.Numero}_{nomeClienteLimpo}.docx";
+                
+                using var streamRef = new DotNetStreamReference(stream: fileStream);
+                await JSRuntime.InvokeVoidAsync("downloadFileFromStream", fileName, streamRef);
+            }
+            else
+            {
+                var errorText = await response.Content.ReadAsStringAsync();
+                await JSRuntime.InvokeVoidAsync("alert", $"Erro ao gerar o contrato: {errorText}");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JSRuntime.InvokeVoidAsync("alert", $"Erro de conexão: {ex.Message}");
+        }
+        finally
+        {
+            isDownloading = false;
+        }
     }
 }
