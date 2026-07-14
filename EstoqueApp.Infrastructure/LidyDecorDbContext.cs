@@ -1,4 +1,4 @@
-﻿using LidyDecorApp.Domain;
+using LidyDecorApp.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace LidyDecorApp.Infrastructure
@@ -64,6 +64,24 @@ namespace LidyDecorApp.Infrastructure
 
                 entity.Property(e => e.Data)
                     .IsRequired();
+
+                entity.Property(e => e.EnderecoEntrega)
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.FormaPagamento)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.TemaPacote)
+                    .HasMaxLength(250);
+
+                entity.Property(e => e.ValorSinal)
+                    .HasConversion<double>(); // SQLite conversion for decimal if needed, but normally EF Core handles decimal on SQLite
+
+                entity.Property(e => e.PorcentagemSinal)
+                    .HasConversion<double>();
+
+                entity.Property(e => e.CidadeContrato)
+                    .HasMaxLength(150);
 
                 entity.HasOne(e => e.TipoEvento)  
                     .WithMany()

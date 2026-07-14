@@ -10,11 +10,12 @@ namespace LidyDecorApp.API.Controllers
     [ApiController]
     [Route("[controller]")]
     [Authorize(Policy = "AcessoTotal")]
-    public class OrcamentosController(IOrcamentosService orcamentosService, IValidator<OrcamentosDTO> validator) : ControllerBase
+    public class OrcamentosController(IOrcamentosService orcamentosService, IValidator<OrcamentosDTO> validator, LidyDecorApp.Application.Interfaces.IContratoService contratoService) : ControllerBase
     {
         private const string id = "{id}";
         private readonly IOrcamentosService _orcamentosService = orcamentosService;
         private readonly IValidator<OrcamentosDTO> _validator = validator;
+        private readonly LidyDecorApp.Application.Interfaces.IContratoService _contratoService = contratoService;
 
         [HttpGet("GetTiposEvento")]
         public async Task<ActionResult<IEnumerable<TipoEventoDTO>>> GetTiposEvento()
@@ -129,6 +130,29 @@ namespace LidyDecorApp.API.Controllers
             catch (Exception)
             {
                 return BadRequest();            
+            }
+        }
+
+        [HttpGet("{id}/gerar-contrato")]
+        public async Task<IActionResult> GerarContrato(int id)
+        {
+            try
+            {
+                var orcamento = await _orcamentosService.GetOrcamentosByIdAsync(id);
+                if (orcamento == null)
+                {
+                    return NotFound("Orçamento não encontrado.");
+                }
+
+                var fileBytes = await _contratoService.GerarContratoAsync(id);
+                var nomeClienteLimpo = (orcamento.Clientes?.Nome ?? "Cliente").Replace(" ", "_");
+                var nomeArquivo = $"Contrato_{orcamento.Numero}_{nomeClienteLimpo}.docx";
+
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.wordprocessingml.document", nomeArquivo);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro ao gerar o contrato: {ex.Message}");
             }
         }
     }

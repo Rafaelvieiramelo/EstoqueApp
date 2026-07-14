@@ -1,4 +1,4 @@
-﻿using System.Text.Json.Serialization;
+using System.Text.Json.Serialization;
 
 namespace LidyDecorApp.Web.Models
 {
@@ -11,6 +11,12 @@ namespace LidyDecorApp.Web.Models
         public DateOnly Data { get; set; } = DateOnly.FromDateTime(DateTime.Now);
         public DateOnly DataEvento { get; set; } = DateOnly.FromDateTime(DateTime.Now);
         public string Observacoes { get; set; }
+        public string? EnderecoEntrega { get; set; }
+        public string? FormaPagamento { get; set; }
+        public string? TemaPacote { get; set; }
+        public decimal ValorSinal { get; set; }
+        public decimal PorcentagemSinal { get; set; }
+        public string? CidadeContrato { get; set; } = "Campinas"; // Valor padrão para conveniência
         public decimal ValorTotal { get; set; }
 
         public Tipoevento TipoEvento { get; set; }

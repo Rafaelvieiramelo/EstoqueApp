@@ -1,4 +1,4 @@
-﻿@page "/orcamentos"
+@page "/orcamentos"
 @attribute [Authorize]
 @inject OrcamentosService OrcamentosService
 @inject ClientesService ClientesService
@@ -69,6 +69,48 @@
                         <label for="valorTotal" class="col-sm-3 col-form-label">Valor Total</label>
                         <div class="col-sm-9">
                             <input type="number" id="valorTotal" @bind="orcamentosEdicao.ValorTotal" class="form-control" placeholder="Valor Total" step="0.01" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="enderecoEntrega" class="col-sm-3 col-form-label">Endereço de Entrega</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="enderecoEntrega" @bind="orcamentosEdicao.EnderecoEntrega" class="form-control" placeholder="Endereço de entrega / Local do evento" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="temaPacote" class="col-sm-3 col-form-label">Tema e Pacote</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="temaPacote" @bind="orcamentosEdicao.TemaPacote" class="form-control" placeholder="Tema e pacote de decoração" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="formaPagamento" class="col-sm-3 col-form-label">Forma Pagamento</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="formaPagamento" @bind="orcamentosEdicao.FormaPagamento" class="form-control" placeholder="Ex: Pix, Entrada + Cartão" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="valorSinal" class="col-sm-3 col-form-label">Valor do Sinal</label>
+                        <div class="col-sm-9">
+                            <input type="number" id="valorSinal" @bind="orcamentosEdicao.ValorSinal" class="form-control" placeholder="Valor do sinal" step="0.01" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="porcentagemSinal" class="col-sm-3 col-form-label">% do Sinal</label>
+                        <div class="col-sm-9">
+                            <input type="number" id="porcentagemSinal" @bind="orcamentosEdicao.PorcentagemSinal" class="form-control" placeholder="Ex: 50" step="1" />
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
+                        <label for="cidadeContrato" class="col-sm-3 col-form-label">Cidade Assinatura</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="cidadeContrato" @bind="orcamentosEdicao.CidadeContrato" class="form-control" placeholder="Cidade de assinatura do contrato" />
                         </div>
                     </div>
 

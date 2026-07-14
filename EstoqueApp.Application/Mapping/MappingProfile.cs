@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using LidyDecorApp.Application.DTOs;
 using LidyDecorApp.Domain;
 
@@ -28,15 +28,24 @@ namespace LidyDecorApp.Application.Mapping
                 .ForMember(dest => dest.Data, opt => opt.MapFrom(src => src.Data))
                 .ForMember(dest => dest.DataEvento, opt => opt.MapFrom(src => src.DataEvento))
                 .ForMember(dest => dest.ProdutosOrcamentos, opt => opt.MapFrom(src => src.ProdutosOrcamento))
-                .PreserveReferences() // Adicione esta linha
-                .ReverseMap();
+                .PreserveReferences();
+
+            CreateMap<OrcamentosDTO, Orcamentos>()
+                .ForMember(dest => dest.Clientes, opt => opt.Ignore())
+                .ForMember(dest => dest.TipoEvento, opt => opt.Ignore())
+                .ForMember(dest => dest.ProdutosOrcamento, opt => opt.MapFrom(src => src.ProdutosOrcamentos))
+                .PreserveReferences();
 
             // ProdutossOrcamentos -> ProdutossOrcamentosDTO
             CreateMap<ProdutosOrcamento, ProdutosOrcamentosDTO>()
                 .ForMember(dest => dest.Produtos, opt => opt.MapFrom(src => src.Produtos))
                 .ForMember(dest => dest.Orcamentos, opt => opt.MapFrom(src => src.Orcamentos))
-                .PreserveReferences() // Adicione esta linha
-                .ReverseMap();
+                .PreserveReferences();
+
+            CreateMap<ProdutosOrcamentosDTO, ProdutosOrcamento>()
+                .ForMember(dest => dest.Produtos, opt => opt.Ignore())
+                .ForMember(dest => dest.Orcamentos, opt => opt.Ignore())
+                .PreserveReferences();
 
             CreateMap<TipoEventos, TipoEventoDTO>()
                 .ReverseMap(); ;
