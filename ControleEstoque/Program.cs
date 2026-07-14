@@ -22,7 +22,8 @@ builder.Services.AddScoped<AuthenticationStateProvider>(s => s.GetRequiredServic
 
 builder.Services.AddScoped(sp =>
 {
-    var httpClient = new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) };
+    var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? builder.HostEnvironment.BaseAddress;
+    var httpClient = new HttpClient { BaseAddress = new Uri(apiBaseUrl) };
 
     // Adicionar Interceptor para Token
     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "");
