@@ -23,7 +23,20 @@ public class OrcamentosService
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
 
-        return await _httpClient.GetFromJsonAsync<List<OrcamentosModel>>("https://localhost:7071/Orcamentos");
+        try
+        {
+            var response = await _httpClient.GetAsync("https://localhost:7071/Orcamentos");
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return new List<OrcamentosModel>();
+            }
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<List<OrcamentosModel>>() ?? new List<OrcamentosModel>();
+        }
+        catch
+        {
+            return new List<OrcamentosModel>();
+        }
     }
 
     public async Task<List<Tipoevento>> GetTiposEventoFromApi()
