@@ -93,4 +93,16 @@ public class OrcamentosService
 
         return await _httpClient.GetAsync($"https://localhost:7071/Orcamentos/{orcamentoId}/gerar-contrato");
     }
+
+    public async Task<HttpResponseMessage> GetContratoPdfFileStreamAsync(int orcamentoId)
+    {
+        var token = await _localStorage.GetItemAsync<string>("jwtToken");
+
+        if (!string.IsNullOrEmpty(token))
+        {
+            _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+        }
+
+        return await _httpClient.GetAsync($"https://localhost:7071/Orcamentos/{orcamentoId}/gerar-contrato-pdf");
+    }
 }

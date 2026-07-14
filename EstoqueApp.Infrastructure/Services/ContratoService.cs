@@ -89,5 +89,17 @@ namespace LidyDecorApp.Infrastructure.Services
                 return outputStream.ToArray();
             }
         }
+
+        public async Task<byte[]> GerarContratoPdfAsync(int orcamentoId)
+        {
+            // 1. Gera o Word (.docx) usando o método existente
+            byte[] docxBytes = await GerarContratoAsync(orcamentoId);
+
+            // 2. Converte o DOCX em PDF na memória usando MiniPdf
+            using (var docxStream = new MemoryStream(docxBytes))
+            {
+                return MiniPdf.ConvertToPdf(docxStream);
+            }
+        }
     }
 }

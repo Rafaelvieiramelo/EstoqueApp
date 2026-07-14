@@ -155,5 +155,28 @@ namespace LidyDecorApp.API.Controllers
                 return BadRequest($"Erro ao gerar o contrato: {ex.Message}");
             }
         }
+
+        [HttpGet("{id}/gerar-contrato-pdf")]
+        public async Task<IActionResult> GerarContratoPdf(int id)
+        {
+            try
+            {
+                var orcamento = await _orcamentosService.GetOrcamentosByIdAsync(id);
+                if (orcamento == null)
+                {
+                    return NotFound("Orçamento não encontrado.");
+                }
+
+                var fileBytes = await _contratoService.GerarContratoPdfAsync(id);
+                var nomeClienteLimpo = (orcamento.Clientes?.Nome ?? "Cliente").Replace(" ", "_");
+                var nomeArquivo = $"Contrato_{orcamento.Numero}_{nomeClienteLimpo}.pdf";
+
+                return File(fileBytes, "application/pdf", nomeArquivo);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erro ao gerar o contrato em PDF: {ex.Message}");
+            }
+        }
     }
 }
