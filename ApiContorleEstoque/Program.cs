@@ -189,11 +189,23 @@ await app.RunAsync();
 string ConvertPostgresUrlToConnectionString(string? url)
 {
     if (string.IsNullOrWhiteSpace(url)) return string.Empty;
-    if (!url.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase)) return url;
+    
+    bool isPostgres = url.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase) ||
+                      url.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase);
+
+    if (!isPostgres) return url;
 
     try
     {
-        var uri = new Uri(url);
+        // Uri parser accepts postgresql:// but throws on postgres://. 
+        // Let's standardise to postgresql:// for Uri constructor
+        var parsingUrl = url;
+        if (url.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase))
+        {
+            parsingUrl = "postgresql://" + url.Substring(11);
+        }
+
+        var uri = new Uri(parsingUrl);
         var userInfo = uri.UserInfo.Split(':');
         var username = userInfo[0];
         var password = userInfo.Length > 1 ? userInfo[1] : "";
