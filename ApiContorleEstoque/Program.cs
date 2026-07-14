@@ -117,8 +117,18 @@ builder.Services.AddScoped<LidyDecorApp.Application.Interfaces.IContratoService,
 builder.Services.AddAutoMapper(typeof(MappingProfile));
 
 // Configuração do banco de dados
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<LidyDecorDbContext>(options => options.UseSqlite(connectionString));
+var rawConnectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
+                           ?? Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
+                           ?? Environment.GetEnvironmentVariable("DATABASE_URL");
+
+var connectionString = ConvertPostgresUrlToConnectionString(rawConnectionString);
+
+builder.Services.AddDbContext<LidyDecorDbContext>(options => 
+    options.UseNpgsql(connectionString));
+
+// Health Checks
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<LidyDecorDbContext>();
 
 builder.Services.AddValidatorsFromAssemblyContaining<ClientesDTOValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<OrcamentoDTOValidator>();
@@ -126,6 +136,32 @@ builder.Services.AddValidatorsFromAssemblyContaining<ProdutosDTOValidator>();
 builder.Services.AddValidatorsFromAssemblyContaining<UsuarioWriteDTOValidator>();
 
 var app = builder.Build();
+
+// Execução de migrações e seed de dados
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var logger = services.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        var context = services.GetRequiredService<LidyDecorDbContext>();
+        logger.LogInformation("Verificando conexão com o banco de dados PostgreSQL...");
+        
+        // Em produção ou se solicitado via variável de ambiente, aplica as migrações automaticamente
+        if (app.Environment.IsProduction() || Environment.GetEnvironmentVariable("RUN_MIGRATIONS") == "true")
+        {
+            logger.LogInformation("Aplicando migrações pendentes em Produção...");
+            await context.Database.MigrateAsync();
+        }
+        
+        await LidyDecorApp.Infrastructure.Services.DbSeeder.SeedAsync(context);
+        logger.LogInformation("Banco de dados verificado e semeado com sucesso.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Erro no tratamento de conexão/migração inicial do PostgreSQL.");
+    }
+}
 
 // Configuração do middleware
 app.UseSwagger();
@@ -139,5 +175,30 @@ app.UseAuthorization();
 app.UseCors("AllowAll");
 
 app.MapControllers();
+app.MapHealthChecks("/health");
 
 await app.RunAsync();
+
+// Local helper function to convert postgres:// url to Npgsql connection string
+string ConvertPostgresUrlToConnectionString(string? url)
+{
+    if (string.IsNullOrWhiteSpace(url)) return string.Empty;
+    if (!url.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase)) return url;
+
+    try
+    {
+        var uri = new Uri(url);
+        var userInfo = uri.UserInfo.Split(':');
+        var username = userInfo[0];
+        var password = userInfo.Length > 1 ? userInfo[1] : "";
+        var host = uri.Host;
+        var port = uri.Port > 0 ? uri.Port : 5432;
+        var database = uri.AbsolutePath.TrimStart('/');
+
+        return $"Host={host};Port={port};Database={database};Username={username};Password={password};SSL Mode=Require;Trust Server Certificate=true;";
+    }
+    catch
+    {
+        return url;
+    }
+}

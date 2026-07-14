@@ -1,0 +1,7 @@
+version: '3.8'
+
+services:
+  web-api:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - LOGGING__LOGLEVEL__DEFAULT=Debug

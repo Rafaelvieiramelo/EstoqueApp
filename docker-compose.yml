@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  web-api:
+    image: lidydecor-api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "7071:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=LidyDecor;Username=postgres;Password=postgres;SSL Mode=Prefer;Trust Server Certificate=true
+      - RUN_MIGRATIONS=true
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  db:
+    image: postgres:16-alpine
+    container_name: lidydecor-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=LidyDecor
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d LidyDecor"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+    driver: local

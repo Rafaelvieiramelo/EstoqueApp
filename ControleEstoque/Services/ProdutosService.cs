@@ -1,4 +1,4 @@
-﻿using System.Net.Http.Headers;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Blazored.LocalStorage;
 using LidyDecorApp.Web.Models;
@@ -23,7 +23,20 @@ public class ProdutosService
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
 
-        return await _httpClient.GetFromJsonAsync<List<ProdutosModel>>("https://localhost:7071/Produtos");
+        try
+        {
+            var response = await _httpClient.GetAsync("https://localhost:7071/Produtos");
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return new List<ProdutosModel>();
+            }
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadFromJsonAsync<List<ProdutosModel>>() ?? new List<ProdutosModel>();
+        }
+        catch
+        {
+            return new List<ProdutosModel>();
+        }
     }
 
     public async Task<HttpResponseMessage> ExcluirProdutos(int idProdutos)

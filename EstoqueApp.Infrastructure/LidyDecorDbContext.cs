@@ -74,11 +74,9 @@ namespace LidyDecorApp.Infrastructure
                 entity.Property(e => e.TemaPacote)
                     .HasMaxLength(250);
 
-                entity.Property(e => e.ValorSinal)
-                    .HasConversion<double>(); // SQLite conversion for decimal if needed, but normally EF Core handles decimal on SQLite
+                entity.Property(e => e.ValorSinal);
 
-                entity.Property(e => e.PorcentagemSinal)
-                    .HasConversion<double>();
+                entity.Property(e => e.PorcentagemSinal);
 
                 entity.Property(e => e.CidadeContrato)
                     .HasMaxLength(150);
