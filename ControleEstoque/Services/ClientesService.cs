@@ -25,7 +25,7 @@ public class ClientesService
 
         try
         {
-            var response = await _httpClient.GetAsync("https://localhost:7071/Clientes");
+            var response = await _httpClient.GetAsync("Clientes");
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 return new List<ClientesModel>();
@@ -48,7 +48,7 @@ public class ClientesService
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
 
-        return await _httpClient.DeleteAsync($"https://localhost:7071/Clientes/{idClientes}");
+        return await _httpClient.DeleteAsync($"Clientes/{idClientes}");
     }
 
     public async Task<HttpResponseMessage> SalvarClientes(ClientesModel clientes, bool isEditMode)
@@ -62,11 +62,11 @@ public class ClientesService
 
         if (isEditMode)
         {
-            return await _httpClient.PatchAsJsonAsync("https://localhost:7071/Clientes", clientes);
+            return await _httpClient.PatchAsJsonAsync("Clientes", clientes);
         }
         else
         {
-            return await _httpClient.PostAsJsonAsync("https://localhost:7071/Clientes", clientes);
+            return await _httpClient.PostAsJsonAsync("Clientes", clientes);
         }
     }
 }

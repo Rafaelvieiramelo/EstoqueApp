@@ -25,7 +25,7 @@ public class UsuariosService
 
         try
         {
-            var response = await _httpClient.GetAsync("https://localhost:7071/Usuarios");
+            var response = await _httpClient.GetAsync("Usuarios");
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 return new List<UsuariosModel>();
@@ -48,7 +48,7 @@ public class UsuariosService
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
 
-        return await _httpClient.DeleteAsync($"https://localhost:7071/Usuarios/{idUsuarios}");
+        return await _httpClient.DeleteAsync($"Usuarios/{idUsuarios}");
     }
 
     public async Task<HttpResponseMessage> SalvarUsuarios(UsuariosModel usuarios, bool isEditMode)
@@ -62,11 +62,11 @@ public class UsuariosService
 
         if (isEditMode)
         {
-            return await _httpClient.PatchAsJsonAsync("https://localhost:7071/Usuarios", usuarios);
+            return await _httpClient.PatchAsJsonAsync("Usuarios", usuarios);
         }
         else
         {
-            return await _httpClient.PostAsJsonAsync("https://localhost:7071/Usuarios", usuarios);
+            return await _httpClient.PostAsJsonAsync("Usuarios", usuarios);
         }
     }
 }

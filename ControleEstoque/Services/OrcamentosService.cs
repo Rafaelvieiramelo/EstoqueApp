@@ -25,7 +25,7 @@ public class OrcamentosService
 
         try
         {
-            var response = await _httpClient.GetAsync("https://localhost:7071/Orcamentos");
+            var response = await _httpClient.GetAsync("Orcamentos");
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 return new List<OrcamentosModel>();
@@ -48,7 +48,7 @@ public class OrcamentosService
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
 
-        return await _httpClient.GetFromJsonAsync<List<Tipoevento>>("https://localhost:7071/Orcamentos/GetTiposEvento");
+        return await _httpClient.GetFromJsonAsync<List<Tipoevento>>("Orcamentos/GetTiposEvento");
     }
 
     public async Task<HttpResponseMessage> ExcluirOrcamentos(int idOrcamentos)
@@ -60,7 +60,7 @@ public class OrcamentosService
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
 
-        return await _httpClient.DeleteAsync($"https://localhost:7071/Orcamentos/{idOrcamentos}");
+        return await _httpClient.DeleteAsync($"Orcamentos/{idOrcamentos}");
     }
 
     public async Task<HttpResponseMessage> SalvarOrcamentos(OrcamentosModel orcamentos, bool isEditMode)
@@ -74,11 +74,11 @@ public class OrcamentosService
 
         if (isEditMode)
         {
-            return await _httpClient.PatchAsJsonAsync("https://localhost:7071/Orcamentos", orcamentos);
+            return await _httpClient.PatchAsJsonAsync("Orcamentos", orcamentos);
         }
         else
         {
-            return await _httpClient.PostAsJsonAsync("https://localhost:7071/Orcamentos", orcamentos);
+            return await _httpClient.PostAsJsonAsync("Orcamentos", orcamentos);
         }
     }
 
@@ -91,7 +91,7 @@ public class OrcamentosService
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
 
-        return await _httpClient.GetAsync($"https://localhost:7071/Orcamentos/{orcamentoId}/gerar-contrato");
+        return await _httpClient.GetAsync($"Orcamentos/{orcamentoId}/gerar-contrato");
     }
 
     public async Task<HttpResponseMessage> GetContratoPdfFileStreamAsync(int orcamentoId)
@@ -103,6 +103,6 @@ public class OrcamentosService
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
 
-        return await _httpClient.GetAsync($"https://localhost:7071/Orcamentos/{orcamentoId}/gerar-contrato-pdf");
+        return await _httpClient.GetAsync($"Orcamentos/{orcamentoId}/gerar-contrato-pdf");
     }
 }

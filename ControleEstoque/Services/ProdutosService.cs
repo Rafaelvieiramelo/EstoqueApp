@@ -25,7 +25,7 @@ public class ProdutosService
 
         try
         {
-            var response = await _httpClient.GetAsync("https://localhost:7071/Produtos");
+            var response = await _httpClient.GetAsync("Produtos");
             if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
                 return new List<ProdutosModel>();
@@ -48,7 +48,7 @@ public class ProdutosService
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         }
 
-        return await _httpClient.DeleteAsync($"https://localhost:7071/Produtos/{idProdutos}");
+        return await _httpClient.DeleteAsync($"Produtos/{idProdutos}");
     }
 
     public async Task<HttpResponseMessage> SalvarProdutos(ProdutosModel produtos, bool isEditMode)
@@ -62,11 +62,11 @@ public class ProdutosService
 
         if (isEditMode)
         {
-            return await _httpClient.PatchAsJsonAsync("https://localhost:7071/Produtos", produtos);
+            return await _httpClient.PatchAsJsonAsync("Produtos", produtos);
         }
         else
         {
-            return await _httpClient.PostAsJsonAsync("https://localhost:7071/Produtos", produtos);
+            return await _httpClient.PostAsJsonAsync("Produtos", produtos);
         }
     }
 }

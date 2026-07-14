@@ -1,4 +1,4 @@
-﻿@page "/login"
+@page "/login"
 @inject HttpClient Http
 @inject NavigationManager Navigation
 @inject Blazored.LocalStorage.ILocalStorageService LocalStorage
@@ -78,7 +78,7 @@
 
     private async Task HandleLogin()
     {
-        var response = await Http.PostAsJsonAsync("https://localhost:7071/Auth/login", loginModel);
+        var response = await Http.PostAsJsonAsync("Auth/login", loginModel);
 
         if (response.IsSuccessStatusCode)
         {
