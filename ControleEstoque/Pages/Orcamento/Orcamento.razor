@@ -80,19 +80,71 @@
                                     <label for="dataEvento" class="form-label fw-semibold">Data do Evento / Festa</label>
                                     <input type="date" id="dataEvento" @bind="orcamentosEdicao.DataEvento" class="form-control" />
                                 </div>
-                                <div class="col-md-6">
+                                <div class="col-md-12">
                                     <label for="temaPacote" class="form-label fw-semibold">Tema e Pacote</label>
                                     <input type="text" id="temaPacote" @bind="orcamentosEdicao.TemaPacote" class="form-control" placeholder="Ex: Pegue e Monte / Tema Jardim Encantado" />
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="enderecoEntrega" class="form-label fw-semibold">Endereço de Entrega / Local</label>
-                                    <input type="text" id="enderecoEntrega" @bind="orcamentosEdicao.EnderecoEntrega" class="form-control" placeholder="Local da festa ou endereço do cliente" />
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 2. Produtos do Orçamento -->
+                    <!-- 2. Endereço de Entrega / Local do Evento -->
+                    <div class="card mb-4 border-0 bg-light">
+                        <div class="card-body">
+                            <h6 class="text-primary fw-bold mb-3"><i class="bi bi-geo-alt me-1"></i> Endereço de Entrega / Local do Evento</h6>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="entregaCep" class="form-label fw-semibold">CEP</label>
+                                    <div class="input-group">
+                                        <input type="text" id="entregaCep" 
+                                               @bind="entregaCep" 
+                                               @bind:event="oninput"
+                                               @bind:after="OnCepEntregaChanged"
+                                               @onblur="BuscarCepEntrega"
+                                               class="form-control" 
+                                               placeholder="00000-000" 
+                                               maxlength="9" />
+                                        <button class="btn btn-outline-primary" type="button" @onclick="BuscarCepEntrega" disabled="@isBuscandoCepEntrega" title="Buscar CEP ViaCEP">
+                                            @if (isBuscandoCepEntrega)
+                                            {
+                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-search"></i>
+                                            }
+                                        </button>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(cepEntregaError))
+                                    {
+                                        <small class="text-danger d-block mt-1">@cepEntregaError</small>
+                                    }
+                                </div>
+
+                                <div class="col-md-8">
+                                    <label for="entregaLogradouro" class="form-label fw-semibold">Logradouro / Rua</label>
+                                    <input type="text" id="entregaLogradouro" @bind="entregaLogradouro" @bind:after="AtualizarEnderecoEntrega" class="form-control" placeholder="Rua, Avenida..." />
+                                </div>
+
+                                <div class="col-md-3">
+                                    <label for="entregaNumero" class="form-label fw-semibold">Número</label>
+                                    <input type="text" id="entregaNumero" @bind="entregaNumero" @bind:after="AtualizarEnderecoEntrega" class="form-control" placeholder="Ex: 123" />
+                                </div>
+
+                                <div class="col-md-5">
+                                    <label for="entregaBairro" class="form-label fw-semibold">Bairro</label>
+                                    <input type="text" id="entregaBairro" @bind="entregaBairro" @bind:after="AtualizarEnderecoEntrega" class="form-control" placeholder="Bairro" />
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="entregaComplemento" class="form-label fw-semibold">Complemento</label>
+                                    <input type="text" id="entregaComplemento" @bind="entregaComplemento" @bind:after="AtualizarEnderecoEntrega" class="form-control" placeholder="Apto, Bloco, Chácara..." />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3. Produtos do Orçamento -->
                     <div class="card mb-4 border-0 bg-light">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -142,26 +194,32 @@
                         </div>
                     </div>
 
-                    <!-- 3. Valores e Pagamento -->
+                    <!-- 4. Valores e Pagamento -->
                     <div class="card mb-4 border-0 bg-light">
                         <div class="card-body">
                             <h6 class="text-primary fw-bold mb-3"><i class="bi bi-cash-stack me-1"></i> Valores e Condições de Pagamento</h6>
                             <div class="row g-3">
                                 <div class="col-md-4">
                                     <label for="valorTotal" class="form-label fw-semibold">Valor Total (R$)</label>
-                                    <input type="number" id="valorTotal" @bind="orcamentosEdicao.ValorTotal" @bind:after="OnPorcentagemSinalChanged" class="form-control" placeholder="0,00" step="0.01" />
+                                    <input type="number" id="valorTotal" @bind="orcamentosEdicao.ValorTotal" @bind:after="OnPorcentagemSinalChanged" class="form-control" placeholder="0,00" step="0.01" onfocus="this.select()" />
                                 </div>
                                 <div class="col-md-4">
                                     <label for="porcentagemSinal" class="form-label fw-semibold">% do Sinal</label>
-                                    <input type="number" id="porcentagemSinal" @bind="orcamentosEdicao.PorcentagemSinal" @bind:after="OnPorcentagemSinalChanged" class="form-control" placeholder="Ex: 50" step="1" />
+                                    <input type="number" id="porcentagemSinal" @bind="orcamentosEdicao.PorcentagemSinal" @bind:after="OnPorcentagemSinalChanged" class="form-control" placeholder="Ex: 50" step="1" onfocus="this.select()" />
                                 </div>
                                 <div class="col-md-4">
                                     <label for="valorSinal" class="form-label fw-semibold">Valor do Sinal (R$)</label>
-                                    <input type="number" id="valorSinal" @bind="orcamentosEdicao.ValorSinal" class="form-control" placeholder="0,00" step="0.01" />
+                                    <input type="number" id="valorSinal" @bind="orcamentosEdicao.ValorSinal" class="form-control" placeholder="0,00" step="0.01" onfocus="this.select()" />
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="formaPagamento" class="form-label fw-semibold">Forma de Pagamento</label>
-                                    <input type="text" id="formaPagamento" @bind="orcamentosEdicao.FormaPagamento" class="form-control" placeholder="Ex: Pix, Entrada + Cartão de Crédito" />
+                                    <label for="formaPagamento" class="form-label fw-semibold">Forma de Pagamento *</label>
+                                    <select class="form-select" id="formaPagamento" @bind="orcamentosEdicao.FormaPagamento">
+                                        <option value="">-- Selecione a Forma de Pagamento --</option>
+                                        @foreach (var forma in FormasPagamentoOpcoes)
+                                        {
+                                            <option value="@forma">@forma</option>
+                                        }
+                                    </select>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="cidadeContrato" class="form-label fw-semibold">Cidade de Assinatura do Contrato</label>
@@ -171,7 +229,7 @@
                         </div>
                     </div>
 
-                    <!-- 4. Observações -->
+                    <!-- 5. Observações -->
                     <div class="row g-3">
                         <div class="col-md-12">
                             <label for="observacoes" class="form-label fw-semibold">Observações / Detalhes Adicionais</label>
@@ -230,7 +288,7 @@
 }
 else
 {
-    <TabelaOrcamentos Orcamentos="orcamentos" EditarOrcamentos="(orcamentos) => Shared.OpenEditModal(ref orcamentosEdicao, orcamentos, ref isEditMode, ref showModal)" ExcluirOrcamentos="ExcluirOrcamentos" />
+    <TabelaOrcamentos Orcamentos="orcamentos" EditarOrcamentos="OpenEditModal" ExcluirOrcamentos="ExcluirOrcamentos" />
 }
 
 @code {
@@ -249,12 +307,124 @@ else
     private List<ProdutosModel> Produtos { get; set; } = new List<ProdutosModel>();
     private int ProdutosSelecionadoId { get; set; }
 
+    // Campos desagregados do Endereço de Entrega
+    private string entregaCep = "";
+    private string entregaLogradouro = "";
+    private string entregaNumero = "";
+    private string entregaBairro = "";
+    private string entregaComplemento = "";
+    private bool isBuscandoCepEntrega = false;
+    private string? cepEntregaError;
+
+    // Lista estática de formas de pagamento
+    private readonly List<string> FormasPagamentoOpcoes = new()
+    {
+        "Pix",
+        "Dinheiro",
+        "Crédito",
+        "Débito",
+        "Pix + Dinheiro",
+        "Pix + Crédito",
+        "Pix + Débito",
+        "Dinheiro + Crédito",
+        "Dinheiro + Débito",
+        "Débito + Pix"
+    };
+
     protected override async Task OnInitializedAsync()
     {
         orcamentos = await OrcamentosService.GetOrcamentosFromApi();
         clientes = await ClientesService.GetClientesFromApi();
         tiposEvento = await OrcamentosService.GetTiposEventoFromApi();
         Produtos = await ProdutosService.GetProdutosFromApi();
+    }
+
+    private void OpenEditModal(OrcamentosModel item)
+    {
+        entregaCep = "";
+        entregaLogradouro = item.EnderecoEntrega ?? "";
+        entregaNumero = "";
+        entregaBairro = "";
+        entregaComplemento = "";
+        cepEntregaError = null;
+
+        Shared.OpenEditModal(ref orcamentosEdicao, item, ref isEditMode, ref showModal);
+    }
+
+    private void AtualizarEnderecoEntrega()
+    {
+        var parts = new List<string>();
+        if (!string.IsNullOrWhiteSpace(entregaLogradouro)) parts.Add(entregaLogradouro);
+        if (!string.IsNullOrWhiteSpace(entregaNumero)) parts.Add($"nº {entregaNumero}");
+        if (!string.IsNullOrWhiteSpace(entregaBairro)) parts.Add($"Bairro {entregaBairro}");
+        if (!string.IsNullOrWhiteSpace(entregaComplemento)) parts.Add(entregaComplemento);
+        if (!string.IsNullOrWhiteSpace(entregaCep)) parts.Add($"CEP {entregaCep}");
+
+        orcamentosEdicao.EnderecoEntrega = string.Join(", ", parts);
+    }
+
+    private async Task OnCepEntregaChanged()
+    {
+        var clean = GetOnlyNumbers(entregaCep);
+        if (clean.Length == 8)
+        {
+            await BuscarCepEntrega();
+        }
+        else
+        {
+            AtualizarEnderecoEntrega();
+        }
+    }
+
+    private string GetOnlyNumbers(string? input)
+    {
+        if (string.IsNullOrEmpty(input)) return string.Empty;
+        return new string(input.Where(char.IsDigit).ToArray());
+    }
+
+    private async Task BuscarCepEntrega()
+    {
+        cepEntregaError = null;
+        var numbersOnly = GetOnlyNumbers(entregaCep);
+
+        if (string.IsNullOrWhiteSpace(numbersOnly)) return;
+
+        if (numbersOnly.Length != 8)
+        {
+            cepEntregaError = "CEP inválido. Deve possuir 8 dígitos.";
+            return;
+        }
+
+        try
+        {
+            isBuscandoCepEntrega = true;
+            StateHasChanged();
+
+            using var viaCepClient = new HttpClient();
+            var result = await viaCepClient.GetFromJsonAsync<ViaCepModel>($"https://viacep.com.br/ws/{numbersOnly}/json/");
+
+            if (result != null && !result.IsErro)
+            {
+                if (!string.IsNullOrWhiteSpace(result.Logradouro)) entregaLogradouro = result.Logradouro;
+                if (!string.IsNullOrWhiteSpace(result.Bairro)) entregaBairro = result.Bairro;
+
+                entregaCep = $"{numbersOnly.Substring(0, 5)}-{numbersOnly.Substring(5)}";
+                AtualizarEnderecoEntrega();
+            }
+            else
+            {
+                cepEntregaError = "CEP não encontrado.";
+            }
+        }
+        catch (Exception)
+        {
+            cepEntregaError = "Falha ao consultar a API ViaCEP.";
+        }
+        finally
+        {
+            isBuscandoCepEntrega = false;
+            StateHasChanged();
+        }
     }
 
     private void RemoverProduto(ProdutosOrcamentos item)
