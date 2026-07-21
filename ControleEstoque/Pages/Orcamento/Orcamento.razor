@@ -15,7 +15,7 @@
 
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Lista de Orcamentos</h1>
-    <button class="btn btn-primary bi bi-plus" @onclick="() => Shared.OpenAddModal(ref orcamentosEdicao, ref isEditMode, ref showModal)"></button>
+    <button class="btn btn-primary bi bi-plus" @onclick="OpenAddModal"></button>
 </div>
 
 @if (!string.IsNullOrEmpty(alertMessage))
@@ -339,14 +339,62 @@ else
         Produtos = await ProdutosService.GetProdutosFromApi();
     }
 
-    private void OpenEditModal(OrcamentosModel item)
+    private void OpenAddModal()
     {
         entregaCep = "";
-        entregaLogradouro = item.EnderecoEntrega ?? "";
+        entregaLogradouro = "";
         entregaNumero = "";
         entregaBairro = "";
         entregaComplemento = "";
         cepEntregaError = null;
+
+        Shared.OpenAddModal(ref orcamentosEdicao, ref isEditMode, ref showModal);
+    }
+
+    private void OpenEditModal(OrcamentosModel item)
+    {
+        entregaCep = "";
+        entregaLogradouro = "";
+        entregaNumero = "";
+        entregaBairro = "";
+        entregaComplemento = "";
+        cepEntregaError = null;
+
+        if (!string.IsNullOrWhiteSpace(item.EnderecoEntrega))
+        {
+            var parts = item.EnderecoEntrega.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries);
+            var unparsedParts = new List<string>();
+
+            foreach (var part in parts)
+            {
+                var trimmed = part.Trim();
+                if (trimmed.StartsWith("CEP ", StringComparison.OrdinalIgnoreCase))
+                {
+                    entregaCep = trimmed.Substring(4).Trim();
+                }
+                else if (trimmed.StartsWith("nº ", StringComparison.OrdinalIgnoreCase))
+                {
+                    entregaNumero = trimmed.Substring(3).Trim();
+                }
+                else if (trimmed.StartsWith("Bairro ", StringComparison.OrdinalIgnoreCase))
+                {
+                    entregaBairro = trimmed.Substring(7).Trim();
+                }
+                else
+                {
+                    unparsedParts.Add(trimmed);
+                }
+            }
+
+            if (unparsedParts.Count > 0)
+            {
+                entregaLogradouro = unparsedParts[0];
+            }
+            if (unparsedParts.Count > 1)
+            {
+                entregaComplemento = string.Join(", ", unparsedParts.Skip(1));
+            }
+        }
 
         Shared.OpenEditModal(ref orcamentosEdicao, item, ref isEditMode, ref showModal);
     }
