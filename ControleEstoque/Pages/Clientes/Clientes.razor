@@ -34,111 +34,112 @@
          role="dialog"
     @onclick:stopPropagation
          @onkeydown="@(e => { if (e.Key == "Escape") showModal =  SharedService.HideModal(HideModalCallback, showModal, StateHasChanged).Result; })">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editModalLabel">@((isEditMode ? "Editar" : "Adicionar") + " Clientes")</h5>
-                    <button type="button" class="btn-close" @onclick="async () => showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged)" aria-label="Close"></button>
+        <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="editModalLabel">
+                        <i class="bi @(isEditMode ? "bi-pencil-square" : "bi-person-plus-fill") me-2"></i>
+                        @((isEditMode ? "Editar Cliente" : "Novo Cliente"))
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="async () => showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged)" aria-label="Close"></button>
                 </div>
 
-                <div class="modal-body">
-                    <div class="mb-3 row">
-                        <label for="nome" class="col-sm-3 col-form-label">Nome</label>
-                        <div class="col-sm-9">
-                            <input type="text" id="nome" @bind="clientesEdicao.Nome" class="form-control" placeholder="Nome" />
-                        </div>
-                    </div>
+                <div class="modal-body p-4">
+                    <!-- Informações Pessoais / Contato -->
+                    <div class="card mb-4 border-0 bg-light">
+                        <div class="card-body">
+                            <h6 class="text-primary fw-bold mb-3"><i class="bi bi-person me-1"></i> Informações Pessoais & Contato</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="nome" class="form-label fw-semibold">Nome Completo *</label>
+                                    <input type="text" id="nome" @bind="clientesEdicao.Nome" class="form-control" placeholder="Nome do cliente" />
+                                </div>
 
-                    <div class="mb-3 row">
-                        <label for="email" class="col-sm-3 col-form-label">E-mail</label>
-                        <div class="col-sm-9">
-                            <input type="email" id="email" @bind="clientesEdicao.Email" class="form-control" placeholder="E-mail"></input>
-                        </div>
-                    </div>
+                                <div class="col-md-6">
+                                    <label for="cpfCnpj" class="form-label fw-semibold">CPF / CNPJ</label>
+                                    <input type="text" id="cpfCnpj" @bind="clientesEdicao.CpfCnpj" class="form-control" placeholder="000.000.000-00" />
+                                </div>
 
-                    <div class="mb-3 row">
-                        <label for="telefone" class="col-sm-3 col-form-label">Telefone</label>
-                        <div class="col-sm-9">
-                            <input type="tel" id="telefone" @bind="clientesEdicao.Telefone" class="form-control" placeholder="Telefone" />
-                        </div>
-                    </div>
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label fw-semibold">E-mail</label>
+                                    <input type="email" id="email" @bind="clientesEdicao.Email" class="form-control" placeholder="cliente@email.com" />
+                                </div>
 
-                    <div class="mb-3 row">
-                        <label for="cpfCnpj" class="col-sm-3 col-form-label">Cpf/Cnpj</label>
-                        <div class="col-sm-9">
-                            <input type="text" id="cpfCnpj" @bind="clientesEdicao.CpfCnpj" class="form-control" placeholder="Cpf/Cnpj" />
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label for="cep" class="col-sm-3 col-form-label">CEP</label>
-                        <div class="col-sm-9">
-                            <div class="input-group">
-                                <input type="text" id="cep" 
-                                       @bind="clientesEdicao.Cep" 
-                                       @bind:event="oninput"
-                                       @bind:after="OnCepChanged"
-                                       @onblur="BuscarCep"
-                                       class="form-control" 
-                                       placeholder="00000-000" 
-                                       maxlength="9" />
-                                <button class="btn btn-outline-secondary" type="button" @onclick="BuscarCep" disabled="@isBuscandoCep" title="Buscar CEP">
-                                    @if (isBuscandoCep)
-                                    {
-                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    }
-                                    else
-                                    {
-                                        <i class="bi bi-search"></i>
-                                    }
-                                </button>
+                                <div class="col-md-6">
+                                    <label for="telefone" class="form-label fw-semibold">Telefone / WhatsApp</label>
+                                    <input type="tel" id="telefone" @bind="clientesEdicao.Telefone" class="form-control" placeholder="(00) 00000-0000" />
+                                </div>
                             </div>
-                            @if (!string.IsNullOrEmpty(cepError))
-                            {
-                                <small class="text-danger d-block mt-1">@cepError</small>
-                            }
                         </div>
                     </div>
 
-                    <div class="mb-3 row">
-                        <label for="logradouro" class="col-sm-3 col-form-label">Logradouro</label>
-                        <div class="col-sm-9">
-                            <input type="text" id="logradouro" @bind="clientesEdicao.Logradouro" class="form-control" placeholder="Logradouro" />
+                    <!-- Endereço -->
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <h6 class="text-primary fw-bold mb-3"><i class="bi bi-geo-alt me-1"></i> Endereço</h6>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="cep" class="form-label fw-semibold">CEP</label>
+                                    <div class="input-group">
+                                        <input type="text" id="cep" 
+                                               @bind="clientesEdicao.Cep" 
+                                               @bind:event="oninput"
+                                               @bind:after="OnCepChanged"
+                                               @onblur="BuscarCep"
+                                               class="form-control" 
+                                               placeholder="00000-000" 
+                                               maxlength="9" />
+                                        <button class="btn btn-outline-primary" type="button" @onclick="BuscarCep" disabled="@isBuscandoCep" title="Buscar CEP ViaCEP">
+                                            @if (isBuscandoCep)
+                                            {
+                                                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            }
+                                            else
+                                            {
+                                                <i class="bi bi-search"></i>
+                                            }
+                                        </button>
+                                    </div>
+                                    @if (!string.IsNullOrEmpty(cepError))
+                                    {
+                                        <small class="text-danger d-block mt-1">@cepError</small>
+                                    }
+                                </div>
+
+                                <div class="col-md-8">
+                                    <label for="logradouro" class="form-label fw-semibold">Logradouro / Rua</label>
+                                    <input type="text" id="logradouro" @bind="clientesEdicao.Logradouro" class="form-control" placeholder="Rua, Avenida, Alameda..." />
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="numero" class="form-label fw-semibold">Número</label>
+                                    <input type="text" id="numero" @bind="clientesEdicao.Numero" class="form-control" placeholder="Ex: 123" />
+                                </div>
+
+                                <div class="col-md-8">
+                                    <label for="bairro" class="form-label fw-semibold">Bairro</label>
+                                    <input type="text" id="bairro" @bind="clientesEdicao.Bairro" class="form-control" placeholder="Bairro" />
+                                </div>
+
+                                <div class="col-md-8">
+                                    <label for="cidade" class="form-label fw-semibold">Cidade</label>
+                                    <input type="text" id="cidade" @bind="clientesEdicao.Cidade" class="form-control" placeholder="Cidade" />
+                                </div>
+
+                                <div class="col-md-4">
+                                    <label for="estado" class="form-label fw-semibold">Estado (UF)</label>
+                                    <input type="text" id="estado" @bind="clientesEdicao.Estado" class="form-control" placeholder="SP" maxlength="2" />
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="mb-3 row">
-                        <label for="numero" class="col-sm-3 col-form-label">Numero</label>
-                        <div class="col-sm-9">
-                            <input type="text" id="numero" @bind="clientesEdicao.Numero" class="form-control" placeholder="Numero" />
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label for="bairro" class="col-sm-3 col-form-label">Bairro</label>
-                        <div class="col-sm-9">
-                            <input type="text" id="bairro" @bind="clientesEdicao.Bairro" class="form-control" placeholder="Bairro" />
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label for="cidade" class="col-sm-3 col-form-label">Cidade</label>
-                        <div class="col-sm-9">
-                            <input type="text" id="cidade" @bind="clientesEdicao.Cidade" class="form-control" placeholder="Cidade" />
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label for="estado" class="col-sm-3 col-form-label">Estado</label>
-                        <div class="col-sm-9">
-                            <input type="text" id="estado" @bind="clientesEdicao.Estado" class="form-control" placeholder="Estado" />
-                        </div>
-                    </div>
-
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="async () => showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged)">Fechar</button>
-                    <button type="button" class="btn btn-primary" @onclick="SalvarClientes">@((isEditMode ? "Salvar" : "Adicionar"))</button>
+
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary px-4" @onclick="async () => showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged)">Cancelar</button>
+                    <button type="button" class="btn btn-primary px-4 fw-bold" @onclick="SalvarClientes">
+                        <i class="bi bi-check-lg me-1"></i> @((isEditMode ? "Salvar Alterações" : "Cadastrar Cliente"))
+                    </button>
                 </div>
             </div>
         </div>

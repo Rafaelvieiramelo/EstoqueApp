@@ -36,131 +36,155 @@
          role="dialog"
     @onclick:stopPropagation
          @onkeydown="@(e => { if (e.Key == "Escape") showModal =  SharedService.HideModal(HideModalCallback, showModal, StateHasChanged).Result; })">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="editModalLabel">@((isEditMode ? "Editar" : "Adicionar") + " Orcamentos")</h5>
-                    <button type="button" class="btn-close" @onclick="async () => showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged)" aria-label="Close"></button>
+        <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="editModalLabel">
+                        <i class="bi @(isEditMode ? "bi-pencil-square" : "bi-file-earmark-plus-fill") me-2"></i>
+                        @((isEditMode ? "Editar Orçamento" : "Novo Orçamento"))
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="async () => showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged)" aria-label="Close"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body p-4">
                     
-                    <div class="mb-3 row">
-                        <label for="data" class="col-sm-3 col-form-label">Data</label>
-                        <div class="col-sm-9">
-                            <input type="date" id="data" @bind="orcamentosEdicao.Data" class="form-control" />
+                    <!-- 1. Cliente e Evento -->
+                    <div class="card mb-4 border-0 bg-light">
+                        <div class="card-body">
+                            <h6 class="text-primary fw-bold mb-3"><i class="bi bi-calendar-event me-1"></i> Cliente & Detalhes do Evento</h6>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="clienteId" class="form-label fw-semibold">Cliente *</label>
+                                    <select class="form-select" id="clienteId" @bind="orcamentosEdicao.ClientesId">
+                                        <option value="0">-- Selecione um Cliente --</option>
+                                        @foreach (var cliente in clientes)
+                                        {
+                                            <option value="@cliente.Id">@cliente.Nome</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="tipoEventoId" class="form-label fw-semibold">Tipo de Evento / Serviço *</label>
+                                    <select class="form-select" id="tipoEventoId" @bind="orcamentosEdicao.TipoEventoId">
+                                        <option value="0">-- Selecione o Tipo --</option>
+                                        @foreach (var tipoEvento in tiposEvento)
+                                        {
+                                            <option value="@tipoEvento.Id">@tipoEvento.Tipo</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="data" class="form-label fw-semibold">Data do Orçamento</label>
+                                    <input type="date" id="data" @bind="orcamentosEdicao.Data" class="form-control" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="dataEvento" class="form-label fw-semibold">Data do Evento / Festa</label>
+                                    <input type="date" id="dataEvento" @bind="orcamentosEdicao.DataEvento" class="form-control" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="temaPacote" class="form-label fw-semibold">Tema e Pacote</label>
+                                    <input type="text" id="temaPacote" @bind="orcamentosEdicao.TemaPacote" class="form-control" placeholder="Ex: Pegue e Monte / Tema Jardim Encantado" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="enderecoEntrega" class="form-label fw-semibold">Endereço de Entrega / Local</label>
+                                    <input type="text" id="enderecoEntrega" @bind="orcamentosEdicao.EnderecoEntrega" class="form-control" placeholder="Local da festa ou endereço do cliente" />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="mb-3 row">
-                        <label for="dataEvento" class="col-sm-3 col-form-label">Data do Evento</label>
-                        <div class="col-sm-9">
-                            <input type="date" id="dataEvento" @bind="orcamentosEdicao.DataEvento" class="form-control" />
+                    <!-- 2. Produtos do Orçamento -->
+                    <div class="card mb-4 border-0 bg-light">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h6 class="text-primary fw-bold mb-0"><i class="bi bi-box-seam me-1"></i> Produtos Decorativos Selecionados</h6>
+                                <button type="button" class="btn btn-sm btn-primary" @onclick="ShowAddProdutosModal">
+                                    <i class="bi bi-plus-lg me-1"></i> Adicionar Produtos
+                                </button>
+                            </div>
+
+                            @if (orcamentosEdicao.ProdutosOrcamentos == null || !orcamentosEdicao.ProdutosOrcamentos.Any())
+                            {
+                                <div class="text-center py-3 text-muted bg-white rounded border border-dashed">
+                                    <i class="bi bi-basket display-6 d-block text-secondary mb-1"></i>
+                                    <small>Nenhum produto adicionado a este orçamento ainda.</small>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="table-responsive bg-white rounded shadow-sm">
+                                    <table class="table table-hover align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th>#</th>
+                                                <th>Produto</th>
+                                                <th class="text-end" style="width: 90px;">Ação</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @for (int i = 0; i < orcamentosEdicao.ProdutosOrcamentos.Count; i++)
+                                            {
+                                                var item = orcamentosEdicao.ProdutosOrcamentos[i];
+                                                var nomeProd = Produtos.FirstOrDefault(p => p.id == item.ProdutosId)?.nome ?? $"Produto #{item.ProdutosId}";
+                                                <tr>
+                                                    <td class="text-muted fw-bold">@(i + 1)</td>
+                                                    <td class="fw-semibold">@nomeProd</td>
+                                                    <td class="text-end">
+                                                        <button type="button" class="btn btn-sm btn-outline-danger" title="Remover produto" @onclick="() => RemoverProduto(item)">
+                                                            <i class="bi bi-trash"></i>
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            }
                         </div>
                     </div>
 
-                    <div class="mb-3 row">
-                        <label for="observacoes" class="col-sm-3 col-form-label">Observações</label>
-                        <div class="col-sm-9">
-                            <textarea id="observacoes" @bind="orcamentosEdicao.Observacoes" class="form-control" placeholder="Observações"></textarea>
+                    <!-- 3. Valores e Pagamento -->
+                    <div class="card mb-4 border-0 bg-light">
+                        <div class="card-body">
+                            <h6 class="text-primary fw-bold mb-3"><i class="bi bi-cash-stack me-1"></i> Valores e Condições de Pagamento</h6>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="valorTotal" class="form-label fw-semibold">Valor Total (R$)</label>
+                                    <input type="number" id="valorTotal" @bind="orcamentosEdicao.ValorTotal" @bind:after="OnPorcentagemSinalChanged" class="form-control" placeholder="0,00" step="0.01" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="porcentagemSinal" class="form-label fw-semibold">% do Sinal</label>
+                                    <input type="number" id="porcentagemSinal" @bind="orcamentosEdicao.PorcentagemSinal" @bind:after="OnPorcentagemSinalChanged" class="form-control" placeholder="Ex: 50" step="1" />
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="valorSinal" class="form-label fw-semibold">Valor do Sinal (R$)</label>
+                                    <input type="number" id="valorSinal" @bind="orcamentosEdicao.ValorSinal" class="form-control" placeholder="0,00" step="0.01" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="formaPagamento" class="form-label fw-semibold">Forma de Pagamento</label>
+                                    <input type="text" id="formaPagamento" @bind="orcamentosEdicao.FormaPagamento" class="form-control" placeholder="Ex: Pix, Entrada + Cartão de Crédito" />
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="cidadeContrato" class="form-label fw-semibold">Cidade de Assinatura do Contrato</label>
+                                    <input type="text" id="cidadeContrato" @bind="orcamentosEdicao.CidadeContrato" class="form-control" placeholder="Campinas - SP" />
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="mb-3 row">
-                        <label for="valorTotal" class="col-sm-3 col-form-label">Valor Total</label>
-                        <div class="col-sm-9">
-                            <input type="number" id="valorTotal" @bind="orcamentosEdicao.ValorTotal" class="form-control" placeholder="Valor Total" step="0.01" />
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label for="enderecoEntrega" class="col-sm-3 col-form-label">Endereço de Entrega</label>
-                        <div class="col-sm-9">
-                            <input type="text" id="enderecoEntrega" @bind="orcamentosEdicao.EnderecoEntrega" class="form-control" placeholder="Endereço de entrega / Local do evento" />
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label for="temaPacote" class="col-sm-3 col-form-label">Tema e Pacote</label>
-                        <div class="col-sm-9">
-                            <input type="text" id="temaPacote" @bind="orcamentosEdicao.TemaPacote" class="form-control" placeholder="Tema e pacote de decoração" />
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label for="formaPagamento" class="col-sm-3 col-form-label">Forma Pagamento</label>
-                        <div class="col-sm-9">
-                            <input type="text" id="formaPagamento" @bind="orcamentosEdicao.FormaPagamento" class="form-control" placeholder="Ex: Pix, Entrada + Cartão" />
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label for="valorSinal" class="col-sm-3 col-form-label">Valor do Sinal</label>
-                        <div class="col-sm-9">
-                            <input type="number" id="valorSinal" @bind="orcamentosEdicao.ValorSinal" class="form-control" placeholder="Valor do sinal" step="0.01" />
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label for="porcentagemSinal" class="col-sm-3 col-form-label">% do Sinal</label>
-                        <div class="col-sm-9">
-                            <input type="number" id="porcentagemSinal" @bind="orcamentosEdicao.PorcentagemSinal" class="form-control" placeholder="Ex: 50" step="1" />
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label for="cidadeContrato" class="col-sm-3 col-form-label">Cidade Assinatura</label>
-                        <div class="col-sm-9">
-                            <input type="text" id="cidadeContrato" @bind="orcamentosEdicao.CidadeContrato" class="form-control" placeholder="Cidade de assinatura do contrato" />
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label for="clienteId" class="col-sm-3 col-form-label">Cliente</label>
-                        <div class="col-sm-9">
-                            <select class="form-control" id="clienteId" @bind="orcamentosEdicao.ClientesId">
-                                @foreach (var cliente in clientes)
-                                {
-                                    <option value="@cliente.Id">@cliente.Nome</option>
-                                }
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label for="tipoEventoId" class="col-sm-3 col-form-label">TipoEvento</label>
-                        <div class="col-sm-9">
-                            <select class="form-control" id="tipoEventoId" @bind="orcamentosEdicao.TipoEventoId">
-                                @foreach (var tipoEvento in tiposEvento)
-                                {
-                                    <option value="@tipoEvento.Id">@tipoEvento.Tipo</option>
-                                }
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-3 row">
-                        <label for="produtos" class="col-sm-3 col-form-label">Produtos</label>
-                        <div class="col-sm-9">
-                            <button type="button" class="btn btn-primary" @onclick="ShowAddProdutosModal">Adicionar Produtos</button>
-                        </div>
-                    </div>
-
-                    <!-- Lista de produtoss adicionados -->
-                    <div class="mb-3 row">
-                        <div class="col-sm-12">
-                            <ul>
-                                @foreach (var produtos in orcamentosEdicao.ProdutosOrcamentos)
-                                {
-                                    <li>@Produtos.FirstOrDefault(p => p.id == produtos.ProdutosId)?.nome</li>
-                                }
-                            </ul>
+                    <!-- 4. Observações -->
+                    <div class="row g-3">
+                        <div class="col-md-12">
+                            <label for="observacoes" class="form-label fw-semibold">Observações / Detalhes Adicionais</label>
+                            <textarea id="observacoes" @bind="orcamentosEdicao.Observacoes" class="form-control" rows="3" placeholder="Observações específicas sobre itens, entrega ou horário..."></textarea>
                         </div>
                     </div>
 
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" @onclick="async () => showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged)">Fechar</button>
-                    <button type="button" class="btn btn-primary" @onclick="SalvarOrcamentos">@((isEditMode ? "Salvar" : "Adicionar"))</button>
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary px-4" @onclick="async () => showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged)">Cancelar</button>
+                    <button type="button" class="btn btn-primary px-4 fw-bold" @onclick="SalvarOrcamentos">
+                        <i class="bi bi-check-lg me-1"></i> @((isEditMode ? "Salvar Alterações" : "Criar Orçamento"))
+                    </button>
                 </div>
             </div>
         </div>
@@ -168,29 +192,31 @@
 
     @if (ShowAddProductModal)
     {
-        <div class="modal fade show" style="display: block;" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="false">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addProductModalLabel">Adicionar Produtos</h5>
-                        <button type="button" class="btn-close" @onclick="HideAddProductModal" aria-label="Close"></button>
+        <div class="modal-backdrop fade show"></div>
+        <div class="modal fade show d-block" tabindex="-1" aria-labelledby="addProductModalLabel" aria-modal="true" role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content shadow-lg border-0">
+                    <div class="modal-header bg-secondary text-white">
+                        <h5 class="modal-title fw-bold" id="addProductModalLabel"><i class="bi bi-plus-circle me-1"></i> Selecionar Produto</h5>
+                        <button type="button" class="btn-close btn-close-white" @onclick="HideAddProductModal" aria-label="Close"></button>
                     </div>
-                    <div class="modal-body">
-                        <div class="mb-3 row">
-                            <label for="produtosId" class="col-sm-3 col-form-label">Produtos</label>
-                            <div class="col-sm-9">
-                                <select class="form-control" id="produtosId" @bind="ProdutosSelecionadoId">
-                                    @foreach (var produtos in Produtos)
-                                    {
-                                        <option value="@produtos.id">@produtos.nome</option>
-                                    }
-                                </select>
-                            </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label for="produtosId" class="form-label fw-semibold">Selecione o Produto</label>
+                            <select class="form-select form-select-lg" id="produtosId" @bind="ProdutosSelecionadoId">
+                                <option value="0">-- Escolha um produto da lista --</option>
+                                @foreach (var produtos in Produtos)
+                                {
+                                    <option value="@produtos.id">@produtos.nome</option>
+                                }
+                            </select>
                         </div>
                     </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" @onclick="HideAddProductModal">Fechar</button>
-                        <button type="button" class="btn btn-primary" @onclick="AdicionarProdutos">Adicionar</button>
+                    <div class="modal-footer bg-light">
+                        <button type="button" class="btn btn-secondary" @onclick="HideAddProductModal">Cancelar</button>
+                        <button type="button" class="btn btn-primary fw-bold" @onclick="AdicionarProdutos">
+                            <i class="bi bi-plus-lg me-1"></i> Adicionar
+                        </button>
                     </div>
                 </div>
             </div>
@@ -229,6 +255,23 @@ else
         clientes = await ClientesService.GetClientesFromApi();
         tiposEvento = await OrcamentosService.GetTiposEventoFromApi();
         Produtos = await ProdutosService.GetProdutosFromApi();
+    }
+
+    private void RemoverProduto(ProdutosOrcamentos item)
+    {
+        if (orcamentosEdicao.ProdutosOrcamentos != null)
+        {
+            orcamentosEdicao.ProdutosOrcamentos.Remove(item);
+            StateHasChanged();
+        }
+    }
+
+    private void OnPorcentagemSinalChanged()
+    {
+        if (orcamentosEdicao.ValorTotal > 0 && orcamentosEdicao.PorcentagemSinal > 0)
+        {
+            orcamentosEdicao.ValorSinal = (orcamentosEdicao.ValorTotal * (decimal)orcamentosEdicao.PorcentagemSinal) / 100m;
+        }
     }
         
     private async Task ExcluirOrcamentos(int idOrcamentos)
