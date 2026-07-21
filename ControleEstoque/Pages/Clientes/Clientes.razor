@@ -1,4 +1,4 @@
-﻿@page "/clientes"
+@page "/clientes"
 @attribute [Authorize]
 @inject ClientesService ClientesService
 @inject SharedService Shared
@@ -71,6 +71,36 @@
                     </div>
 
                     <div class="mb-3 row">
+                        <label for="cep" class="col-sm-3 col-form-label">CEP</label>
+                        <div class="col-sm-9">
+                            <div class="input-group">
+                                <input type="text" id="cep" 
+                                       @bind="clientesEdicao.Cep" 
+                                       @bind:event="oninput"
+                                       @bind:after="OnCepChanged"
+                                       @onblur="BuscarCep"
+                                       class="form-control" 
+                                       placeholder="00000-000" 
+                                       maxlength="9" />
+                                <button class="btn btn-outline-secondary" type="button" @onclick="BuscarCep" disabled="@isBuscandoCep" title="Buscar CEP">
+                                    @if (isBuscandoCep)
+                                    {
+                                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                    }
+                                    else
+                                    {
+                                        <i class="bi bi-search"></i>
+                                    }
+                                </button>
+                            </div>
+                            @if (!string.IsNullOrEmpty(cepError))
+                            {
+                                <small class="text-danger d-block mt-1">@cepError</small>
+                            }
+                        </div>
+                    </div>
+
+                    <div class="mb-3 row">
                         <label for="logradouro" class="col-sm-3 col-form-label">Logradouro</label>
                         <div class="col-sm-9">
                             <input type="text" id="logradouro" @bind="clientesEdicao.Logradouro" class="form-control" placeholder="Logradouro" />
@@ -105,13 +135,6 @@
                         </div>
                     </div>
 
-                    <div class="mb-3 row">
-                        <label for="cep" class="col-sm-3 col-form-label">Cep</label>
-                        <div class="col-sm-9">
-                            <input type="text" id="cep" @bind="clientesEdicao.Cep" class="form-control" placeholder="Cep" />
-                        </div>
-                    </div>
-
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" @onclick="async () => showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged)">Fechar</button>
@@ -128,7 +151,7 @@
 }
 else
 {
-    <TabelaClientes Clientes="clientes" EditarClientes="(clientes) => Shared.OpenEditModal(ref clientesEdicao, clientes, ref isEditMode, ref showModal)" ExcluirClientes="ExcluirClientes" />
+    <TabelaClientes Clientes="clientes" EditarClientes="(clientes) => { cepError = null; Shared.OpenEditModal(ref clientesEdicao, clientes, ref isEditMode, ref showModal); }" ExcluirClientes="ExcluirClientes" />
 }
 
 @code {
@@ -142,9 +165,73 @@ else
     private EventCallback HideModalCallback { get; set; }
     private EventCallback<ClientesModel> SalvarClientesCallback { get; set; }
 
+    private bool isBuscandoCep = false;
+    private string? cepError;
+
     protected override async Task OnInitializedAsync()
     {
         clientes = await ClientesService.GetClientesFromApi();
+    }
+
+    private async Task OnCepChanged()
+    {
+        var clean = GetOnlyNumbers(clientesEdicao.Cep);
+        if (clean.Length == 8)
+        {
+            await BuscarCep();
+        }
+    }
+
+    private string GetOnlyNumbers(string? input)
+    {
+        if (string.IsNullOrEmpty(input)) return string.Empty;
+        return new string(input.Where(char.IsDigit).ToArray());
+    }
+
+    private async Task BuscarCep()
+    {
+        cepError = null;
+        var numbersOnly = GetOnlyNumbers(clientesEdicao.Cep);
+
+        if (string.IsNullOrWhiteSpace(numbersOnly)) return;
+
+        if (numbersOnly.Length != 8)
+        {
+            cepError = "CEP inválido. Deve possuir 8 dígitos.";
+            return;
+        }
+
+        try
+        {
+            isBuscandoCep = true;
+            StateHasChanged();
+
+            using var viaCepClient = new HttpClient();
+            var result = await viaCepClient.GetFromJsonAsync<ViaCepModel>($"https://viacep.com.br/ws/{numbersOnly}/json/");
+
+            if (result != null && !result.IsErro)
+            {
+                if (!string.IsNullOrWhiteSpace(result.Logradouro)) clientesEdicao.Logradouro = result.Logradouro;
+                if (!string.IsNullOrWhiteSpace(result.Bairro)) clientesEdicao.Bairro = result.Bairro;
+                if (!string.IsNullOrWhiteSpace(result.Cidade)) clientesEdicao.Cidade = result.Cidade;
+                if (!string.IsNullOrWhiteSpace(result.Estado)) clientesEdicao.Estado = result.Estado;
+
+                clientesEdicao.Cep = $"{numbersOnly.Substring(0, 5)}-{numbersOnly.Substring(5)}";
+            }
+            else
+            {
+                cepError = "CEP não encontrado.";
+            }
+        }
+        catch (Exception)
+        {
+            cepError = "Falha ao consultar a API ViaCEP.";
+        }
+        finally
+        {
+            isBuscandoCep = false;
+            StateHasChanged();
+        }
     }
         
     private async Task ExcluirClientes(int idClientes)
