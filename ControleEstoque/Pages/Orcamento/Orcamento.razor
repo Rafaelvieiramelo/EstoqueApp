@@ -3,6 +3,7 @@
 @inject OrcamentosService OrcamentosService
 @inject ClientesService ClientesService
 @inject ProdutosService ProdutosService
+@inject ServicosService ServicosService
 @inject SharedService Shared
 @inject HttpClient Http
 @inject IJSRuntime JSRuntime
@@ -63,7 +64,17 @@
                                     </select>
                                 </div>
                                 <div class="col-md-6">
-                                    <label for="tipoEventoId" class="form-label fw-semibold">Tipo de Evento / Serviço *</label>
+                                    <label for="servicoId" class="form-label fw-semibold">Serviço Contratado (Substitui Tipo no Contrato)</label>
+                                    <select class="form-select" id="servicoId" @bind="orcamentosEdicao.ServicoId">
+                                        <option value="">-- Selecione o Serviço --</option>
+                                        @foreach (var s in servicosLista)
+                                        {
+                                            <option value="@s.Id">@s.Servico</option>
+                                        }
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="tipoEventoId" class="form-label fw-semibold">Tipo de Evento</label>
                                     <select class="form-select" id="tipoEventoId" @bind="orcamentosEdicao.TipoEventoId">
                                         <option value="0">-- Selecione o Tipo --</option>
                                         @foreach (var tipoEvento in tiposEvento)
@@ -297,6 +308,7 @@ else
     private OrcamentosModel orcamentosEdicao = new OrcamentosModel();
     private List<ClientesModel> clientes = new List<ClientesModel>();
     private List<Tipoevento> tiposEvento = new List<Tipoevento>();
+    private List<ServicosModel> servicosLista = new List<ServicosModel>();
     private List<OrcamentosModel>? orcamentos;
     private string? alertMessage;
     private string? alertMessageType;
@@ -337,6 +349,7 @@ else
         clientes = await ClientesService.GetClientesFromApi();
         tiposEvento = await OrcamentosService.GetTiposEventoFromApi();
         Produtos = await ProdutosService.GetProdutosFromApi();
+        servicosLista = await ServicosService.GetServicosFromApi();
     }
 
     private void OpenAddModal()

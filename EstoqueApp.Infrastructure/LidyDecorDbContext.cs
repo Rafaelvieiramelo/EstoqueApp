@@ -16,6 +16,7 @@ namespace LidyDecorApp.Infrastructure
         public DbSet<Orcamentos> Orcamentos { get; set; }
         public DbSet<ProdutosOrcamento> ProdutosOrcamento { get; set; }
         public DbSet<TipoEventos> TipoEventos { get; set; }
+        public DbSet<Servico> Servicos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -49,6 +50,21 @@ namespace LidyDecorApp.Infrastructure
 
                 entity.Property(e => e.Nome).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Email).HasMaxLength(150);
+            });
+
+            modelBuilder.Entity<Servico>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Nome)
+                    .IsRequired()
+                    .HasMaxLength(150);
+
+                entity.Property(e => e.Inclusao)
+                    .HasMaxLength(1000);
             });
 
             modelBuilder.Entity<Orcamentos>(entity =>
@@ -85,6 +101,11 @@ namespace LidyDecorApp.Infrastructure
                     .WithMany()
                     .HasForeignKey(e => e.TipoEventoId)
                     .IsRequired();
+
+                entity.HasOne(e => e.Servico)
+                    .WithMany()
+                    .HasForeignKey(e => e.ServicoId)
+                    .IsRequired(false);
             });
 
             modelBuilder.Entity<TipoEventos>(entity =>

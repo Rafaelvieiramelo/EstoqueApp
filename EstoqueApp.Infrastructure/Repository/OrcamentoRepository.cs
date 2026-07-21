@@ -1,4 +1,4 @@
-﻿using LidyDecorApp.Domain.Interfaces;
+using LidyDecorApp.Domain.Interfaces;
 using LidyDecorApp.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -39,6 +39,7 @@ namespace LidyDecorApp.Infrastructure.Repository
                 return await _context.Orcamentos
                     .Include(o => o.Clientes)
                     .Include(o => o.TipoEvento)
+                    .Include(o => o.Servico)
                     .Include(o => o.ProdutosOrcamento)
                         .ThenInclude(po => po.Produtos)
                     .ToListAsync();
@@ -57,7 +58,13 @@ namespace LidyDecorApp.Infrastructure.Repository
 
         public async Task<Orcamentos> GetOrcamentosByIdAsync(int id)
         {
-            return await _context.Orcamentos.FirstOrDefaultAsync(p => p.Id == id);
+            return await _context.Orcamentos
+                .Include(o => o.Clientes)
+                .Include(o => o.TipoEvento)
+                .Include(o => o.Servico)
+                .Include(o => o.ProdutosOrcamento)
+                    .ThenInclude(po => po.Produtos)
+                .FirstOrDefaultAsync(p => p.Id == id);
         }
 
         public async Task UpdateOrcamentosAsync(Orcamentos orcamentos)
@@ -69,11 +76,18 @@ namespace LidyDecorApp.Infrastructure.Repository
             {
                 orcamentosExistente.Numero = orcamentos.Numero;
                 orcamentosExistente.TipoEventoId = orcamentos.TipoEventoId;
+                orcamentosExistente.ServicoId = orcamentos.ServicoId;
                 orcamentosExistente.ClientesId = orcamentos.ClientesId;
                 orcamentosExistente.Data = orcamentos.Data;
                 orcamentosExistente.DataEvento = orcamentos.DataEvento;
                 orcamentosExistente.Observacoes = orcamentos.Observacoes;
                 orcamentosExistente.ValorTotal = orcamentos.ValorTotal;
+                orcamentosExistente.EnderecoEntrega = orcamentos.EnderecoEntrega;
+                orcamentosExistente.FormaPagamento = orcamentos.FormaPagamento;
+                orcamentosExistente.TemaPacote = orcamentos.TemaPacote;
+                orcamentosExistente.ValorSinal = orcamentos.ValorSinal;
+                orcamentosExistente.PorcentagemSinal = orcamentos.PorcentagemSinal;
+                orcamentosExistente.CidadeContrato = orcamentos.CidadeContrato;
 
                 foreach (var item in orcamentos.ProdutosOrcamento.Where(p => p.Id == 0))
                 {

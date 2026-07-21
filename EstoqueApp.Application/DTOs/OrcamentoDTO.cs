@@ -19,6 +19,8 @@ namespace LidyDecorApp.Application.DTOs
         public string? CidadeContrato { get; set; }
         public decimal ValorTotal { get; set; }
 
+        public int? ServicoId { get; set; }
+        public ServicoDTO? Servico { get; set; }
         public TipoEventoDTO? TipoEvento { get; set; }
         public ClientesDTO? Clientes { get; set; }
         public ICollection<ProdutosOrcamentosDTO> ProdutosOrcamentos { get; set; } = new List<ProdutosOrcamentosDTO>();
