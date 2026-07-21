@@ -18,12 +18,16 @@ builder.Services.AddScoped<SharedService>();
 builder.Services.AddScoped<AuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(s => s.GetRequiredService<AuthStateProvider>());
 
-//builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
+builder.Services.AddTransient<UnauthorizedRedirectHandler>();
 
 builder.Services.AddScoped(sp =>
 {
     var apiBaseUrl = builder.Configuration["ApiBaseUrl"] ?? builder.HostEnvironment.BaseAddress;
-    var httpClient = new HttpClient { BaseAddress = new Uri(apiBaseUrl) };
+    
+    var redirectHandler = sp.GetRequiredService<UnauthorizedRedirectHandler>();
+    redirectHandler.InnerHandler = new HttpClientHandler();
+
+    var httpClient = new HttpClient(redirectHandler) { BaseAddress = new Uri(apiBaseUrl) };
 
     // Adicionar Interceptor para Token
     httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "");
