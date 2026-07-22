@@ -187,7 +187,7 @@ namespace LidyDecorApp.Infrastructure.Services
                         {
                             text.Justify();
                             text.Span("CLÁUSULA 1 – OBJETO\n").Bold();
-                            text.Span($"O presente contrato tem por objeto a prestação de serviços de {tipoServico} (ex: pegue e monte), a ser entregue na data {dataEvento}, no endereço {enderecoEntrega}, conforme tema e pacote contratado: {temaPacote}.");
+                            text.Span($"O presente contrato tem por objeto a prestação de serviços de {tipoServico}, a ser entregue na data {dataEvento}, no endereço {enderecoEntrega}, conforme tema e pacote contratado: {temaPacote}.");
                         });
 
                         // CLÁUSULA 2
