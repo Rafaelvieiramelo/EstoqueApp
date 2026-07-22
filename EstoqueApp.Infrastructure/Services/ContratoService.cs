@@ -26,10 +26,11 @@ namespace LidyDecorApp.Infrastructure.Services
 
         public async Task<byte[]> GerarContratoAsync(int orcamentoId)
         {
-            // 1. Busca os dados do orçamento com Clientes, TipoEvento e Produtos
+            // 1. Busca os dados do orçamento com Clientes, TipoEvento, Servico e Produtos
             var orcamento = await _context.Orcamentos
                 .Include(o => o.Clientes)
                 .Include(o => o.TipoEvento)
+                .Include(o => o.Servico)
                 .Include(o => o.ProdutosOrcamento)
                     .ThenInclude(po => po.Produtos)
                 .FirstOrDefaultAsync(o => o.Id == orcamentoId);
@@ -70,6 +71,18 @@ namespace LidyDecorApp.Infrastructure.Services
                 ? $"{orcamento.PorcentagemSinal:F0}" 
                 : "";
 
+            string tipoServicoText = "";
+            if (orcamento.Servico != null)
+            {
+                tipoServicoText = string.IsNullOrWhiteSpace(orcamento.Servico.Inclusao)
+                    ? orcamento.Servico.Nome
+                    : $"{orcamento.Servico.Nome} ({orcamento.Servico.Inclusao})";
+            }
+            else
+            {
+                tipoServicoText = orcamento.TipoEvento?.Tipo ?? "";
+            }
+
             // 5. Preenche o dicionário com as variáveis correspondentes às tags do Word
             var dadosContrato = new Dictionary<string, object>
             {
@@ -78,7 +91,7 @@ namespace LidyDecorApp.Infrastructure.Services
                 { "DATA_CONTRATO", orcamento.Data.ToString("dd/MM/yyyy") },
                 { "DATA_EVENTO", orcamento.DataEvento?.ToString("dd/MM/yyyy") ?? "" },
                 { "VALOR_TOTAL", orcamento.ValorTotal.ToString("C") },
-                { "TIPO_SERVICO", orcamento.TipoEvento?.Tipo ?? "" },
+                { "TIPO_SERVICO", tipoServicoText },
                 { "CIDADE_CONTRATO", orcamento.CidadeContrato ?? "Campinas" },
                 { "ENDERECO_ENTREGA", orcamento.EnderecoEntrega ?? "" },
                 { "FORMA_PAGAMENTO", orcamento.FormaPagamento ?? "" },
@@ -102,6 +115,7 @@ namespace LidyDecorApp.Infrastructure.Services
             var orcamento = await _context.Orcamentos
                 .Include(o => o.Clientes)
                 .Include(o => o.TipoEvento)
+                .Include(o => o.Servico)
                 .Include(o => o.ProdutosOrcamento)
                     .ThenInclude(po => po.Produtos)
                 .FirstOrDefaultAsync(o => o.Id == orcamentoId);
@@ -117,7 +131,19 @@ namespace LidyDecorApp.Infrastructure.Services
             // 3. Define variáveis para o preenchimento do contrato
             string nomeContratante = orcamento.Clientes?.Nome ?? "";
             string cpfContratante = orcamento.Clientes?.CpfCnpj ?? "";
-            string tipoServico = orcamento.TipoEvento?.Tipo ?? "";
+            
+            string tipoServico = "";
+            if (orcamento.Servico != null)
+            {
+                tipoServico = string.IsNullOrWhiteSpace(orcamento.Servico.Inclusao)
+                    ? orcamento.Servico.Nome
+                    : $"{orcamento.Servico.Nome} ({orcamento.Servico.Inclusao})";
+            }
+            else
+            {
+                tipoServico = orcamento.TipoEvento?.Tipo ?? "";
+            }
+
             string dataEvento = orcamento.DataEvento?.ToString("dd/MM/yyyy") ?? "";
             string enderecoEntrega = orcamento.EnderecoEntrega ?? "";
             string temaPacote = orcamento.TemaPacote ?? "";

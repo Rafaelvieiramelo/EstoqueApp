@@ -14,6 +14,7 @@ builder.Services.AddScoped<ClientesService>();
 builder.Services.AddScoped<ProdutosService>();
 builder.Services.AddScoped<UsuariosService>();
 builder.Services.AddScoped<OrcamentosService>();
+builder.Services.AddScoped<ServicosService>();
 builder.Services.AddScoped<SharedService>();
 builder.Services.AddScoped<AuthStateProvider>();
 builder.Services.AddScoped<AuthenticationStateProvider>(s => s.GetRequiredService<AuthStateProvider>());

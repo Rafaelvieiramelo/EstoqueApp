@@ -105,11 +105,13 @@ builder.Services.AddScoped<IProdutosService, ProdutosService>();
 builder.Services.AddScoped<IUsuariosService, UsuariosService>();
 builder.Services.AddScoped<IClientesService, ClientesService>();
 builder.Services.AddScoped<IOrcamentosService, OrcamentosService>();
+builder.Services.AddScoped<IServicoService, ServicoService>();
 
 builder.Services.AddScoped<IProdutosRepository, ProdutosRepository>();
 builder.Services.AddScoped<IUsuariosRepository, UsuariosRepository>();
 builder.Services.AddScoped<IClientesRepository, ClientesRepository>();
 builder.Services.AddScoped<IOrcamentosRepository, OrcamentosRepository>();
+builder.Services.AddScoped<IServicoRepository, ServicoRepository>();
 
 builder.Services.AddTransient<IJwtTokenService, JwtTokenService>();
 builder.Services.AddScoped<LidyDecorApp.Application.Interfaces.IContratoService, LidyDecorApp.Infrastructure.Services.ContratoService>();

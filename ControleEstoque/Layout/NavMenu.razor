@@ -44,6 +44,16 @@
             </div>
         }
 
+        @if (IsInRole("Admin") || IsInRole("User"))
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="servicos">
+                    <span class="bi bi-tools" style="font-size: 1.5rem; color: black; margin-bottom: 30px;"></span>
+                    <span style="color: black;">Serviços</span>
+                </NavLink>
+            </div>
+        }
+
         @if (IsInRole("Admin"))
         {
             <div class="nav-item px-3">

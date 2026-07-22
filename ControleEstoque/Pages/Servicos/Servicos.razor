@@ -1,0 +1,152 @@
+@page "/servicos"
+@attribute [Authorize]
+@inject ServicosService ServicosService
+@inject SharedService Shared
+@inject HttpClient Http
+@inject IJSRuntime JSRuntime
+
+@using LidyDecorApp.Web.Models
+@using LidyDecorApp.Web.Services
+@using Microsoft.AspNetCore.Authorization
+
+<PageTitle>Cadastro de Serviços</PageTitle>
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h3 fw-bold text-dark mb-0"><i class="bi bi-tools text-primary me-2"></i> Cadastro de Serviços</h1>
+    <button class="btn btn-primary fw-bold" @onclick="() => Shared.OpenAddModal(ref servicoEdicao, ref isEditMode, ref showModal)">
+        <i class="bi bi-plus-lg me-1"></i> Novo Serviço
+    </button>
+</div>
+
+@if (!string.IsNullOrEmpty(alertMessage))
+{
+    <div class="alert alert-@alertMessageType alert-dismissible fade show shadow-sm" role="alert">
+        @alertMessage
+        <button type="button" class="btn-close" aria-label="Close" @onclick="async () => await SharedService.CloseAlert(ref alertMessage, ref alertMessageType, ref alertVisible)"></button>
+    </div>
+}
+
+@if (showModal)
+{
+    <div class="modal-backdrop fade show"></div>
+    <div class="modal fade show d-block" tabindex="-1" aria-labelledby="editModalLabel" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content shadow-lg border-0">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title fw-bold" id="editModalLabel">
+                        <i class="bi @(isEditMode ? "bi-pencil-square" : "bi-plus-circle") me-2"></i>
+                        @((isEditMode ? "Editar Serviço" : "Novo Serviço"))
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" @onclick="async () => showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged)" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-md-12">
+                                    <label for="nomeServico" class="form-label fw-semibold">Serviço *</label>
+                                    <input type="text" id="nomeServico" @bind="servicoEdicao.Servico" class="form-control" placeholder="Ex: Pegue e Monte / Decoração Completa com Balões" />
+                                </div>
+
+                                <div class="col-md-12">
+                                    <label for="inclusao" class="form-label fw-semibold">Inclusão (O que está incluído no pacote)</label>
+                                    <textarea id="inclusao" @bind="servicoEdicao.Inclusao" class="form-control" rows="3" placeholder="Ex: Painel redondo, trio de cilindros, tapete, arco de balões desconstruído..."></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer bg-light">
+                    <button type="button" class="btn btn-secondary px-4" @onclick="async () => showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged)">Cancelar</button>
+                    <button type="button" class="btn btn-primary px-4 fw-bold" @onclick="SalvarServico">
+                        <i class="bi bi-check-lg me-1"></i> @((isEditMode ? "Salvar Alterações" : "Cadastrar Serviço"))
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@if (servicos == null)
+{
+    <p><em>Carregando serviços...</em></p>
+}
+else
+{
+    <TabelaServicos Servicos="servicos" EditarServico="(s) => Shared.OpenEditModal(ref servicoEdicao, s, ref isEditMode, ref showModal)" ExcluirServico="ExcluirServico" />
+}
+
+@code {
+    private bool showModal = false;
+    private bool isEditMode = false;
+    private ServicosModel servicoEdicao = new();
+    private List<ServicosModel>? servicos;
+    private string? alertMessage;
+    private string? alertMessageType;
+    private bool alertVisible;
+    private EventCallback HideModalCallback { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CarregarServicos();
+    }
+
+    private async Task CarregarServicos()
+    {
+        servicos = await ServicosService.GetServicosFromApi();
+    }
+
+    private async Task ExcluirServico(int id)
+    {
+        alertMessage = null;
+        alertMessageType = null;
+        HttpResponseMessage response = await ServicosService.ExcluirServicos(id);
+
+        if (response.IsSuccessStatusCode)
+        {
+            alertMessage = "Serviço excluído com sucesso!";
+            alertMessageType = "success";
+            await CarregarServicos();
+            StateHasChanged();
+        }
+        else
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            alertMessage = $"Erro ao excluir serviço: {errorContent}";
+            alertMessageType = "danger";
+        }
+    }
+
+    private async Task SalvarServico()
+    {
+        alertMessage = null;
+        alertMessageType = null;
+
+        if (string.IsNullOrWhiteSpace(servicoEdicao.Servico))
+        {
+            alertMessage = "Por favor, informe o nome do serviço.";
+            alertMessageType = "warning";
+            return;
+        }
+
+        HttpResponseMessage response = await ServicosService.SalvarServicos(servicoEdicao, isEditMode);
+
+        if (response.IsSuccessStatusCode)
+        {
+            alertMessage = isEditMode ? "Serviço editado com sucesso!" : "Serviço adicionado com sucesso!";
+            alertMessageType = "success";
+            await CarregarServicos();
+        }
+        else
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            alertMessage = $"Erro ao {(isEditMode ? "salvar" : "adicionar")} o serviço: {errorContent}";
+            alertMessageType = "danger";
+        }
+
+        SharedService.ShowAlert(ref alertVisible);
+        showModal = await SharedService.HideModal(HideModalCallback, showModal, StateHasChanged);
+    }
+}

@@ -1,0 +1,69 @@
+@using LidyDecorApp.Web.Models
+
+<div class="table-responsive bg-white rounded shadow-sm">
+    <table id="servicosTable" class="table table-hover align-middle mb-0">
+        <thead class="table-light">
+            <tr>
+                <th style="width: 80px;">Id</th>
+                <th>Serviço</th>
+                <th>Inclusão (Itens / Pacote)</th>
+                <th class="text-end" style="width: 120px;">Ações</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Servicos == null || !Servicos.Any())
+            {
+                <tr>
+                    <td colspan="4" class="text-center py-4 text-muted">
+                        <i class="bi bi-tools display-6 d-block mb-2 text-secondary"></i>
+                        Nenhum serviço cadastrado ainda.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                @foreach (var servico in Servicos)
+                {
+                    <tr>
+                        <td class="fw-bold text-muted">#@servico.Id</td>
+                        <td class="fw-semibold text-primary">@servico.Servico</td>
+                        <td>
+                            @if (string.IsNullOrWhiteSpace(servico.Inclusao))
+                            {
+                                <span class="text-muted fst-italic">Sem detalhes de inclusão</span>
+                            }
+                            else
+                            {
+                                <span>@servico.Inclusao</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-outline-primary me-1" title="Editar" @onclick="() => OnEdit(servico)">
+                                <i class="bi bi-pencil"></i>
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger" title="Excluir" @onclick="() => DeleteServico(servico.Id)">
+                                <i class="bi bi-trash3"></i>
+                            </button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@code {
+    [Parameter] public List<ServicosModel> Servicos { get; set; } = new();
+    [Parameter] public EventCallback<ServicosModel> EditarServico { get; set; }
+    [Parameter] public EventCallback<int> ExcluirServico { get; set; }
+
+    private void OnEdit(ServicosModel servico)
+    {
+        EditarServico.InvokeAsync(servico);
+    }
+
+    private void DeleteServico(int idServico)
+    {
+        ExcluirServico.InvokeAsync(idServico);
+    }
+}
