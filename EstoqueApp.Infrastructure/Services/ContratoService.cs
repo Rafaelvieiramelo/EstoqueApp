@@ -7,6 +7,7 @@ using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -111,7 +112,22 @@ namespace LidyDecorApp.Infrastructure.Services
 
         public async Task<byte[]> GerarContratoPdfAsync(int orcamentoId)
         {
-            // 1. Busca os dados do orçamento
+            // 1. Tenta gerar o PDF diretamente convertendo o documento Word (.docx) via LibreOffice (garantindo 100% de igualdade entre Word e PDF)
+            try
+            {
+                var docxBytes = await GerarContratoAsync(orcamentoId);
+                var convertedPdf = ConvertDocxToPdfUsingLibreOffice(docxBytes);
+                if (convertedPdf != null && convertedPdf.Length > 0)
+                {
+                    return convertedPdf;
+                }
+            }
+            catch
+            {
+                // Em ambiente sem LibreOffice instalado, segue para a geração nativa via QuestPDF
+            }
+
+            // 2. Fallback: Geração nativa com QuestPDF
             var orcamento = await _context.Orcamentos
                 .Include(o => o.Clientes)
                 .Include(o => o.TipoEvento)
@@ -213,7 +229,7 @@ namespace LidyDecorApp.Infrastructure.Services
                         {
                             text.Justify();
                             text.Span("CLÁUSULA 1 – OBJETO\n").Bold();
-                            text.Span($"O presente contrato tem por objeto a prestação de serviços de {tipoServico} (ex: pegue e monte), a ser entregue na data {dataEvento}, no endereço {enderecoEntrega}, conforme tema e pacote contratado: {temaPacote}.");
+                            text.Span($"O presente contrato tem por objeto a prestação de serviços de {tipoServico}, a ser entregue na data {dataEvento}, no endereço {enderecoEntrega}, conforme tema e pacote contratado: {temaPacote}.");
                         });
 
                         // CLÁUSULA 2
@@ -350,6 +366,72 @@ namespace LidyDecorApp.Infrastructure.Services
             }
 
             return (logoBytes, watermarkBytes);
+        }
+
+        private static byte[]? ConvertDocxToPdfUsingLibreOffice(byte[] docxBytes)
+        {
+            string tempDir = Path.Combine(Path.GetTempPath(), "LidyDecor_" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(tempDir);
+
+            try
+            {
+                string docxPath = Path.Combine(tempDir, "contrato.docx");
+                string pdfPath = Path.Combine(tempDir, "contrato.pdf");
+
+                File.WriteAllBytes(docxPath, docxBytes);
+
+                string libreOfficeExecutable = FindLibreOfficeExecutable();
+                if (string.IsNullOrEmpty(libreOfficeExecutable))
+                {
+                    return null;
+                }
+
+                var processInfo = new ProcessStartInfo
+                {
+                    FileName = libreOfficeExecutable,
+                    Arguments = $"--headless --convert-to pdf \"{docxPath}\" --outdir \"{tempDir}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using (var process = Process.Start(processInfo))
+                {
+                    if (process == null) return null;
+                    process.WaitForExit(15000);
+                }
+
+                if (File.Exists(pdfPath))
+                {
+                    return File.ReadAllBytes(pdfPath);
+                }
+
+                return null;
+            }
+            finally
+            {
+                try { Directory.Delete(tempDir, true); } catch { }
+            }
+        }
+
+        private static string FindLibreOfficeExecutable()
+        {
+            if (File.Exists("/usr/bin/libreoffice")) return "/usr/bin/libreoffice";
+            if (File.Exists("/usr/bin/soffice")) return "/usr/bin/soffice";
+
+            string[] commonWindowsPaths = new[]
+            {
+                @"C:\Program Files\LibreOffice\program\soffice.exe",
+                @"C:\Program Files (x86)\LibreOffice\program\soffice.exe"
+            };
+
+            foreach (var path in commonWindowsPaths)
+            {
+                if (File.Exists(path)) return path;
+            }
+
+            return string.Empty;
         }
     }
 }
