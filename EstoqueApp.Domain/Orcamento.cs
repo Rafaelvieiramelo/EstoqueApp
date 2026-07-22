@@ -17,6 +17,8 @@ namespace LidyDecorApp.Domain
         public string? CidadeContrato { get; set; }
         public decimal ValorTotal { get; set; }
 
+        public int? ServicoId { get; set; }
+        public Servico? Servico { get; set; }
         public TipoEventos? TipoEvento { get; set; }
         public Clientes? Clientes { get; set; }
         public ICollection<ProdutosOrcamento> ProdutosOrcamento { get; set; } = new List<ProdutosOrcamento>();

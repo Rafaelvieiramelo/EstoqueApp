@@ -48,7 +48,12 @@ namespace LidyDecorApp.Application.Mapping
                 .PreserveReferences();
 
             CreateMap<TipoEventos, TipoEventoDTO>()
-                .ReverseMap(); ;
+                .ReverseMap();
+
+            CreateMap<Servico, ServicoDTO>()
+                .ForMember(dest => dest.Servico, opt => opt.MapFrom(src => src.Nome))
+                .ReverseMap()
+                .ForMember(dest => dest.Nome, opt => opt.MapFrom(src => src.Servico));
         }
     }
 }

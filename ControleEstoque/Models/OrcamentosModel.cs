@@ -19,6 +19,8 @@ namespace LidyDecorApp.Web.Models
         public string? CidadeContrato { get; set; } = "Campinas"; // Valor padrão para conveniência
         public decimal ValorTotal { get; set; }
 
+        public int? ServicoId { get; set; }
+        public ServicosModel? Servico { get; set; }
         public Tipoevento TipoEvento { get; set; }
         
         public ClientesModel Clientes { get; set; }
